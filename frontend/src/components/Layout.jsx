@@ -11,7 +11,7 @@ export default function Layout() {
   return (
     <div className={styles.shell} data-theme={theme}>
       <Navbar theme={theme} toggleTheme={toggleTheme} />
-      <main key={pathname} className="route-enter">
+      <main key={pathname} className={`route-enter ${pathname === '/' ? styles.flush : styles.main}`}>
         <Outlet />
       </main>
       <Footer />

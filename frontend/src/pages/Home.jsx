@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, Quote, ExternalLink, AtSign } from 'lucide-react'
+import { ArrowRight, Check, Quote, ExternalLink, AtSign, MapPin, CalendarDays, Sparkles } from 'lucide-react'
 import { useApi } from '../hooks/useApi.js'
 import { homeContent } from '../api/home.js'
 import { programs as programsApi } from '../api/programs.js'
@@ -11,7 +11,7 @@ import ProgramCard from '../components/ProgramCard.jsx'
 import SectionHeading from '../components/SectionHeading.jsx'
 import NewsletterForm from '../components/NewsletterForm.jsx'
 import Carousel from '../components/Carousel.jsx'
-import Ticker from '../components/Ticker.jsx'
+import AppPreview from '../components/AppPreview.jsx'
 import Marquee from '../components/Marquee.jsx'
 import HeroSlideshow from '../components/HeroSlideshow.jsx'
 import Reveal from '../components/Reveal.jsx'
@@ -101,6 +101,12 @@ export default function Home() {
   if (!content) return <Loading />
 
   const { hero, stats, featured, app, tips, testimonials, team, about, newsletter, ticker, gallery, contact } = content
+  const nextSession = (() => {
+    const open = (programsList ?? []).find((p) => p.status === 'open' && p.schedule?.length)
+    if (!open) return null
+    const slot = open.schedule[0]
+    return { day: String(slot.day).slice(0, 3), time: String(slot.time).split(/\s*[–-]\s*/)[0], program: open.name }
+  })()
   const heroSlides = hero.slides?.length ? hero.slides : hero.imageUrl ? [{ imageUrl: hero.imageUrl, caption: '' }] : []
   const instagram = (contact?.instagram || '').replace(/^@/, '')
   const instagramUrl = instagram ? `https://instagram.com/${instagram}` : null
@@ -110,49 +116,76 @@ export default function Home() {
   return (
     <>
       <section className={styles.hero}>
+        <div className={styles.heroGrid} aria-hidden="true" />
         <div className={`page ${styles.heroInner}`}>
           <div className={styles.heroCopy}>
-            {hero.eyebrow && <span className={`eyebrow rise`}>{hero.eyebrow}</span>}
-            <h1 className={`${styles.heroTitle} rise rise-2`}>{hero.title}</h1>
+            <span className={`${styles.pill} rise`}>
+              <span className={styles.pillDot} />
+              <MapPin size={14} />
+              {hero.eyebrow || 'Kigali · Rwanda'}
+            </span>
+            <h1 className={`${styles.heroTitle} rise rise-2`}>
+              {hero.title}
+              {hero.script && <span className={styles.heroAccent}> {hero.script}</span>}
+            </h1>
             <p className={`${styles.heroLead} rise rise-3`}>{hero.paragraph}</p>
             <div className={`${styles.heroActions} rise rise-4`}>
-              <Link to="/programs" className="btn btn-lg">
+              <Link to="/programs" className={`btn btn-lg ${styles.heroPrimary}`}>
                 {hero.primaryButtonLabel || 'See programs'}
                 <ArrowRight size={18} />
               </Link>
-              <Link to="/shop" className="btn btn-outline btn-lg">
+              <Link to="/shop" className={`btn btn-lg ${styles.heroSecondary}`}>
                 {hero.secondaryButtonLabel || 'Shop Nkondo Active'}
+                <ArrowRight size={18} />
               </Link>
             </div>
+            {stats?.length > 0 && (
+              <dl className={`${styles.heroStats} rise rise-4`}>
+                {stats.map((stat, index) => (
+                  <div key={`${stat.label}-${index}`}>
+                    <dt>{stat.value}</dt>
+                    <dd>{stat.label}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
           </div>
 
           <div className={`${styles.heroArt} rise rise-3`}>
-            <div className={styles.heroShape} aria-hidden="true" />
+            {nextSession && (
+              <div className={styles.heroChip}>
+                <span className={styles.heroChipIcon}>
+                  <CalendarDays size={16} />
+                </span>
+                <span>
+                  <b>Next class · {nextSession.day} {nextSession.time}</b>
+                  <small>{nextSession.program}</small>
+                </span>
+              </div>
+            )}
             {heroSlides.length > 0 ? (
-              <HeroSlideshow slides={heroSlides} className={styles.float} />
+              <HeroSlideshow slides={heroSlides} />
             ) : (
-              <div className={`${styles.heroFrame} ${styles.float}`}>
-                <img src="/logo.svg" alt="" className={styles.heroFrameLogo} />
+              <div className={styles.heroFrame}>
+                <img src="/logo-light.svg" alt="" className={styles.heroFrameLogo} />
               </div>
             )}
           </div>
         </div>
-      </section>
 
-      {ticker?.enabled && ticker.items?.length > 0 && <Ticker items={ticker.items} />}
-
-      {stats?.length > 0 && (
-        <section className={styles.stats}>
-          <div className={`page ${styles.statsInner}`}>
-            {stats.map((stat, index) => (
-              <Reveal key={`${stat.label}-${index}`} delay={index * 90} className={styles.stat}>
-                <span className={styles.statValue}>{stat.value}</span>
-                <span className={styles.statLabel}>{stat.label}</span>
-              </Reveal>
-            ))}
+        {ticker?.enabled && ticker.items?.length > 0 && (
+          <div className={styles.heroChips}>
+            <Marquee duration={Math.max(24, ticker.items.length * 5)} gap={12}>
+              {ticker.items.map((item, index) => (
+                <span key={`${item}-${index}`} className={styles.chipItem}>
+                  <Sparkles size={13} />
+                  {item}
+                </span>
+              ))}
+            </Marquee>
           </div>
-        </section>
-      )}
+        )}
+      </section>
 
       {featuredPrograms.length > 0 && (
         <section className={styles.section}>
@@ -297,17 +330,13 @@ export default function Home() {
             </Reveal>
 
             <Reveal delay={120} className={styles.phoneWrap}>
-              <div className={styles.phone}>
-                {app.imageUrl ? (
+              {app.imageUrl ? (
+                <div className={styles.phone}>
                   <img src={app.imageUrl} alt="" loading="lazy" />
-                ) : (
-                  <div className={styles.phoneScreen}>
-                    <img src="/logo-light.svg" alt="" className={styles.phoneLogo} />
-                    <p className={styles.phoneTitle}>Strong women, stronger together</p>
-                    <p className={styles.phoneText}>Programs, nutrition and coaching for women in Rwanda.</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <AppPreview />
+              )}
             </Reveal>
           </div>
         </section>

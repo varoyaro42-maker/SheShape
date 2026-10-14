@@ -4,3 +4,12 @@
   color: var(--text);
   transition: background 0.2s ease, color 0.2s ease;
 }
+
+/* Room above the footer on inner pages; the home page ends on a full-bleed band. */
+.main {
+  padding-bottom: var(--section);
+}
+
+.flush {
+  padding-bottom: 0;
+}

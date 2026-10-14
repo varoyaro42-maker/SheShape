@@ -27,7 +27,7 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.12.0",
     "mysql2": "^3.24.3",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^10.1.1",
     "sequelize": "^6.37.8",
     "slugify": "^1.6.9"
   },

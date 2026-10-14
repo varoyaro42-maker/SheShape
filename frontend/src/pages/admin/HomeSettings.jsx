@@ -211,8 +211,9 @@ export default function AdminHomeSettingsPage() {
               { key: 'caption', label: 'Caption (optional, shown on the photo)', placeholder: 'She Strong Classes, Kimihurura', max: 60 }
             ]}
           />
-          <Field label="Small line above the headline">{text('hero', 'eyebrow', { maxLength: 80 })}</Field>
+          <Field label="Location pill" hint="The small rounded label above the headline.">{text('hero', 'eyebrow', { maxLength: 80, placeholder: 'Kigali · Rwanda' })}</Field>
           <Field label="Headline">{text('hero', 'title', { maxLength: 120 })}</Field>
+          <Field label="Highlighted second line" hint="Shown under the headline in light green.">{text('hero', 'script', { maxLength: 120, placeholder: "Let's build it together." })}</Field>
           <Field label="Paragraph">{area('hero', 'paragraph')}</Field>
           <div className={styles.row}>
             <Field label="Primary button" hint="Links to programs.">{text('hero', 'primaryButtonLabel', { maxLength: 40 })}</Field>

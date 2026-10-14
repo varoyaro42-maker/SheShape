@@ -1,5 +1,6 @@
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { getHomeContentRow, withDefaults } from '../utils/homeContent.js'
+import { sanitizeUrls } from '../utils/safeUrl.js'
 
 export const getHomeContent = asyncHandler(async (req, res) => {
   const row = await getHomeContentRow()
@@ -8,7 +9,7 @@ export const getHomeContent = asyncHandler(async (req, res) => {
 
 export const updateHomeContent = asyncHandler(async (req, res) => {
   const row = await getHomeContentRow()
-  const incoming = req.body ?? {}
+  const incoming = sanitizeUrls(req.body ?? {})
 
   const merged = withDefaults({ ...row.data, ...incoming })
   row.data = merged

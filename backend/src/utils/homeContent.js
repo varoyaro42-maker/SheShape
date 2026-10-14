@@ -9,9 +9,9 @@ const SETTINGS_ID = 1
  */
 export const DEFAULT_HOME_CONTENT = {
   hero: {
-    eyebrow: "Women's fitness · Kigali",
+    eyebrow: 'Kigali · Rwanda',
     title: 'Strong is your shape.',
-    script: '',
+    script: "Let's build it together.",
     paragraph:
       'Coached strength classes, small-group programs and honest nutrition guidance for women in Kigali. Train with intention and feel at home in your body.',
     primaryButtonLabel: 'See programs',
