@@ -364,7 +364,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className={`${styles.tile} media-zoom`}
               >
-                <img src={photo.imageUrl} alt={photo.caption || ''} loading="lazy" />
+                <img src={photo.imageUrl} alt={photo.caption || ''} decoding="async" />
                 {photo.caption && <span className={styles.tileCaption}>{photo.caption}</span>}
               </a>
             ))}
