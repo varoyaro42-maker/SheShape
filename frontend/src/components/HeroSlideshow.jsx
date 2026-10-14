@@ -9,7 +9,7 @@ const reducedMotion = () =>
  * label and a caption over a gradient; progress bars along the bottom fill
  * while a photo is showing and can be clicked. Pauses on hover.
  */
-export default function HeroSlideshow({ slides = [], interval = 5000, label = 'On the floor', className = '' }) {
+export default function HeroSlideshow({ slides = [], interval = 5000, label = '', className = '' }) {
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const still = slides.length < 2 || reducedMotion()
@@ -55,10 +55,12 @@ export default function HeroSlideshow({ slides = [], interval = 5000, label = 'O
       <div className={styles.shade} aria-hidden="true" />
 
       <div className={styles.overlay}>
-        <span className={styles.label}>
-          <span className={styles.labelLine} />
-          {label}
-        </span>
+        {(current.label || label) && (
+          <span key={`lbl-${index}`} className={styles.label}>
+            <span className={styles.labelLine} />
+            {current.label || label}
+          </span>
+        )}
         {current.caption && (
           <p key={`cap-${index}`} className={styles.caption}>
             {current.caption}

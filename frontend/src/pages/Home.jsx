@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, Quote, ExternalLink, AtSign, MapPin, CalendarDays, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Quote, ExternalLink, AtSign, MapPin, CalendarDays } from 'lucide-react'
 import { useApi } from '../hooks/useApi.js'
 import { homeContent } from '../api/home.js'
 import { programs as programsApi } from '../api/programs.js'
@@ -9,9 +9,9 @@ import { formatPrice } from '../utils/format.js'
 import ProductCard from '../components/ProductCard.jsx'
 import ProgramCard from '../components/ProgramCard.jsx'
 import SectionHeading from '../components/SectionHeading.jsx'
-import NewsletterForm from '../components/NewsletterForm.jsx'
 import Carousel from '../components/Carousel.jsx'
 import AppPreview from '../components/AppPreview.jsx'
+import Ticker from '../components/Ticker.jsx'
 import Marquee from '../components/Marquee.jsx'
 import HeroSlideshow from '../components/HeroSlideshow.jsx'
 import Reveal from '../components/Reveal.jsx'
@@ -100,7 +100,7 @@ export default function Home() {
 
   if (!content) return <Loading />
 
-  const { hero, stats, featured, app, tips, testimonials, team, about, newsletter, ticker, gallery, contact } = content
+  const { hero, stats, featured, app, tips, testimonials, team, about, ticker, gallery, contact } = content
   const nextSession = (() => {
     const open = (programsList ?? []).find((p) => p.status === 'open' && p.schedule?.length)
     if (!open) return null
@@ -164,7 +164,7 @@ export default function Home() {
               </div>
             )}
             {heroSlides.length > 0 ? (
-              <HeroSlideshow slides={heroSlides} />
+              <HeroSlideshow slides={heroSlides} label="" />
             ) : (
               <div className={styles.heroFrame}>
                 <img src="/logo-light.svg" alt="" className={styles.heroFrameLogo} />
@@ -173,19 +173,9 @@ export default function Home() {
           </div>
         </div>
 
-        {ticker?.enabled && ticker.items?.length > 0 && (
-          <div className={styles.heroChips}>
-            <Marquee duration={Math.max(24, ticker.items.length * 5)} gap={12}>
-              {ticker.items.map((item, index) => (
-                <span key={`${item}-${index}`} className={styles.chipItem}>
-                  <Sparkles size={13} />
-                  {item}
-                </span>
-              ))}
-            </Marquee>
-          </div>
-        )}
       </section>
+
+      {ticker?.enabled && ticker.items?.length > 0 && <Ticker items={ticker.items} />}
 
       {featuredPrograms.length > 0 && (
         <section className={styles.section}>
@@ -403,21 +393,6 @@ export default function Home() {
         </section>
       )}
 
-      {newsletter?.enabled && (
-        <section className={styles.newsletter}>
-          <img src="/logo-light.svg" alt="" className={styles.newsletterMark} aria-hidden="true" />
-          <div className={`page ${styles.newsletterInner}`}>
-            <Reveal className={styles.newsletterCopy}>
-              <span className="eyebrow">Newsletter</span>
-              <h2 className={styles.newsletterTitle}>{newsletter.heading}</h2>
-              <p className={styles.newsletterText}>{newsletter.paragraph}</p>
-            </Reveal>
-            <Reveal delay={100}>
-              <NewsletterForm light />
-            </Reveal>
-          </div>
-        </section>
-      )}
     </>
   )
 }

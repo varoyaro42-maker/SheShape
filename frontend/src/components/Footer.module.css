@@ -8,7 +8,7 @@
 
 .statement {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 28px;
   padding-bottom: 44px;
@@ -16,19 +16,39 @@
   border-bottom: 1px solid rgba(158, 198, 166, 0.22);
 }
 
+.statementEyebrow {
+  font-family: var(--accent);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin-bottom: 12px;
+}
+
 .statementText {
   font-family: var(--heading);
-  font-size: clamp(40px, 6vw, 84px);
+  font-size: clamp(26px, 3vw, 38px);
   font-weight: 700;
-  line-height: 0.95;
-  letter-spacing: -0.03em;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: #fff;
-  max-width: 12ch;
+  max-width: 22ch;
+}
+
+.statementNote {
+  margin-top: 10px;
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.statementForm {
+  flex: 0 1 460px;
 }
 
 .inner {
   display: grid;
-  grid-template-columns: 1.3fr 0.8fr 1fr 1.4fr;
+  grid-template-columns: 1.4fr 0.8fr 1fr;
   gap: 40px;
 }
 

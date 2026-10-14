@@ -30,12 +30,18 @@ export default function Footer() {
 
   return (
     <footer className={styles.footer}>
-      <div className={`page ${styles.statement}`}>
-        <p className={styles.statementText}>Strong is your shape.</p>
-        <Link to="/programs" className="btn btn-light">
-          Find your program
-        </Link>
-      </div>
+      {newsletterOn && (
+        <div className={`page ${styles.statement}`}>
+          <div>
+            <p className={styles.statementEyebrow}>Newsletter</p>
+            <p className={styles.statementText}>{content?.newsletter?.heading || 'Tips, workouts and early access to new programs.'}</p>
+            <p className={styles.statementNote}>{content?.newsletter?.paragraph || 'One email a week at most. Unsubscribe any time.'}</p>
+          </div>
+          <div className={styles.statementForm}>
+            <NewsletterForm light />
+          </div>
+        </div>
+      )}
 
       <div className={`page ${styles.inner}`}>
         <div className={styles.brandCol}>
@@ -90,13 +96,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {newsletterOn && (
-          <div className={styles.newsletterCol}>
-            <h3>Stay in the loop</h3>
-            <p className={styles.newsletterText}>Tips, workouts and new programs. One email a week at most.</p>
-            <NewsletterForm compact light />
-          </div>
-        )}
       </div>
 
       <div className={`page ${styles.bottom}`}>

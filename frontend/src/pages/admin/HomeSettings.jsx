@@ -199,15 +199,16 @@ export default function AdminHomeSettingsPage() {
       <form onSubmit={submit} className={styles.form} noValidate>
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Hero</h2>
-          <p className={styles.hint}>The big photo at the top. Add two or more and they crossfade as a slideshow. Portrait photos (4:5) work best.</p>
+          <p className={styles.hint}>The photos that switch at the top of the home page. Upload, reorder by removing and re-adding, and caption them here. Two or more photos switch automatically; portrait photos (4:5) look best.</p>
           <ListEditor
             items={content.hero.slides ?? []}
             onChange={(value) => set('hero', 'slides', value)}
             addLabel="Add a hero photo"
-            blank={{ imageUrl: '', caption: '' }}
+            blank={{ imageUrl: '', label: '', caption: '' }}
             disabled={saving}
             fields={[
               { key: 'imageUrl', label: 'Photo', type: 'image' },
+              { key: 'label', label: 'Small label (optional)', placeholder: 'On the floor', max: 30 },
               { key: 'caption', label: 'Caption (optional, shown on the photo)', placeholder: 'She Strong Classes, Kimihurura', max: 60 }
             ]}
           />
