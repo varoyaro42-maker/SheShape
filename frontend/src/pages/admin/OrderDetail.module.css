@@ -245,3 +245,31 @@
     grid-template-columns: 1fr;
   }
 }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.9rem 1.5rem;
+  margin: 0;
+}
+
+.facts dt {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  margin-bottom: 0.2rem;
+}
+
+.facts dd {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--admin-ink);
+}
+
+.facts a {
+  color: var(--green-mid, #2f6b3d);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

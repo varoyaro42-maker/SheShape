@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { Check, Plus, Trash2 } from 'lucide-react'
 import { adminPrograms, adminUploads } from '../../api/admin.js'
 import { readError } from '../../api/client.js'
 import { useToast } from '../../context/toast-context.js'
@@ -14,8 +14,17 @@ const BLANK = {
   label: '',
   description: '',
   highlights: '',
-  status: 'coming_soon'
+  status: 'coming_soon',
+  price: '',
+  priceNote: '',
+  duration: '',
+  location: '',
+  coach: '',
+  capacity: '',
+  bookable: true
 }
+
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 export default function AdminProgramFormPage() {
   const { id } = useParams()
@@ -24,6 +33,7 @@ export default function AdminProgramFormPage() {
   const isNew = !id
 
   const [fields, setFields] = useState(BLANK)
+  const [schedule, setSchedule] = useState([])
   const [coverImage, setCoverImage] = useState('')
   const [videos, setVideos] = useState([])
   const [slug, setSlug] = useState('')
@@ -48,8 +58,16 @@ export default function AdminProgramFormPage() {
           label: program.label ?? '',
           description: program.description ?? '',
           highlights: (program.highlights ?? []).join('\n'),
-          status: program.status
+          status: program.status,
+          price: program.price ?? '',
+          priceNote: program.priceNote ?? '',
+          duration: program.duration ?? '',
+          location: program.location ?? '',
+          coach: program.coach ?? '',
+          capacity: program.capacity ?? '',
+          bookable: program.bookable !== false
         })
+        setSchedule(program.schedule ?? [])
         setCoverImage(program.coverImage ?? '')
         setVideos(program.videos ?? [])
         setSlug(program.slug)
@@ -65,6 +83,18 @@ export default function AdminProgramFormPage() {
   function set(field, value) {
     setFields((current) => ({ ...current, [field]: value }))
     setFieldErrors((current) => ({ ...current, [field]: undefined }))
+  }
+
+  function updateSession(index, key, value) {
+    setSchedule((current) => current.map((entry, i) => (i === index ? { ...entry, [key]: value } : entry)))
+  }
+
+  function addSession() {
+    setSchedule((current) => [...current, { day: 'Monday', time: '', note: '' }])
+  }
+
+  function removeSession(index) {
+    setSchedule((current) => current.filter((_, i) => i !== index))
   }
 
   async function handleCoverChange(event) {
@@ -129,7 +159,15 @@ export default function AdminProgramFormPage() {
       description: fields.description,
       highlights: fields.highlights.split('\n').map((line) => line.trim()).filter(Boolean),
       coverImage: coverImage || null,
-      status: fields.status
+      status: fields.status,
+      price: fields.price === '' ? null : Number(fields.price),
+      priceNote: fields.priceNote,
+      duration: fields.duration,
+      location: fields.location,
+      coach: fields.coach,
+      capacity: fields.capacity === '' ? null : Number(fields.capacity),
+      bookable: fields.bookable,
+      schedule
     }
 
     try {
@@ -154,6 +192,8 @@ export default function AdminProgramFormPage() {
 
   if (loading) return <Loading />
 
+  const hint = (field) => fieldErrors[field] && <span className={styles.hint}>{fieldErrors[field]}</span>
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -171,38 +211,23 @@ export default function AdminProgramFormPage() {
 
       <form onSubmit={submit} className={styles.form} noValidate>
         <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Basics</h2>
+
           <label className={styles.field}>
             <span className={styles.label}>Name</span>
-            <input
-              type="text"
-              value={fields.name}
-              onChange={(event) => set('name', event.target.value)}
-              maxLength={120}
-              className={styles.input}
-            />
-            {fieldErrors.name && <span className={styles.hint}>{fieldErrors.name}</span>}
+            <input type="text" value={fields.name} onChange={(event) => set('name', event.target.value)} maxLength={120} className={styles.input} />
+            {hint('name')}
           </label>
 
           <div className={styles.row}>
             <label className={styles.field}>
               <span className={styles.label}>Label</span>
-              <input
-                type="text"
-                value={fields.label}
-                onChange={(event) => set('label', event.target.value)}
-                maxLength={40}
-                placeholder="e.g. Signature"
-                className={styles.input}
-              />
+              <input type="text" value={fields.label} onChange={(event) => set('label', event.target.value)} maxLength={40} placeholder="e.g. Signature, Group training" className={styles.input} />
             </label>
 
             <label className={styles.field}>
               <span className={styles.label}>Status</span>
-              <select
-                value={fields.status}
-                onChange={(event) => set('status', event.target.value)}
-                className={styles.input}
-              >
+              <select value={fields.status} onChange={(event) => set('status', event.target.value)} className={styles.input}>
                 <option value="coming_soon">Coming soon</option>
                 <option value="open">Open</option>
               </select>
@@ -211,34 +236,102 @@ export default function AdminProgramFormPage() {
 
           <label className={styles.field}>
             <span className={styles.label}>Tagline</span>
-            <input
-              type="text"
-              value={fields.tagline}
-              onChange={(event) => set('tagline', event.target.value)}
-              maxLength={200}
-              className={styles.input}
-            />
+            <input type="text" value={fields.tagline} onChange={(event) => set('tagline', event.target.value)} maxLength={200} placeholder="One line that says who it is for" className={styles.input} />
           </label>
 
           <label className={styles.field}>
             <span className={styles.label}>Description</span>
-            <textarea
-              value={fields.description}
-              onChange={(event) => set('description', event.target.value)}
-              rows={6}
-              className={styles.textarea}
-            />
+            <textarea value={fields.description} onChange={(event) => set('description', event.target.value)} rows={6} className={styles.textarea} />
+            <span className={styles.hint}>Leave an empty line between paragraphs.</span>
           </label>
 
           <label className={styles.field}>
-            <span className={styles.label}>Highlights (one per line)</span>
-            <textarea
-              value={fields.highlights}
-              onChange={(event) => set('highlights', event.target.value)}
-              rows={4}
-              className={styles.textarea}
-            />
+            <span className={styles.label}>What you get (one per line)</span>
+            <textarea value={fields.highlights} onChange={(event) => set('highlights', event.target.value)} rows={4} className={styles.textarea} />
           </label>
+        </section>
+
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Practical details</h2>
+          <p className={styles.hint}>Shown on the program card and page. Leave anything blank to hide it.</p>
+
+          <div className={styles.row}>
+            <label className={styles.field}>
+              <span className={styles.label}>Price (RWF)</span>
+              <input type="number" min="0" step="1" value={fields.price} onChange={(event) => set('price', event.target.value)} placeholder="45000" className={styles.input} />
+              {hint('price')}
+            </label>
+
+            <label className={styles.field}>
+              <span className={styles.label}>Price note</span>
+              <input type="text" value={fields.priceNote} onChange={(event) => set('priceNote', event.target.value)} maxLength={60} placeholder="per month, per session, for 12 weeks" className={styles.input} />
+            </label>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.field}>
+              <span className={styles.label}>Duration</span>
+              <input type="text" value={fields.duration} onChange={(event) => set('duration', event.target.value)} maxLength={80} placeholder="12 weeks · 3 sessions a week" className={styles.input} />
+            </label>
+
+            <label className={styles.field}>
+              <span className={styles.label}>Location</span>
+              <input type="text" value={fields.location} onChange={(event) => set('location', event.target.value)} maxLength={120} placeholder="Fitnesspoint Kimihurura" className={styles.input} />
+            </label>
+          </div>
+
+          <div className={styles.row}>
+            <label className={styles.field}>
+              <span className={styles.label}>Coach</span>
+              <input type="text" value={fields.coach} onChange={(event) => set('coach', event.target.value)} maxLength={80} placeholder="Coach Arnoldine" className={styles.input} />
+            </label>
+
+            <label className={styles.field}>
+              <span className={styles.label}>Max group size</span>
+              <input type="number" min="1" step="1" value={fields.capacity} onChange={(event) => set('capacity', event.target.value)} placeholder="5" className={styles.input} />
+              {hint('capacity')}
+            </label>
+          </div>
+
+          <label className={styles.field} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem' }}>
+            <input type="checkbox" checked={fields.bookable} onChange={(event) => set('bookable', event.target.checked)} />
+            <span className={styles.label} style={{ margin: 0 }}>
+              Customers can send a request to join from the website
+            </span>
+          </label>
+        </section>
+
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Weekly schedule</h2>
+          <p className={styles.hint}>Add each session. The note can hold the gym or room.</p>
+
+          {schedule.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {schedule.map((entry, index) => (
+                <div key={index} style={{ display: 'grid', gridTemplateColumns: '150px 150px 1fr auto', gap: '0.6rem', alignItems: 'center' }}>
+                  <select value={entry.day} onChange={(event) => updateSession(index, 'day', event.target.value)} className={styles.input}>
+                    {DAYS.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                  <input type="text" value={entry.time} onChange={(event) => updateSession(index, 'time', event.target.value)} placeholder="06:30 – 07:30" className={styles.input} maxLength={40} />
+                  <input type="text" value={entry.note} onChange={(event) => updateSession(index, 'note', event.target.value)} placeholder="Fitnesspoint Remera" className={styles.input} maxLength={120} />
+                  <button type="button" onClick={() => removeSession(index)} className={styles.ghost} aria-label="Remove session">
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className={styles.actions} style={{ marginTop: '0.75rem' }}>
+            <button type="button" onClick={addSession} className={styles.ghost}>
+              <Plus size={15} />
+              Add a session
+            </button>
+          </div>
         </section>
 
         <section className={styles.card}>
@@ -254,7 +347,6 @@ export default function AdminProgramFormPage() {
 
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Videos</h2>
-
           <VideoUploader videos={videos} onAdd={addVideo} onRemove={removeVideo} disabled={saving} />
         </section>
 

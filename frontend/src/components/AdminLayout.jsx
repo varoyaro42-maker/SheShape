@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X } from 'lucide-react'
+import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X, CalendarCheck, Megaphone } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useTheme } from '../hooks/useTheme.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
-import { adminMessages } from '../api/admin.js'
+import { adminMessages, adminBookings } from '../api/admin.js'
 import TopbarIcons from './TopbarIcons.jsx'
 import GlobalSearch from './GlobalSearch.jsx'
 import styles from './AdminLayout.module.css'
@@ -16,9 +16,11 @@ const LINKS = [
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/programs', label: 'Programs', icon: Dumbbell },
   { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { to: '/admin/messages', label: 'Messages', icon: Mail },
+  { to: '/admin/subscribers', label: 'Newsletter', icon: Megaphone },
   { to: '/admin/posts', label: 'Blog', icon: Newspaper },
-  { to: '/admin/home', label: 'Home page', icon: Home },
+  { to: '/admin/home', label: 'Site content', icon: Home },
   { to: '/admin/settings', label: 'Payment settings', icon: CreditCard },
   { to: '/admin/account', label: 'My account', icon: User }
 ]
@@ -36,6 +38,7 @@ export default function AdminLayout() {
   const location = useLocation()
   const menu = useMobileMenu()
   const [unreadMessages, setUnreadMessages] = useState(0)
+  const [newBookings, setNewBookings] = useState(0)
 
   const initial = user?.name?.trim()?.[0]?.toUpperCase() ?? '?'
   const pageTitle = getPageTitle(location.pathname, LINKS, 'Dashboard')
@@ -46,6 +49,11 @@ export default function AdminLayout() {
     adminMessages
       .counts()
       .then((data) => active && setUnreadMessages(data.unread))
+      .catch(() => {})
+
+    adminBookings
+      .counts()
+      .then((data) => active && setNewBookings(data.new))
       .catch(() => {})
 
     return () => {
@@ -83,6 +91,9 @@ export default function AdminLayout() {
               {link.label}
               {link.to === '/admin/messages' && unreadMessages > 0 && (
                 <span className={styles.navBadge}>{unreadMessages}</span>
+              )}
+              {link.to === '/admin/bookings' && newBookings > 0 && (
+                <span className={styles.navBadge}>{newBookings}</span>
               )}
             </NavLink>
           ))}

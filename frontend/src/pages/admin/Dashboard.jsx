@@ -16,7 +16,9 @@ import {
   UserPlus,
   CheckCircle2,
   PackagePlus,
-  AlertTriangle
+  AlertTriangle,
+  CalendarCheck,
+  Megaphone
 } from 'lucide-react'
 import {
   AreaChart,
@@ -59,6 +61,20 @@ const SECTIONS = [
     stat: (data) => `${data.orders.byStatus.pending} awaiting payment`
   },
   {
+    to: '/admin/bookings',
+    label: 'Bookings',
+    icon: CalendarCheck,
+    description: 'Confirm or decline requests to join programs.',
+    stat: (data) => `${data.bookings?.new ?? 0} waiting for a reply`
+  },
+  {
+    to: '/admin/subscribers',
+    label: 'Newsletter',
+    icon: Megaphone,
+    description: 'See who signed up and export the list for Brevo.',
+    stat: (data) => `${data.subscribers?.total ?? 0} subscribed`
+  },
+  {
     to: '/admin/posts',
     label: 'Blog',
     icon: Newspaper,
@@ -69,7 +85,7 @@ const SECTIONS = [
     to: '/admin/settings',
     label: 'Payment settings',
     icon: CreditCard,
-    description: "Connect the Stripe account that receives payments.",
+    description: 'Mobile money number and XentriPay online payments.',
     stat: () => null
   },
   {

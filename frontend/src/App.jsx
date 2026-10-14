@@ -18,9 +18,10 @@ import VerifyEmail from './pages/VerifyEmail.jsx'
 import ForgotPassword from './pages/ForgotPassword.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 import NotFound from './pages/NotFound.jsx'
+import NewsletterStatus from './pages/NewsletterStatus.jsx'
 
 // Everything behind a login is split out of the storefront bundle. Visitors
-// never download the admin dashboard, Recharts, or the Stripe checkout.
+// never download the admin dashboard, Recharts, or the checkout.
 const CustomerLayout = lazy(() => import('./components/CustomerLayout.jsx'))
 const AdminRoute = lazy(() => import('./components/AdminRoute.jsx'))
 const AdminLayout = lazy(() => import('./components/AdminLayout.jsx'))
@@ -28,6 +29,7 @@ const Cart = lazy(() => import('./pages/Cart.jsx'))
 const Checkout = lazy(() => import('./pages/Checkout.jsx'))
 const OrderConfirm = lazy(() => import('./pages/OrderConfirm.jsx'))
 const MyOrders = lazy(() => import('./pages/MyOrders.jsx'))
+const MyBookings = lazy(() => import('./pages/MyBookings.jsx'))
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'))
 const Account = lazy(() => import('./pages/Account.jsx'))
 const AdminDashboardPage = lazy(() => import('./pages/admin/Dashboard.jsx'))
@@ -45,6 +47,9 @@ const AdminPaymentSettingsPage = lazy(() => import('./pages/admin/PaymentSetting
 const AdminHomeSettingsPage = lazy(() => import('./pages/admin/HomeSettings.jsx'))
 const AdminMessagesPage = lazy(() => import('./pages/admin/Messages.jsx'))
 const AdminMessageDetailPage = lazy(() => import('./pages/admin/MessageDetail.jsx'))
+const AdminBookingsPage = lazy(() => import('./pages/admin/Bookings.jsx'))
+const AdminBookingDetailPage = lazy(() => import('./pages/admin/BookingDetail.jsx'))
+const AdminSubscribersPage = lazy(() => import('./pages/admin/Subscribers.jsx'))
 
 export default function App() {
   return (
@@ -65,6 +70,7 @@ export default function App() {
           <Route path="verify-email" element={<VerifyEmail />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="newsletter/:state" element={<NewsletterStatus />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -94,6 +100,9 @@ export default function App() {
           <Route path="home" element={<AdminHomeSettingsPage />} />
           <Route path="messages" element={<AdminMessagesPage />} />
           <Route path="messages/:id" element={<AdminMessageDetailPage />} />
+          <Route path="bookings" element={<AdminBookingsPage />} />
+          <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
+          <Route path="subscribers" element={<AdminSubscribersPage />} />
           <Route path="account" element={<Account />} />
         </Route>
 
@@ -110,6 +119,7 @@ export default function App() {
             <Route path="checkout" element={<Checkout />} />
             <Route path="order/:orderNumber" element={<OrderConfirm />} />
             <Route path="orders" element={<MyOrders />} />
+            <Route path="bookings" element={<MyBookings />} />
             <Route path="account" element={<Account />} />
           </Route>
         </Route>

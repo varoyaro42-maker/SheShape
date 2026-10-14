@@ -80,3 +80,17 @@ export const adminUploads = {
   presignVideo: (payload) => api.post('/admin/uploads/presign-video', payload).then(unwrap),
   presignHome: (payload) => api.post('/admin/uploads/presign-home', payload).then(unwrap)
 }
+
+export const adminBookings = {
+  list: (params) => api.get('/admin/bookings', { params }).then((r) => r.data),
+  counts: () => api.get('/admin/bookings/counts').then(unwrap),
+  detail: (id) => api.get(`/admin/bookings/${id}`).then(unwrap),
+  updateStatus: (id, payload) => api.patch(`/admin/bookings/${id}/status`, payload).then(unwrap)
+}
+
+export const adminSubscribers = {
+  list: (params) => api.get('/admin/subscribers', { params }).then((r) => r.data),
+  counts: () => api.get('/admin/subscribers/counts').then(unwrap),
+  exportUrl: '/api/admin/subscribers/export.csv',
+  remove: (id) => api.delete(`/admin/subscribers/${id}`)
+}

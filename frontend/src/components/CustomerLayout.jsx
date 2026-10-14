@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ShoppingBag, Dumbbell, Newspaper, Package, Settings, Menu, X } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Dumbbell, Newspaper, Package, Settings, Menu, X, CalendarCheck } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useCart } from '../context/cart-context.js'
 import { useTheme } from '../hooks/useTheme.js'
@@ -18,6 +18,7 @@ const BROWSE_LINKS = [
 
 const ACCOUNT_LINKS = [
   { to: '/dashboard/orders', label: 'My orders', icon: Package },
+  { to: '/dashboard/bookings', label: 'My bookings', icon: CalendarCheck },
   { to: '/dashboard/account', label: 'Account settings', icon: Settings }
 ]
 

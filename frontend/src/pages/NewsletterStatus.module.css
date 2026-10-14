@@ -1,0 +1,41 @@
+.page {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(48px, 8vw, 96px);
+  padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.card {
+  max-width: 520px;
+  width: 100%;
+  padding: 44px 36px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--green-soft);
+  color: var(--green-dark);
+}
+
+.title {
+  font-size: 30px;
+}
+
+.text {
+  color: var(--text-soft);
+  line-height: 1.65;
+  margin-bottom: 10px;
+}

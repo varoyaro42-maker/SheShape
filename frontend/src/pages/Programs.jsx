@@ -3,15 +3,25 @@ import { Link } from 'react-router-dom'
 import { programs as programsApi } from '../api/programs.js'
 import { readError } from '../api/client.js'
 import { usePortalPath } from '../hooks/usePortalPath.js'
+import ProgramCard from '../components/ProgramCard.jsx'
+import BookingForm from '../components/BookingForm.jsx'
+import Reveal from '../components/Reveal.jsx'
 import Loading from '../components/Loading.jsx'
 import Empty from '../components/Empty.jsx'
 import styles from './Programs.module.css'
+
+const FILTERS = [
+  { value: 'all', label: 'All' },
+  { value: 'open', label: 'Open now' },
+  { value: 'coming_soon', label: 'Coming soon' }
+]
 
 export default function ProgramsPage() {
   const to = usePortalPath()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [filter, setFilter] = useState('all')
 
   useEffect(() => {
     let active = true
@@ -27,70 +37,64 @@ export default function ProgramsPage() {
     }
   }, [])
 
+  const visible = filter === 'all' ? rows : rows.filter((program) => program.status === filter)
+  const openCount = rows.filter((program) => program.status === 'open').length
+
   return (
-    <div className={styles.page}>
+    <div className="page">
       <header className={styles.header}>
-        <p className={styles.eyebrow}>Train with intention</p>
-        <h1 className={styles.title}>Programs</h1>
-        <p className={styles.intro}>
-          Structured training for women — in studio, in groups, at work, or at our wellness
-          events. Every session is coached, progressive, and built for real life.
-        </p>
+        <div className={styles.headerCopy}>
+          <span className="eyebrow rise">Programs</span>
+          <h1 className={`${styles.title} rise rise-2`}>Train with us</h1>
+          <p className={`${styles.intro} rise rise-3`}>
+            Coached strength classes, small groups and workplace sessions across Kigali. Every program is
+            progressive, built around real life, and led by a coach who knows your name.
+          </p>
+        </div>
+        {rows.length > 1 && (
+          <div className={`${styles.filters} rise rise-4`} role="group" aria-label="Filter programs">
+            {FILTERS.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                onClick={() => setFilter(item.value)}
+                className={filter === item.value ? `${styles.chip} ${styles.chipActive}` : styles.chip}
+              >
+                {item.label}
+                {item.value === 'open' && openCount > 0 && <span className={styles.count}>{openCount}</span>}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
-      <div className={styles.banner}>
-        <strong>Booking isn&apos;t open here yet.</strong> These programs run today, but signing
-        up happens over the phone. Message us and we&apos;ll place you.
-      </div>
-
       {error && <p className={styles.error}>{error}</p>}
-
       {loading && <Loading />}
+      {!loading && visible.length === 0 && <Empty message="No programs listed here yet." />}
 
-      {!loading && rows.length === 0 && <Empty message="No programs listed yet." />}
-
-      {!loading && rows.length > 0 && (
+      {!loading && visible.length > 0 && (
         <div className={styles.grid}>
-          {rows.map((program) => (
-            <article key={program.id} className={styles.card}>
-              {program.coverImage ? (
-                <img src={program.coverImage} alt="" className={styles.cover} />
-              ) : (
-                <span className={styles.coverEmpty} />
-              )}
-
-              <div className={styles.cardBody}>
-                {program.label && <p className={styles.label}>{program.label}</p>}
-
-                <h2 className={styles.cardTitle}>
-                  <Link to={to(`/programs/${program.slug}`)} className={styles.cardLink}>
-                    {program.name}
-                  </Link>
-                </h2>
-
-                <p className={styles.tagline}>{program.tagline}</p>
-
-                {program.highlights?.length > 0 && (
-                  <ul className={styles.highlights}>
-                    {program.highlights.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-
-                <p className={styles.badge}>Coming soon</p>
-              </div>
-            </article>
+          {visible.map((program, index) => (
+            <Reveal key={program.id} delay={index * 70}>
+              <ProgramCard program={program} />
+            </Reveal>
           ))}
         </div>
       )}
 
-      <footer className={styles.footer}>
-        <p>
-          Want to join one of these? <Link to={to('/shop')}>Shop our products</Link> while booking
-          is being built, or reach us on the number in the footer.
-        </p>
-      </footer>
+      <Reveal as="section" className={styles.help}>
+        <div className={styles.helpCopy}>
+          <span className="eyebrow">Not sure where to start?</span>
+          <h2 className={styles.helpTitle}>Tell us about yourself and we'll suggest a program.</h2>
+          <p className={styles.helpText}>
+            New to training, coming back after a break, or short on time? Leave your details and a coach will
+            reply with a recommendation. You can also <Link to={to('/contact')}>send us a message</Link>.
+          </p>
+        </div>
+        <div className={styles.helpForm}>
+          <BookingForm />
+        </div>
+      </Reveal>
     </div>
   )
 }

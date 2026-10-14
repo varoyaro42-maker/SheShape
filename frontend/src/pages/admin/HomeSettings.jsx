@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Plus, Trash2 } from 'lucide-react'
 import { adminHome } from '../../api/admin.js'
 import { readError } from '../../api/client.js'
 import { useToast } from '../../context/toast-context.js'
@@ -8,47 +8,113 @@ import Loading from '../../components/Loading.jsx'
 import styles from './ProductForm.module.css'
 
 const BLANK = {
-  hero: {
-    eyebrow: '',
-    title: '',
-    script: '',
-    paragraph: '',
-    primaryButtonLabel: '',
-    secondaryButtonLabel: '',
-    imageUrl: ''
-  },
-  featured: {
-    eyebrow: '',
-    heading: '',
-    script: '',
-    paragraph: '',
-    tags: [],
-    buttonLabel: ''
-  },
-  program: {
-    eyebrow: '',
-    buttonLabel: ''
-  },
-  app: {
-    eyebrow: '',
-    heading: '',
-    script: '',
-    paragraph: '',
-    features: [],
-    imageUrl: ''
-  },
-  about: {
-    heading: '',
-    paragraph: '',
-    imageUrl: ''
-  },
-  contact: {
-    phone: '',
-    email: '',
-    whatsapp: '',
-    instagram: '',
-    address: ''
+  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '' },
+  stats: [],
+  featured: { eyebrow: '', heading: '', script: '', paragraph: '', tags: [], buttonLabel: '' },
+  program: { eyebrow: '', buttonLabel: '' },
+  app: { enabled: true, eyebrow: '', heading: '', script: '', paragraph: '', features: [], imageUrl: '', demoUrl: '', demoLabel: '' },
+  tips: [],
+  testimonials: [],
+  team: [],
+  about: { heading: '', paragraph: '', imageUrl: '' },
+  contact: { phone: '', email: '', whatsapp: '', instagram: '', address: '' },
+  newsletter: { enabled: true, heading: '', paragraph: '' }
+}
+
+function Field({ label, hint, children }) {
+  return (
+    <label className={styles.field}>
+      <span className={styles.label}>{label}</span>
+      {children}
+      {hint && <span className={styles.hint}>{hint}</span>}
+    </label>
+  )
+}
+
+function Toggle({ label, checked, onChange }) {
+  return (
+    <label className={styles.field} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem' }}>
+      <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
+      <span className={styles.label} style={{ margin: 0 }}>
+        {label}
+      </span>
+    </label>
+  )
+}
+
+/** Repeatable rows (stats, tips, quotes, team). `fields` describes each row's inputs. */
+function ListEditor({ items, onChange, fields, addLabel, blank, disabled }) {
+  function update(index, key, value) {
+    onChange(items.map((item, i) => (i === index ? { ...item, [key]: value } : item)))
   }
+
+  function remove(index) {
+    onChange(items.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+      {items.map((item, index) => (
+        <div
+          key={index}
+          style={{
+            display: 'grid',
+            gap: '0.6rem',
+            padding: '0.9rem',
+            border: '1px solid var(--admin-line)',
+            borderRadius: 10,
+            background: 'var(--admin-canvas)'
+          }}
+        >
+          {fields.map((field) =>
+            field.type === 'image' ? (
+              <HomeImageUploader
+                key={field.key}
+                label={field.label}
+                value={item[field.key] ?? ''}
+                onChange={(url) => update(index, field.key, url)}
+                disabled={disabled}
+              />
+            ) : field.type === 'textarea' ? (
+              <Field key={field.key} label={field.label}>
+                <textarea
+                  value={item[field.key] ?? ''}
+                  onChange={(event) => update(index, field.key, event.target.value)}
+                  rows={field.rows ?? 3}
+                  className={styles.textarea}
+                  placeholder={field.placeholder}
+                />
+              </Field>
+            ) : (
+              <Field key={field.key} label={field.label}>
+                <input
+                  type="text"
+                  value={item[field.key] ?? ''}
+                  onChange={(event) => update(index, field.key, event.target.value)}
+                  className={styles.input}
+                  placeholder={field.placeholder}
+                  maxLength={field.max ?? 200}
+                />
+              </Field>
+            )
+          )}
+          <div>
+            <button type="button" onClick={() => remove(index)} className={styles.ghost}>
+              <Trash2 size={14} />
+              Remove
+            </button>
+          </div>
+        </div>
+      ))}
+
+      <div>
+        <button type="button" onClick={() => onChange([...items, { ...blank }])} className={styles.ghost}>
+          <Plus size={15} />
+          {addLabel}
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminHomeSettingsPage() {
@@ -63,7 +129,7 @@ export default function AdminHomeSettingsPage() {
 
     adminHome
       .get()
-      .then((data) => active && setContent(data))
+      .then((data) => active && setContent({ ...BLANK, ...data }))
       .catch((err) => active && setError(readError(err)))
       .finally(() => active && setLoading(false))
 
@@ -73,10 +139,11 @@ export default function AdminHomeSettingsPage() {
   }, [])
 
   function set(section, key, value) {
-    setContent((current) => ({
-      ...current,
-      [section]: { ...current[section], [key]: value }
-    }))
+    setContent((current) => ({ ...current, [section]: { ...current[section], [key]: value } }))
+  }
+
+  function setList(section, value) {
+    setContent((current) => ({ ...current, [section]: value }))
   }
 
   async function submit(event) {
@@ -86,8 +153,8 @@ export default function AdminHomeSettingsPage() {
 
     try {
       const updated = await adminHome.update(content)
-      setContent(updated)
-      showToast('Home page updated.')
+      setContent({ ...BLANK, ...updated })
+      showToast('Site content updated.')
     } catch (err) {
       setError(readError(err))
     } finally {
@@ -97,12 +164,31 @@ export default function AdminHomeSettingsPage() {
 
   if (loading) return <Loading />
 
+  const text = (section, key, props = {}) => (
+    <input
+      type="text"
+      value={content[section][key] ?? ''}
+      onChange={(event) => set(section, key, event.target.value)}
+      className={styles.input}
+      {...props}
+    />
+  )
+
+  const area = (section, key, rows = 3) => (
+    <textarea
+      value={content[section][key] ?? ''}
+      onChange={(event) => set(section, key, event.target.value)}
+      rows={rows}
+      className={styles.textarea}
+    />
+  )
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Home page</h1>
-          <p className={styles.slug}>Edit the text and pictures shown on the public homepage.</p>
+          <h1 className={styles.title}>Site content</h1>
+          <p className={styles.slug}>Everything editable on the home page, about page and footer.</p>
         </div>
       </header>
 
@@ -111,359 +197,152 @@ export default function AdminHomeSettingsPage() {
       <form onSubmit={submit} className={styles.form} noValidate>
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Hero</h2>
-
-          <HomeImageUploader
-            label="Hero image"
-            value={content.hero.imageUrl}
-            onChange={(url) => set('hero', 'imageUrl', url)}
-            disabled={saving}
-          />
-
-          <label className={styles.field}>
-            <span className={styles.label}>Eyebrow</span>
-            <input
-              type="text"
-              value={content.hero.eyebrow}
-              onChange={(event) => set('hero', 'eyebrow', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Headline</span>
-            <input
-              type="text"
-              value={content.hero.title}
-              onChange={(event) => set('hero', 'title', event.target.value)}
-              className={styles.input}
-              maxLength={120}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Script line</span>
-            <input
-              type="text"
-              value={content.hero.script}
-              onChange={(event) => set('hero', 'script', event.target.value)}
-              className={styles.input}
-              maxLength={120}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Paragraph</span>
-            <textarea
-              value={content.hero.paragraph}
-              onChange={(event) => set('hero', 'paragraph', event.target.value)}
-              rows={3}
-              className={styles.textarea}
-            />
-          </label>
-
+          <HomeImageUploader label="Hero photo" value={content.hero.imageUrl} onChange={(url) => set('hero', 'imageUrl', url)} disabled={saving} />
+          <Field label="Small line above the headline">{text('hero', 'eyebrow', { maxLength: 80 })}</Field>
+          <Field label="Headline">{text('hero', 'title', { maxLength: 120 })}</Field>
+          <Field label="Paragraph">{area('hero', 'paragraph')}</Field>
           <div className={styles.row}>
-            <label className={styles.field}>
-              <span className={styles.label}>Primary button label</span>
-              <input
-                type="text"
-                value={content.hero.primaryButtonLabel}
-                onChange={(event) => set('hero', 'primaryButtonLabel', event.target.value)}
-                className={styles.input}
-                maxLength={40}
-              />
-              <span className={styles.hint}>Links to the shop.</span>
-            </label>
-
-            <label className={styles.field}>
-              <span className={styles.label}>Secondary button label</span>
-              <input
-                type="text"
-                value={content.hero.secondaryButtonLabel}
-                onChange={(event) => set('hero', 'secondaryButtonLabel', event.target.value)}
-                className={styles.input}
-                maxLength={40}
-              />
-              <span className={styles.hint}>Links to programs.</span>
-            </label>
+            <Field label="Primary button" hint="Links to programs.">{text('hero', 'primaryButtonLabel', { maxLength: 40 })}</Field>
+            <Field label="Secondary button" hint="Links to the shop.">{text('hero', 'secondaryButtonLabel', { maxLength: 40 })}</Field>
           </div>
         </section>
 
         <section className={styles.card}>
-          <h2 className={styles.sectionTitle}>Featured promo</h2>
-          <p className={styles.hint}>
-            The picture, name and price shown here come automatically from your most recently added
-            product — add a product in Products to feature it.
-          </p>
+          <h2 className={styles.sectionTitle}>Numbers that matter</h2>
+          <p className={styles.hint}>Shown under the hero and on the about page. Keep them true: "250+", "4", "2026".</p>
+          <ListEditor
+            items={content.stats}
+            onChange={(value) => setList('stats', value)}
+            addLabel="Add a number"
+            blank={{ value: '', label: '' }}
+            disabled={saving}
+            fields={[
+              { key: 'value', label: 'Number', placeholder: '250+', max: 20 },
+              { key: 'label', label: 'What it is', placeholder: 'women in the community', max: 80 }
+            ]}
+          />
+        </section>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Eyebrow</span>
-            <input
-              type="text"
-              value={content.featured.eyebrow}
-              onChange={(event) => set('featured', 'eyebrow', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Heading</span>
-            <input
-              type="text"
-              value={content.featured.heading}
-              onChange={(event) => set('featured', 'heading', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Script line</span>
-            <input
-              type="text"
-              value={content.featured.script}
-              onChange={(event) => set('featured', 'script', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Paragraph</span>
-            <textarea
-              value={content.featured.paragraph}
-              onChange={(event) => set('featured', 'paragraph', event.target.value)}
-              rows={3}
-              className={styles.textarea}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Tags (comma separated)</span>
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Nkondo Active promo</h2>
+          <p className={styles.hint}>The product shown comes from your most recently added product.</p>
+          <Field label="Small line">{text('featured', 'eyebrow', { maxLength: 80 })}</Field>
+          <Field label="Heading">{text('featured', 'heading', { maxLength: 80 })}</Field>
+          <Field label="Subheading (italic)">{text('featured', 'script', { maxLength: 80 })}</Field>
+          <Field label="Paragraph">{area('featured', 'paragraph')}</Field>
+          <Field label="Tags (comma separated)">
             <input
               type="text"
               value={content.featured.tags.join(', ')}
-              onChange={(event) =>
-                set(
-                  'featured',
-                  'tags',
-                  event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean)
-                )
-              }
+              onChange={(event) => set('featured', 'tags', event.target.value.split(',').map((tag) => tag.trim()).filter(Boolean))}
               className={styles.input}
             />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Button label</span>
-            <input
-              type="text"
-              value={content.featured.buttonLabel}
-              onChange={(event) => set('featured', 'buttonLabel', event.target.value)}
-              className={styles.input}
-              maxLength={40}
-            />
-            <span className={styles.hint}>Links to that product's page.</span>
-          </label>
+          </Field>
+          <Field label="Button label">{text('featured', 'buttonLabel', { maxLength: 40 })}</Field>
         </section>
 
         <section className={styles.card}>
-          <h2 className={styles.sectionTitle}>Featured program</h2>
-          <p className={styles.hint}>
-            The picture, name and description shown here come automatically from your open programs
-            (or your most recent program if none are open) — manage that in Programs.
-          </p>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Eyebrow</span>
-            <input
-              type="text"
-              value={content.program.eyebrow}
-              onChange={(event) => set('program', 'eyebrow', event.target.value)}
-              className={styles.input}
-              maxLength={40}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Button label</span>
-            <input
-              type="text"
-              value={content.program.buttonLabel}
-              onChange={(event) => set('program', 'buttonLabel', event.target.value)}
-              className={styles.input}
-              maxLength={40}
-            />
-            <span className={styles.hint}>Links to that program's page.</span>
-          </label>
-        </section>
-
-        <section className={styles.card}>
-          <h2 className={styles.sectionTitle}>App pitch</h2>
-
-          <HomeImageUploader
-            label="Section image"
-            value={content.app.imageUrl}
-            onChange={(url) => set('app', 'imageUrl', url)}
+          <h2 className={styles.sectionTitle}>Myths and tips</h2>
+          <p className={styles.hint}>The dark band on the home page. Three reads best. Remove all to hide it.</p>
+          <ListEditor
+            items={content.tips}
+            onChange={(value) => setList('tips', value)}
+            addLabel="Add a tip"
+            blank={{ title: '', body: '' }}
             disabled={saving}
+            fields={[
+              { key: 'title', label: 'Title', placeholder: "Lifting won't make you bulky.", max: 90 },
+              { key: 'body', label: 'Body', type: 'textarea', rows: 2 }
+            ]}
           />
+        </section>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Eyebrow</span>
-            <input
-              type="text"
-              value={content.app.eyebrow}
-              onChange={(event) => set('app', 'eyebrow', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>What members say</h2>
+          <p className={styles.hint}>Short, real quotes with a first name. Shown on the home and about pages.</p>
+          <ListEditor
+            items={content.testimonials}
+            onChange={(value) => setList('testimonials', value)}
+            addLabel="Add a quote"
+            blank={{ quote: '', name: '', detail: '' }}
+            disabled={saving}
+            fields={[
+              { key: 'quote', label: 'Quote', type: 'textarea', rows: 3 },
+              { key: 'name', label: 'Name', placeholder: 'Ama', max: 60 },
+              { key: 'detail', label: 'Detail', placeholder: 'She Strong Classes, since March', max: 80 }
+            ]}
+          />
+        </section>
 
-          <label className={styles.field}>
-            <span className={styles.label}>Heading</span>
-            <input
-              type="text"
-              value={content.app.heading}
-              onChange={(event) => set('app', 'heading', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Script line</span>
-            <input
-              type="text"
-              value={content.app.script}
-              onChange={(event) => set('app', 'script', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Paragraph</span>
-            <textarea
-              value={content.app.paragraph}
-              onChange={(event) => set('app', 'paragraph', event.target.value)}
-              rows={3}
-              className={styles.textarea}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Feature list (one per line)</span>
-            <textarea
-              value={content.app.features.join('\n')}
-              onChange={(event) =>
-                set(
-                  'app',
-                  'features',
-                  event.target.value.split('\n').map((line) => line.trim()).filter(Boolean)
-                )
-              }
-              rows={4}
-              className={styles.textarea}
-            />
-          </label>
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Coaches and team</h2>
+          <ListEditor
+            items={content.team}
+            onChange={(value) => setList('team', value)}
+            addLabel="Add a person"
+            blank={{ name: '', role: '', bio: '', imageUrl: '' }}
+            disabled={saving}
+            fields={[
+              { key: 'imageUrl', label: 'Photo', type: 'image' },
+              { key: 'name', label: 'Name', placeholder: 'Arnoldine Urukundo', max: 80 },
+              { key: 'role', label: 'Role', placeholder: 'Co-founder and head coach', max: 80 },
+              { key: 'bio', label: 'Short bio', type: 'textarea', rows: 3 }
+            ]}
+          />
         </section>
 
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>About page</h2>
+          <HomeImageUploader label="About photo" value={content.about.imageUrl} onChange={(url) => set('about', 'imageUrl', url)} disabled={saving} />
+          <Field label="Heading">{text('about', 'heading', { maxLength: 120 })}</Field>
+          <Field label="Your story" hint="Leave an empty line between paragraphs.">{area('about', 'paragraph', 7)}</Field>
+        </section>
 
-          <HomeImageUploader
-            label="About image"
-            value={content.about.imageUrl}
-            onChange={(url) => set('about', 'imageUrl', url)}
-            disabled={saving}
-          />
-
-          <label className={styles.field}>
-            <span className={styles.label}>Heading</span>
-            <input
-              type="text"
-              value={content.about.heading}
-              onChange={(event) => set('about', 'heading', event.target.value)}
-              className={styles.input}
-              maxLength={80}
-            />
-          </label>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Story</span>
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>App section</h2>
+          <Toggle label="Show the app section on the home page" checked={content.app.enabled !== false} onChange={(value) => set('app', 'enabled', value)} />
+          <HomeImageUploader label="Phone screenshot" value={content.app.imageUrl} onChange={(url) => set('app', 'imageUrl', url)} disabled={saving} />
+          <Field label="Small line">{text('app', 'eyebrow', { maxLength: 80 })}</Field>
+          <Field label="Heading">{text('app', 'heading', { maxLength: 80 })}</Field>
+          <Field label="Paragraph">{area('app', 'paragraph')}</Field>
+          <Field label="Feature list (one per line)">
             <textarea
-              value={content.about.paragraph}
-              onChange={(event) => set('about', 'paragraph', event.target.value)}
-              rows={5}
+              value={content.app.features.join('\n')}
+              onChange={(event) => set('app', 'features', event.target.value.split('\n').map((line) => line.trim()).filter(Boolean))}
+              rows={4}
               className={styles.textarea}
             />
-          </label>
+          </Field>
+          <div className={styles.row}>
+            <Field label="Demo link" hint="Leave blank to hide the button.">{text('app', 'demoUrl', { placeholder: '/app-demo.html' })}</Field>
+            <Field label="Demo button label">{text('app', 'demoLabel', { maxLength: 40 })}</Field>
+          </div>
+        </section>
+
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Newsletter</h2>
+          <Toggle label="Show newsletter signup on the site" checked={content.newsletter.enabled !== false} onChange={(value) => set('newsletter', 'enabled', value)} />
+          <Field label="Heading">{text('newsletter', 'heading', { maxLength: 120 })}</Field>
+          <Field label="Paragraph">{text('newsletter', 'paragraph', { maxLength: 160 })}</Field>
         </section>
 
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Contact details</h2>
-
           <div className={styles.row}>
-            <label className={styles.field}>
-              <span className={styles.label}>Phone</span>
-              <input
-                type="text"
-                value={content.contact.phone}
-                onChange={(event) => set('contact', 'phone', event.target.value)}
-                className={styles.input}
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span className={styles.label}>WhatsApp</span>
-              <input
-                type="text"
-                value={content.contact.whatsapp}
-                onChange={(event) => set('contact', 'whatsapp', event.target.value)}
-                className={styles.input}
-              />
-            </label>
+            <Field label="Phone">{text('contact', 'phone')}</Field>
+            <Field label="WhatsApp number">{text('contact', 'whatsapp')}</Field>
           </div>
-
           <div className={styles.row}>
-            <label className={styles.field}>
-              <span className={styles.label}>Email</span>
-              <input
-                type="email"
-                value={content.contact.email}
-                onChange={(event) => set('contact', 'email', event.target.value)}
-                className={styles.input}
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span className={styles.label}>Address</span>
-              <input
-                type="text"
-                value={content.contact.address}
-                onChange={(event) => set('contact', 'address', event.target.value)}
-                className={styles.input}
-              />
-            </label>
+            <Field label="Email">{text('contact', 'email', { type: 'email' })}</Field>
+            <Field label="Address">{text('contact', 'address')}</Field>
           </div>
-
-          <label className={styles.field}>
-            <span className={styles.label}>Instagram handle</span>
-            <input
-              type="text"
-              value={content.contact.instagram}
-              onChange={(event) => set('contact', 'instagram', event.target.value)}
-              className={styles.input}
-              placeholder="@sheshape_rw"
-            />
-          </label>
+          <Field label="Instagram handle">{text('contact', 'instagram', { placeholder: '@sheshape_wellness' })}</Field>
         </section>
 
         <div className={styles.actions}>
           <button type="submit" disabled={saving} className={styles.primary}>
             <Check size={16} />
-            {saving ? 'Saving' : 'Save home page'}
+            {saving ? 'Saving' : 'Save content'}
           </button>
         </div>
       </form>
