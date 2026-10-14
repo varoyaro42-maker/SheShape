@@ -26,19 +26,18 @@
 .hero {
   position: relative;
   overflow: hidden;
-  color: #fff;
+  color: var(--text);
   background:
-    radial-gradient(700px 480px at 82% 30%, rgba(158, 198, 166, 0.22), transparent 62%),
-    radial-gradient(520px 380px at 8% 100%, rgba(47, 107, 61, 0.45), transparent 70%),
-    var(--green-dark);
+    radial-gradient(900px 500px at 85% -10%, rgba(158, 198, 166, 0.28), transparent 60%),
+    var(--bg);
 }
 
 .heroGrid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(rgba(6, 49, 26, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 49, 26, 0.05) 1px, transparent 1px);
   background-size: 56px 56px;
   -webkit-mask-image: radial-gradient(ellipse at 70% 40%, #000 20%, transparent 75%);
   mask-image: radial-gradient(ellipse at 70% 40%, #000 20%, transparent 75%);
@@ -66,28 +65,28 @@
   padding: 8px 16px 8px 12px;
   margin-bottom: 26px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--surface);
+  border: 1px solid var(--border);
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--text-soft);
 }
 
 .pill svg {
-  color: var(--green-light);
+  color: var(--green-mid);
 }
 
 .pillDot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--green-light);
-  box-shadow: 0 0 0 4px rgba(158, 198, 166, 0.25);
+  background: var(--green-mid);
+  box-shadow: 0 0 0 4px rgba(47, 107, 61, 0.2);
   animation: pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes pulse {
   50% {
-    box-shadow: 0 0 0 7px rgba(158, 198, 166, 0);
+    box-shadow: 0 0 0 7px rgba(47, 107, 61, 0);
   }
 }
 
@@ -97,17 +96,17 @@
   font-weight: 700;
   line-height: 0.98;
   letter-spacing: -0.035em;
-  color: #fff;
+  color: var(--green-dark);
   margin: 0 0 22px;
 }
 
 .heroAccent {
   display: inline;
-  color: var(--green-light);
+  color: var(--green-mid);
 }
 
 .heroLead {
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--text-soft);
   font-size: clamp(16px, 1.3vw, 18px);
   line-height: 1.7;
   max-width: 50ch;
@@ -121,25 +120,19 @@
 }
 
 .heroPrimary {
-  background: var(--green-light);
-  color: var(--green-dark);
   border-radius: 999px;
 }
 
-.heroPrimary:hover:not(:disabled) {
-  background: #fff;
-  color: var(--green-dark);
-}
-
 .heroSecondary {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  background: transparent;
+  border-color: var(--green-dark);
+  color: var(--green-dark);
   border-radius: 999px;
 }
 
 .heroSecondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--green-dark);
+  color: #fff;
 }
 
 .heroStats {
@@ -148,7 +141,7 @@
   gap: 12px 36px;
   margin: 40px 0 0;
   padding-top: 26px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border);
 }
 
 .heroStats dt {
@@ -156,13 +149,13 @@
   font-size: clamp(26px, 2.6vw, 34px);
   font-weight: 900;
   line-height: 1;
-  color: #fff;
+  color: var(--green-dark);
 }
 
 .heroStats dd {
   margin: 6px 0 0;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--text-muted);
   max-width: 18ch;
 }
 
@@ -734,4 +727,18 @@
   .pillDot {
     animation: none;
   }
+}
+
+[data-theme='dark'] .heroTitle,
+[data-theme='dark'] .heroStats dt {
+  color: var(--text);
+}
+
+[data-theme='dark'] .heroAccent {
+  color: var(--green-light);
+}
+
+[data-theme='dark'] .heroSecondary {
+  border-color: var(--green-light);
+  color: var(--green-light);
 }
