@@ -4,9 +4,10 @@ import { PHONE_PATTERN, normalizePhone } from '../utils/phone.js';
 
 export const ORDER_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 
-// cod: pay the courier. momo: customer sends mobile money to the shop's number
-// and an admin confirms. xentripay: online collection through XentriPay.
-export const PAYMENT_METHODS = ['cod', 'momo', 'xentripay'];
+// cod: pay the courier. momo: mobile money, either a XentriPay push prompt or
+// a manual transfer to the shop's number. card: Visa/Mastercard via XentriPay.
+export const PAYMENT_METHODS = ['cod', 'momo', 'card'];
+export const PAYMENT_PROVIDERS = ['manual', 'xentripay'];
 
 const Order = sequelize.define(
   'Order',
@@ -69,8 +70,17 @@ const Order = sequelize.define(
       defaultValue: 'cod',
       field: 'payment_method',
     },
-    // Provider-side id for online payments (XentriPay transaction id).
+    paymentProvider: {
+      type: DataTypes.ENUM(...PAYMENT_PROVIDERS),
+      allowNull: true,
+      field: 'payment_provider',
+    },
+    // XentriPay's refid for the current collection attempt.
     paymentReference: { type: DataTypes.STRING(120), allowNull: true, field: 'payment_reference' },
+    // How many collections were started; the customerRef is ORDER or ORDER-n.
+    paymentAttempts: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0, field: 'payment_attempts' },
+    // Set when XentriPay reports the latest attempt failed, cleared on retry.
+    paymentFailedAt: { type: DataTypes.DATE, allowNull: true, field: 'payment_failed_at' },
     // Hosted checkout link, kept so a customer can resume an unfinished payment.
     paymentCheckoutUrl: { type: DataTypes.TEXT, allowNull: true, field: 'payment_checkout_url' },
     paidAt: { type: DataTypes.DATE, allowNull: true, field: 'paid_at' },

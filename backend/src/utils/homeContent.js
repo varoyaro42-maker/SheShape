@@ -16,7 +16,9 @@ export const DEFAULT_HOME_CONTENT = {
       'Coached strength classes, small-group programs and honest nutrition guidance for women in Kigali. Train with intention and feel at home in your body.',
     primaryButtonLabel: 'See programs',
     secondaryButtonLabel: 'Shop Nkondo Active',
-    imageUrl: ''
+    imageUrl: '',
+    // Slideshow photos: [{ imageUrl, caption }]. Falls back to imageUrl when empty.
+    slides: []
   },
   stats: [
     { value: '250+', label: 'women in the community' },

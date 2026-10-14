@@ -13,6 +13,7 @@ import NewsletterForm from '../components/NewsletterForm.jsx'
 import Carousel from '../components/Carousel.jsx'
 import Ticker from '../components/Ticker.jsx'
 import Marquee from '../components/Marquee.jsx'
+import HeroSlideshow from '../components/HeroSlideshow.jsx'
 import Reveal from '../components/Reveal.jsx'
 import Loading from '../components/Loading.jsx'
 import styles from './Home.module.css'
@@ -100,6 +101,7 @@ export default function Home() {
   if (!content) return <Loading />
 
   const { hero, stats, featured, app, tips, testimonials, team, about, newsletter, ticker, gallery, contact } = content
+  const heroSlides = hero.slides?.length ? hero.slides : hero.imageUrl ? [{ imageUrl: hero.imageUrl, caption: '' }] : []
   const instagram = (contact?.instagram || '').replace(/^@/, '')
   const instagramUrl = instagram ? `https://instagram.com/${instagram}` : null
   const spotlight = products?.[0] ?? null
@@ -126,8 +128,8 @@ export default function Home() {
 
           <div className={`${styles.heroArt} rise rise-3`}>
             <div className={styles.heroShape} aria-hidden="true" />
-            {hero.imageUrl ? (
-              <img src={hero.imageUrl} alt="" className={`${styles.heroImage} ${styles.float}`} fetchPriority="high" />
+            {heroSlides.length > 0 ? (
+              <HeroSlideshow slides={heroSlides} className={styles.float} />
             ) : (
               <div className={`${styles.heroFrame} ${styles.float}`}>
                 <img src="/logo.svg" alt="" className={styles.heroFrameLogo} />

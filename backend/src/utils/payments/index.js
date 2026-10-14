@@ -17,14 +17,23 @@ export function momoReady(row) {
   return Boolean(row.momoNumber);
 }
 
-/** What the storefront may offer at checkout. Never includes secrets. */
+/**
+ * What the storefront may offer at checkout. Never includes secrets.
+ * When XentriPay is on, mobile money goes through it (push prompt) and card
+ * is available; otherwise mobile money falls back to the manual number.
+ */
 export async function getPublicPaymentMethods() {
   const row = await getSettingsRow();
+  const online = xentripayReady(row);
 
   return {
     cod: true,
-    momo: momoReady(row) ? { number: row.momoNumber, name: row.momoName || 'She Shape' } : null,
-    xentripay: xentripayReady(row) ? { environment: row.xentripayEnvironment } : null,
+    momo: online
+      ? { provider: 'xentripay' }
+      : momoReady(row)
+        ? { provider: 'manual', number: row.momoNumber, name: row.momoName || 'She Shape' }
+        : null,
+    card: online ? { provider: 'xentripay' } : null,
   };
 }
 
@@ -49,6 +58,7 @@ export function publicSettings(row) {
     momoName: row.momoName ?? '',
     xentripayEnabled: Boolean(row.xentripayEnabled),
     xentripayEnvironment: row.xentripayEnvironment,
+    xentripayChargesIncluded: row.xentripayChargesIncluded !== false,
     hasXentripayApiKey: Boolean(row.xentripayApiKeyEnc),
     hasXentripayWebhookSecret: Boolean(row.xentripayWebhookSecretEnc),
     payoutNote: row.payoutNote ?? '',

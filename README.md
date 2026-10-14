@@ -97,12 +97,18 @@ The newsletter uses double opt-in: a signup is stored as pending and only counts
 
 ## Payments
 
-Cash on delivery is always offered. Two more methods are configured by the admin under **Payment settings**:
+Cash on delivery is always offered. Online payment runs through XentriPay, configured by the admin under **Payment settings**:
 
-- **Mobile money (manual).** Enter the shop's MoMo number and registered name. Customers who choose it get the number and their order number as the reference, on screen and by email. An admin marks the order paid once the money arrives.
-- **XentriPay (online).** Enter the API key from the XentriPay merchant dashboard, pick sandbox or live, and turn the option on. Orders redirect to XentriPay's checkout; the webhook at `/api/payments/xentripay/webhook` marks them paid, and the order page also polls XentriPay as a fallback.
+- **XentriPay on.** Mobile money becomes a push prompt: the customer enters their phone number at checkout, XentriPay sends the approval prompt, and the order page waits and updates itself. Card payments open XentriPay's secure page and return to the order page. Failed attempts can be retried from the order page.
+- **XentriPay off.** Mobile money falls back to a manual transfer to the shop's MoMo number, which the admin confirms by hand.
 
-XentriPay does not publish its endpoint reference; the integration pack comes from the Centrika account manager. The adapter in `backend/src/utils/payments/xentripay.js` follows the common request shape and reads every path and header name from the environment (`XENTRIPAY_*` in `.env.example`), so adjusting it to the pack is a config change plus, at most, the request body in one function.
+Setup, following XentriPay's integration pack:
+
+1. Create an API key in the merchant dashboard. Use the sandbox (merchant.test.xentripay.com) first, then live (xentripay.com). Paste it into Payment settings, pick the environment, and turn online payment on.
+2. Register the webhook `https://<your-domain>/api/payments/xentripay/webhook` for the events `COLLECTION_SUCCESSFUL` and `COLLECTION_FAILED`, and paste the `secretHash` it returns into the webhook secret field. Webhooks are verified with HMAC-SHA256 over the raw body (`X-Xentripay-Signature: sha256=…`). Without the secret the site still confirms payments by polling XentriPay's status endpoint.
+3. Choose who pays the XentriPay fee. "We do" keeps the customer's total exact; "the customer" lets XentriPay add the fee on top.
+
+The adapter lives in `backend/src/utils/payments/xentripay.js` and is covered by `backend/tests/xentripay.test.js`, which runs the full flow against a mock of XentriPay's API: MoMo prompt, card redirect, status polling, failure and retry, signed webhooks.
 
 ## Bookings
 
@@ -122,7 +128,7 @@ See `backend/.env.example`. The ones that matter most:
 | `AWS_*`, `S3_BUCKET`, `S3_PUBLIC_URL` | Media uploads. |
 | `BREVO_API_KEY`, `BREVO_LIST_ID` | Brevo transactional email and the newsletter list. |
 | `SMTP_*` | Fallback SMTP transport if Brevo is not used. |
-| `XENTRIPAY_*` | Base URLs, endpoint paths and signature header for the XentriPay adapter. |
+| `XENTRIPAY_LIVE_URL`, `XENTRIPAY_SANDBOX_URL` | XentriPay base URLs; only override if XentriPay says so. |
 | `SENTRY_DSN` | Optional error reporting. Nothing is loaded without it. |
 | `AUTH_RATE_LIMIT_MAX`, `CONTACT_RATE_LIMIT_MAX`, `NEWSLETTER_RATE_LIMIT_MAX`, `BOOKING_RATE_LIMIT_MAX` | Per-IP request budgets for the public forms. |
 
@@ -131,4 +137,4 @@ See `backend/.env.example`. The ones that matter most:
 - Database backups: enable them in cPanel and restore one into a local MariaDB container at least once to prove they work.
 - Error reporting: create a free Sentry project and set `SENTRY_DSN` to hear about production errors before customers do.
 - Email deliverability: authenticate the sending domain in Brevo (SPF and DKIM). If signups look low, check OTP delivery first.
-- Content: the admin **Home page** screen edits the hero, numbers, tips, member quotes, coaches, about story, app section, newsletter copy and contact details. Programs carry price, schedule, location and coach.
+- Content: the admin **Site content** screen edits the hero slideshow photos, the scrolling words, the Instagram strip, and the hero, numbers, tips, member quotes, coaches, about story, app section, newsletter copy and contact details. Programs carry price, schedule, location and coach.

@@ -5,7 +5,8 @@ import { HttpError } from '../utils/httpError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { buildUniqueOrderNumber } from '../utils/orderNumber.js';
 import { normalizePhone } from '../utils/phone.js';
-import { getPublicPaymentMethods, getXentripayClient } from '../utils/payments/index.js';
+import { getPublicPaymentMethods, getSettingsRow, getXentripayClient } from '../utils/payments/index.js';
+import { MIN_AMOUNT_RWF } from '../utils/payments/xentripay.js';
 import { sendOrderConfirmationEmail, clientUrl } from '../utils/emails.js';
 
 const MAX_LINES = 50;
@@ -58,10 +59,25 @@ async function releaseOrder(order, lines) {
 }
 
 function paymentSummary(order, methods) {
-  const summary = { method: order.paymentMethod, checkoutUrl: null, momo: null };
+  const pending = order.status === 'pending';
+  const summary = {
+    method: order.paymentMethod,
+    provider: order.paymentProvider,
+    checkoutUrl: null,
+    momo: null,
+    prompt: false,
+    failedAt: order.paymentFailedAt,
+  };
 
-  if (order.paymentMethod === 'momo' && methods.momo) summary.momo = methods.momo;
-  if (order.paymentMethod === 'xentripay') summary.checkoutUrl = order.paymentCheckoutUrl;
+  if (order.paymentMethod === 'momo' && order.paymentProvider === 'manual' && methods.momo?.provider === 'manual') {
+    summary.momo = methods.momo;
+  }
+  if (order.paymentMethod === 'momo' && order.paymentProvider === 'xentripay') {
+    summary.prompt = pending;
+  }
+  if (order.paymentMethod === 'card' && pending) {
+    summary.checkoutUrl = order.paymentCheckoutUrl;
+  }
 
   return summary;
 }
@@ -78,11 +94,17 @@ export const createOrder = asyncHandler(async (req, res) => {
   if (paymentMethod === 'momo' && !methods.momo) {
     throw new HttpError(400, 'Mobile money is not available right now. Choose cash on delivery.');
   }
+  if (paymentMethod === 'card' && !methods.card) {
+    throw new HttpError(400, 'Card payment is not available right now. Choose another payment method.');
+  }
 
-  const xentripay = paymentMethod === 'xentripay' ? await getXentripayClient() : null;
-  if (paymentMethod === 'xentripay' && !xentripay) {
+  const online = paymentMethod === 'card' || (paymentMethod === 'momo' && methods.momo?.provider === 'xentripay');
+  const xentripay = online ? await getXentripayClient() : null;
+  if (online && !xentripay) {
     throw new HttpError(400, 'Online payment is not available right now. Choose another payment method.');
   }
+
+  const paymentProvider = online ? 'xentripay' : paymentMethod === 'momo' ? 'manual' : null;
 
   const { order: created, lines } = await sequelize.transaction(async (transaction) => {
     const products = await Product.findAll({
@@ -123,10 +145,15 @@ export const createOrder = asyncHandler(async (req, res) => {
         customerPhone,
         address,
         paymentMethod,
+        paymentProvider,
         total: lines.reduce((sum, line) => sum + line.price * line.quantity, 0),
       },
       { transaction }
     );
+
+    if (online && order.total < MIN_AMOUNT_RWF) {
+      throw new HttpError(400, `Online payment needs a total of at least ${MIN_AMOUNT_RWF} RWF. Choose cash on delivery.`);
+    }
 
     await OrderItem.bulkCreate(
       lines.map((line) => ({ ...line, orderId: order.id })),
@@ -140,24 +167,37 @@ export const createOrder = asyncHandler(async (req, res) => {
     return { order, lines };
   });
 
+  let paymentMessage = '';
+
   if (xentripay) {
     try {
+      const settings = await getSettingsRow();
+      const orderUrl = clientUrl(`/dashboard/order/${created.orderNumber}`);
       const collection = await xentripay.initiateCollection({
         amount: created.total,
         reference: created.orderNumber,
         description: `She Shape order ${created.orderNumber}`,
         customer: { name: created.customerName, email: req.user.email, phone: created.customerPhone },
-        callbackUrl: clientUrl('/api/payments/xentripay/webhook'),
-        returnUrl: clientUrl(`/dashboard/order/${created.orderNumber}`),
+        method: paymentMethod,
+        redirectUrl: orderUrl,
+        returnUrl: orderUrl,
+        chargesIncluded: settings.xentripayChargesIncluded !== false,
       });
 
-      created.paymentReference = collection.id ? String(collection.id) : created.orderNumber;
-      created.paymentCheckoutUrl = collection.checkoutUrl ?? null;
+      created.paymentAttempts = 1;
+      created.paymentReference = collection.reference || created.orderNumber;
+      created.paymentCheckoutUrl = collection.checkoutUrl;
       await created.save();
+      paymentMessage = collection.message;
     } catch (error) {
       console.error('[orders] Could not start XentriPay payment for', created.orderNumber, error.message);
       await releaseOrder(created, lines);
-      throw new HttpError(502, 'We could not start the online payment. Try again or choose another method.');
+      throw new HttpError(
+        502,
+        paymentMethod === 'momo'
+          ? 'We could not send the payment prompt to your phone. Check the number and try again, or choose cash on delivery.'
+          : 'We could not start the card payment. Try again or choose another method.'
+      );
     }
   }
 
@@ -165,7 +205,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     include: [{ model: OrderItem, as: 'items' }],
   });
 
-  const payment = paymentSummary(order, methods);
+  const payment = { ...paymentSummary(order, methods), message: paymentMessage };
 
   if (req.user.email) {
     sendOrderConfirmationEmail({ to: req.user.email, order, payment }).catch((error) => {

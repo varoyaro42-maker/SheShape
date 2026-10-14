@@ -11,6 +11,7 @@ const BLANK = {
   momoName: '',
   xentripayEnabled: false,
   xentripayEnvironment: 'sandbox',
+  xentripayChargesIncluded: true,
   xentripayApiKey: '',
   xentripayWebhookSecret: '',
   payoutNote: ''
@@ -32,6 +33,7 @@ export default function AdminPaymentSettingsPage() {
       momoName: data.momoName ?? '',
       xentripayEnabled: Boolean(data.xentripayEnabled),
       xentripayEnvironment: data.xentripayEnvironment ?? 'sandbox',
+      xentripayChargesIncluded: data.xentripayChargesIncluded !== false,
       xentripayApiKey: '',
       xentripayWebhookSecret: '',
       payoutNote: data.payoutNote ?? ''
@@ -93,8 +95,8 @@ export default function AdminPaymentSettingsPage() {
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Mobile money (manual)</h2>
           <p className={styles.hint}>
-            Customers send the total to this number and you confirm the payment on the order. Leave the number
-            blank to hide this option at checkout.
+            Used only while XentriPay is off. Customers send the total to this number and you mark the order paid
+            by hand. Leave the number blank to hide this option at checkout.
           </p>
 
           <div className={styles.row}>
@@ -126,8 +128,9 @@ export default function AdminPaymentSettingsPage() {
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>XentriPay (online payments)</h2>
           <p className={styles.hint}>
-            Mobile money and card payments collected by XentriPay. Create your API key in the XentriPay
-            merchant dashboard, test in sandbox first, then switch to live.
+            When this is on, mobile money payments are collected as a prompt on the customer's phone and card
+            payments open XentriPay's secure page. Create the API key in the XentriPay merchant dashboard
+            (merchant.test.xentripay.com for sandbox, xentripay.com for live). Test in sandbox first.
           </p>
 
           <label className={styles.field} style={{ flexDirection: 'row', alignItems: 'center', gap: '0.6rem' }}>
@@ -169,17 +172,31 @@ export default function AdminPaymentSettingsPage() {
           </div>
 
           <label className={styles.field}>
+            <span className={styles.label}>Who pays the XentriPay fee</span>
+            <select
+              value={fields.xentripayChargesIncluded ? 'shop' : 'customer'}
+              onChange={(event) => set('xentripayChargesIncluded', event.target.value === 'shop')}
+              className={styles.input}
+            >
+              <option value="shop">We do: the customer pays exactly the order total</option>
+              <option value="customer">The customer: XentriPay adds the fee on top</option>
+            </select>
+          </label>
+
+          <label className={styles.field}>
             <span className={styles.label}>Webhook signing secret</span>
             <input
               type="password"
               value={fields.xentripayWebhookSecret}
               onChange={(event) => set('xentripayWebhookSecret', event.target.value)}
-              placeholder={hasWebhookSecret ? 'A secret is saved. Leave blank to keep it.' : 'Optional, if XentriPay gives you one'}
+              placeholder={hasWebhookSecret ? 'A secret is saved. Leave blank to keep it.' : 'The secretHash shown once when you register the webhook'}
               className={styles.input}
               autoComplete="off"
             />
             <span className={styles.hint}>
-              Register this webhook URL in XentriPay so paid orders update by themselves:{' '}
+              Register this URL as a webhook in XentriPay for the events COLLECTION_SUCCESSFUL and COLLECTION_FAILED,
+              then paste the secretHash it returns here. Paid orders then update within seconds; without it the
+              site still checks XentriPay directly while the customer waits.{' '}
               <code style={{ userSelect: 'all' }}>{webhookUrl}</code>
             </span>
           </label>

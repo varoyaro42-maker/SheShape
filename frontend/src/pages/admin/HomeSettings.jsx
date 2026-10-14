@@ -8,7 +8,7 @@ import Loading from '../../components/Loading.jsx'
 import styles from './ProductForm.module.css'
 
 const BLANK = {
-  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '' },
+  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '', slides: [] },
   stats: [],
   featured: { eyebrow: '', heading: '', script: '', paragraph: '', tags: [], buttonLabel: '' },
   program: { eyebrow: '', buttonLabel: '' },
@@ -199,7 +199,18 @@ export default function AdminHomeSettingsPage() {
       <form onSubmit={submit} className={styles.form} noValidate>
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Hero</h2>
-          <HomeImageUploader label="Hero photo" value={content.hero.imageUrl} onChange={(url) => set('hero', 'imageUrl', url)} disabled={saving} />
+          <p className={styles.hint}>The big photo at the top. Add two or more and they crossfade as a slideshow. Portrait photos (4:5) work best.</p>
+          <ListEditor
+            items={content.hero.slides ?? []}
+            onChange={(value) => set('hero', 'slides', value)}
+            addLabel="Add a hero photo"
+            blank={{ imageUrl: '', caption: '' }}
+            disabled={saving}
+            fields={[
+              { key: 'imageUrl', label: 'Photo', type: 'image' },
+              { key: 'caption', label: 'Caption (optional, shown on the photo)', placeholder: 'She Strong Classes, Kimihurura', max: 60 }
+            ]}
+          />
           <Field label="Small line above the headline">{text('hero', 'eyebrow', { maxLength: 80 })}</Field>
           <Field label="Headline">{text('hero', 'title', { maxLength: 120 })}</Field>
           <Field label="Paragraph">{area('hero', 'paragraph')}</Field>

@@ -116,16 +116,20 @@ function itemsTable(items) {
 }
 
 function paymentInstructions(order, payment) {
+  if (order.paymentMethod === 'momo' && order.paymentProvider === 'xentripay') {
+    return `A payment prompt for <strong>${formatPrice(order.total)}</strong> was sent to <strong>${escapeHtml(order.customerPhone)}</strong>. Approve it on your phone to finish. If it did not appear, dial <strong>*182*7*1#</strong> on MTN to see pending approvals. You will get another email as soon as it clears.`;
+  }
+
   if (order.paymentMethod === 'momo') {
     const momo = payment?.momo;
     const target = momo ? `<strong>${escapeHtml(momo.number)}</strong> (${escapeHtml(momo.name)})` : 'the MoMo number on our website';
     return `Send <strong>${formatPrice(order.total)}</strong> by MTN MoMo or Airtel Money to ${target}, using <strong>${escapeHtml(order.orderNumber)}</strong> as the reference. We confirm payment by hand, so allow a little time before the status updates.`;
   }
 
-  if (order.paymentMethod === 'xentripay') {
+  if (order.paymentMethod === 'card') {
     return payment?.checkoutUrl
-      ? `If you have not finished paying, you can <a href="${escapeHtml(payment.checkoutUrl)}" style="color:#2f6b3d;font-weight:700;">complete your payment here</a>. You will get another email as soon as it clears.`
-      : 'We are confirming your online payment now. You will get another email as soon as it clears.';
+      ? `If you have not finished paying, you can <a href="${escapeHtml(payment.checkoutUrl)}" style="color:#2f6b3d;font-weight:700;">complete your card payment here</a>. You will get another email as soon as it clears.`
+      : 'We are confirming your card payment now. You will get another email as soon as it clears.';
   }
 
   return "Pay in cash when your order arrives. We'll call you on the number you gave us to confirm details.";

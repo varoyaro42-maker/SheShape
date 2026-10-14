@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { Banknote, Smartphone, Globe, Copy, Check, ExternalLink } from 'lucide-react';
+import { Banknote, Smartphone, CreditCard, Copy, Check, ExternalLink, RefreshCw, Loader2 } from 'lucide-react';
 import api, { readError } from '../api/client.js';
 import { paymentsApi } from '../api/payments.js';
 import { formatPrice } from '../utils/format.js';
@@ -20,8 +20,11 @@ const HEADINGS = {
 const METHOD_LABEL = {
   cod: ['Cash on delivery', Banknote],
   momo: ['Mobile money', Smartphone],
-  xentripay: ['Paid online', Globe]
+  card: ['Card', CreditCard]
 };
+
+const POLL_MS = 4000;
+const POLL_LIMIT = 90; // six minutes
 
 function CopyButton({ value }) {
   const [copied, setCopied] = useState(false);
@@ -50,8 +53,12 @@ export default function OrderConfirm() {
 
   const [order, setOrder] = useState(location.state?.order ?? null);
   const [payment, setPayment] = useState(location.state?.payment ?? null);
+  const [paymentStatus, setPaymentStatus] = useState(location.state?.payment?.failedAt ? 'failed' : 'pending');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(!location.state?.order);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState('');
+  const pollCount = useRef(0);
 
   useEffect(() => {
     if (order && payment) return undefined;
@@ -66,6 +73,7 @@ export default function OrderConfirm() {
         if (!active) return;
         setOrder(response.data.data);
         setPayment(response.data.payment ?? null);
+        if (response.data.payment?.failedAt) setPaymentStatus('failed');
       })
       .catch((requestError) => active && setError(readError(requestError)))
       .finally(() => active && setLoading(false));
@@ -75,29 +83,54 @@ export default function OrderConfirm() {
     };
   }, [orderNumber, order, payment]);
 
-  // Online payments: poll until the webhook or a status check marks the order paid.
-  const awaitingOnline = order?.paymentMethod === 'xentripay' && order?.status === 'pending';
+  // Online payments: keep asking until XentriPay says paid or failed.
+  const online = order?.paymentProvider === 'xentripay';
+  const waiting = online && order?.status === 'pending' && paymentStatus === 'pending';
 
   useEffect(() => {
-    if (!awaitingOnline) return undefined;
+    if (!waiting) return undefined;
 
-    let attempts = 0;
     const timer = setInterval(async () => {
-      attempts += 1;
+      pollCount.current += 1;
       try {
         const status = await paymentsApi.status(orderNumber);
-        if (status.status !== 'pending') {
+        if (status.paymentStatus === 'paid') {
           setOrder((current) => (current ? { ...current, status: status.status, paidAt: status.paidAt } : current));
           clearInterval(timer);
+        } else if (status.paymentStatus === 'failed') {
+          setPaymentStatus('failed');
+          clearInterval(timer);
+        } else if (status.checkoutUrl) {
+          setPayment((current) => ({ ...current, checkoutUrl: status.checkoutUrl }));
         }
       } catch {
-        // Keep polling; a transient error should not stop the check.
+        // A transient error should not stop the check.
       }
-      if (attempts >= 36) clearInterval(timer);
-    }, 5000);
+      if (pollCount.current >= POLL_LIMIT) clearInterval(timer);
+    }, POLL_MS);
 
     return () => clearInterval(timer);
-  }, [awaitingOnline, orderNumber]);
+  }, [waiting, orderNumber]);
+
+  async function retry() {
+    setRetrying(true);
+    setRetryError('');
+    try {
+      const status = await paymentsApi.retry(orderNumber);
+      pollCount.current = 0;
+      if (status.paymentStatus === 'paid') {
+        setOrder((current) => ({ ...current, status: status.status, paidAt: status.paidAt }));
+      } else {
+        setPayment((current) => ({ ...current, checkoutUrl: status.checkoutUrl, prompt: order.paymentMethod === 'momo' }));
+        setPaymentStatus('pending');
+        if (order.paymentMethod === 'card' && status.checkoutUrl) window.open(status.checkoutUrl, '_blank', 'noopener');
+      }
+    } catch (requestError) {
+      setRetryError(readError(requestError));
+    } finally {
+      setRetrying(false);
+    }
+  }
 
   if (loading) return <Loading />;
 
@@ -116,11 +149,15 @@ export default function OrderConfirm() {
   const [heading, blurb] = HEADINGS[order.status] ?? HEADINGS.pending;
   const [methodLabel, MethodIcon] = METHOD_LABEL[order.paymentMethod] ?? METHOD_LABEL.cod;
   const momo = payment?.momo;
+  const pending = order.status === 'pending';
+  const momoPrompt = online && order.paymentMethod === 'momo' && pending;
+  const cardPending = online && order.paymentMethod === 'card' && pending;
+  const failed = paymentStatus === 'failed';
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>{heading}</h1>
-      <p className={styles.subtitle}>{blurb}</p>
+      <h1 className={styles.title}>{momoPrompt && !failed ? 'Almost there' : heading}</h1>
+      <p className={styles.subtitle}>{momoPrompt && !failed ? 'Approve the payment on your phone to finish.' : blurb}</p>
 
       <div className={styles.card}>
         <div className={styles.cardHead}>
@@ -151,7 +188,70 @@ export default function OrderConfirm() {
           <span>{formatPrice(order.total)}</span>
         </div>
 
-        {order.paymentMethod === 'momo' && order.status === 'pending' && (
+        {momoPrompt && !failed && (
+          <div className={styles.instructions}>
+            <h2 className={styles.instructionsTitle}>
+              <Loader2 size={18} className={styles.spin} /> Waiting for your approval
+            </h2>
+            <ol className={styles.steps}>
+              <li>
+                A prompt for <strong>{formatPrice(order.total)}</strong> was sent to <strong>{order.customerPhone}</strong>.
+              </li>
+              <li>Enter your MoMo PIN on your phone to approve it.</li>
+              <li>
+                Nothing appeared? On MTN dial <strong>*182*7*1#</strong> <CopyButton value="*182*7*1#" /> to see pending approvals.
+              </li>
+            </ol>
+            <p className={styles.payment}>This page updates by itself as soon as the payment clears.</p>
+            <div className={styles.actions} style={{ marginTop: 14 }}>
+              <button type="button" className="btn btn-outline btn-sm" onClick={retry} disabled={retrying}>
+                <RefreshCw size={14} />
+                {retrying ? 'Sending…' : 'Send the prompt again'}
+              </button>
+            </div>
+            {retryError && <p className={styles.errorText}>{retryError}</p>}
+          </div>
+        )}
+
+        {cardPending && !failed && (
+          <div className={styles.instructions}>
+            <h2 className={styles.instructionsTitle}>Finish your card payment</h2>
+            <p className={styles.payment}>
+              This page updates by itself once XentriPay confirms your payment. If you closed the payment window, open it again below.
+            </p>
+            <div className={styles.actions} style={{ marginTop: 14 }}>
+              {payment?.checkoutUrl && (
+                <a href={payment.checkoutUrl} className="btn" target="_blank" rel="noopener noreferrer">
+                  Open payment page
+                  <ExternalLink size={16} />
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
+        {online && pending && failed && (
+          <div className={`${styles.instructions} ${styles.instructionsWarn}`}>
+            <h2 className={styles.instructionsTitle}>The payment didn't go through</h2>
+            <p className={styles.payment}>
+              {order.paymentMethod === 'momo'
+                ? 'The prompt was declined, timed out, or the balance was too low. Your order is still reserved, so you can try again.'
+                : 'The card payment was not completed. Your order is still reserved, so you can try again.'}
+            </p>
+            <div className={styles.actions} style={{ marginTop: 14 }}>
+              <button type="button" className="btn" onClick={retry} disabled={retrying}>
+                <RefreshCw size={15} />
+                {retrying ? 'Trying…' : order.paymentMethod === 'momo' ? 'Send the prompt again' : 'Try the card payment again'}
+              </button>
+            </div>
+            {retryError && <p className={styles.errorText}>{retryError}</p>}
+            <p className={styles.payment} style={{ marginTop: 12 }}>
+              Prefer to pay on delivery? Reply to your confirmation email or call us and we will switch the order for you.
+            </p>
+          </div>
+        )}
+
+        {order.paymentMethod === 'momo' && order.paymentProvider === 'manual' && pending && (
           <div className={styles.instructions}>
             <h2 className={styles.instructionsTitle}>How to pay</h2>
             <ol className={styles.steps}>
@@ -173,23 +273,7 @@ export default function OrderConfirm() {
           </div>
         )}
 
-        {awaitingOnline && (
-          <div className={styles.instructions}>
-            <h2 className={styles.instructionsTitle}>Finish your payment</h2>
-            <p className={styles.payment}>
-              This page updates by itself once XentriPay confirms your payment. If you closed the payment window,
-              open it again below.
-            </p>
-            {payment?.checkoutUrl && (
-              <a href={payment.checkoutUrl} className="btn" target="_blank" rel="noopener noreferrer">
-                Open payment page
-                <ExternalLink size={16} />
-              </a>
-            )}
-          </div>
-        )}
-
-        {order.paymentMethod === 'cod' && (order.status === 'pending' || order.status === 'paid') && (
+        {order.paymentMethod === 'cod' && (pending || order.status === 'paid') && (
           <p className={styles.payment}>
             No payment is needed now. We'll call you on the number you gave to confirm, and you pay the courier on
             delivery.

@@ -318,8 +318,11 @@ describe('admin: every create, read, update and delete the dashboard offers', ()
     assert.equal(withKey.body.data.xentripayEnabled, true)
 
     const methods = await request(app).get('/api/payments/methods')
-    assert.deepEqual(methods.body.data.xentripay, { environment: 'sandbox' })
-    assert.equal(methods.body.data.momo.number, '+250788000111')
+    assert.deepEqual(methods.body.data.card, { provider: 'xentripay' })
+    assert.deepEqual(methods.body.data.momo, { provider: 'xentripay' }, 'XentriPay takes over mobile money when on')
+
+    const fee = await admin.put('/api/admin/settings').send({ xentripayChargesIncluded: false })
+    assert.equal(fee.body.data.xentripayChargesIncluded, false)
 
     const cleared = await admin.put('/api/admin/settings').send({ clearXentripay: true })
     assert.equal(cleared.body.data.xentripayEnabled, false)

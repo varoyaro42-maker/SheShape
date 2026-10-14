@@ -61,6 +61,8 @@ export const updateSettings = asyncHandler(async (req, res) => {
     row.xentripayEnabled = body.xentripayEnabled;
   }
 
+  if (typeof body.xentripayChargesIncluded === 'boolean') row.xentripayChargesIncluded = body.xentripayChargesIncluded;
+
   if (typeof body.payoutNote === 'string') row.payoutNote = body.payoutNote.trim() || null;
 
   await row.save();

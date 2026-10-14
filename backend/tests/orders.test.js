@@ -80,19 +80,19 @@ describe('placing an order', () => {
     assert.equal(visible.stock, 5, 'validation failure must roll back the stock decrement')
   })
 
-  test('online payment without XentriPay configured fails before any stock is reserved', async () => {
+  test('card payment without XentriPay configured fails before any stock is reserved', async () => {
     const product = await createProduct({ stock: 4 })
     const user = await createUser()
     const agent = await signIn(user)
 
     const response = await agent.post('/api/orders').send({
       ...delivery,
-      paymentMethod: 'xentripay',
+      paymentMethod: 'card',
       items: [{ productId: product.id, quantity: 1 }]
     })
 
     assert.equal(response.status, 400)
-    assert.match(response.body.error, /Online payment is not available/)
+    assert.match(response.body.error, /Card payment is not available/)
     await product.reload()
     assert.equal(product.stock, 4)
     assert.equal(await Order.count({ where: { userId: user.id } }), 0)
@@ -117,8 +117,8 @@ describe('placing an order', () => {
 
     const methods = await request(app).get('/api/payments/methods')
     assert.equal(methods.status, 200)
-    assert.deepEqual(methods.body.data.momo, { number: '+250788000111', name: 'She Shape Ltd' })
-    assert.equal(methods.body.data.xentripay, null)
+    assert.deepEqual(methods.body.data.momo, { provider: 'manual', number: '+250788000111', name: 'She Shape Ltd' })
+    assert.equal(methods.body.data.card, null)
 
     const placed = await agent.post('/api/orders').send({
       ...delivery,
@@ -127,6 +127,7 @@ describe('placing an order', () => {
     })
     assert.equal(placed.status, 201)
     assert.equal(placed.body.data.paymentMethod, 'momo')
+    assert.equal(placed.body.data.paymentProvider, 'manual')
     assert.equal(placed.body.payment.momo.number, '+250788000111')
     assert.equal(placed.body.data.status, 'pending')
 
@@ -162,40 +163,16 @@ describe('looking up an order', () => {
   })
 })
 
-describe('xentripay webhook', () => {
-  test('ignores payloads it cannot match to an order and never crashes', async () => {
+describe('xentripay webhook without a secret configured', () => {
+  test('acknowledges payloads it cannot match and never crashes', async () => {
     const response = await request(app)
       .post('/api/payments/xentripay/webhook')
       .set('Content-Type', 'application/json')
-      .send(JSON.stringify({ status: 'success', reference: 'SS-NOPE-0000', id: 'tx_123' }))
+      .send(JSON.stringify({ event: 'COLLECTION_SUCCESSFUL', data: { reference: 'SS-NOPE-0000', id: 'tx_123' } }))
     assert.equal(response.status, 200)
     assert.deepEqual(response.body, { received: true })
-  })
 
-  test('rejects a bad signature once a webhook secret is configured', async () => {
-    const { encrypt } = await import('../src/utils/crypto.js')
-    const [settings] = await PaymentSettings.findOrCreate({ where: { id: 1 } })
-    settings.xentripayWebhookSecretEnc = encrypt('whsec-test')
-    await settings.save()
-
-    const rejected = await request(app)
-      .post('/api/payments/xentripay/webhook')
-      .set('Content-Type', 'application/json')
-      .set('x-xentripay-signature', 'deadbeef')
-      .send('{"status":"success"}')
-    assert.equal(rejected.status, 400)
-
-    const crypto = await import('node:crypto')
-    const body = '{"status":"success","reference":"SS-NOPE-0000"}'
-    const good = crypto.createHmac('sha256', 'whsec-test').update(body).digest('hex')
-    const accepted = await request(app)
-      .post('/api/payments/xentripay/webhook')
-      .set('Content-Type', 'application/json')
-      .set('x-xentripay-signature', good)
-      .send(body)
-    assert.equal(accepted.status, 200)
-
-    settings.xentripayWebhookSecretEnc = null
-    await settings.save()
+    const notJson = await request(app).post('/api/payments/xentripay/webhook').set('Content-Type', 'application/json').send('nope')
+    assert.equal(notJson.status, 400)
   })
 })

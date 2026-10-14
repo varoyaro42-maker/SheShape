@@ -3,7 +3,7 @@ import User from './User.js'
 import { Product } from './Product.js'
 import { Category } from './Category.js'
 import { ProductImage } from './ProductImage.js'
-import Order, { ORDER_STATUSES, PAYMENT_METHODS } from './Order.js'
+import Order, { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_PROVIDERS } from './Order.js'
 import OrderItem from './OrderItem.js'
 import Post from './Post.js'
 import Program, { PROGRAM_STATUSES } from './Program.js'
@@ -80,6 +80,7 @@ export {
   Booking,
   ORDER_STATUSES,
   PAYMENT_METHODS,
+  PAYMENT_PROVIDERS,
   PROGRAM_STATUSES,
   OTP_PURPOSES,
   MESSAGE_STATUSES,
