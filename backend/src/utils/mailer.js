@@ -24,7 +24,9 @@ export async function sendMail({ to, bcc, subject, html, text }) {
   const client = getTransporter();
 
   if (!client) {
-    console.log(`[mailer] SMTP not configured — printing email instead.\nTo: ${to}\nBcc: ${bcc ?? '-'}\nSubject: ${subject}\n${text ?? html}`);
+    if (process.env.NODE_ENV !== 'test') {
+      console.log(`[mailer] SMTP not configured — printing email instead.\nTo: ${to}\nBcc: ${bcc ?? '-'}\nSubject: ${subject}\n${text ?? html}`);
+    }
     return;
   }
 

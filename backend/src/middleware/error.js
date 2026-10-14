@@ -5,12 +5,16 @@ import {
   DatabaseError,
   ConnectionError
 } from 'sequelize'
+import { captureException } from '../utils/monitoring.js'
 
-const PG_CODES = {
-  '22P02': [400, 'One of the values in the request is malformed.'],
-  '22001': [400, 'One of the values is too long.'],
-  '23502': [400, 'A required field is missing.'],
-  '23514': [400, 'One of the values is outside the allowed range.']
+// mysql2 error codes that mean the client sent something the schema rejects.
+const MYSQL_CODES = {
+  ER_DATA_TOO_LONG: [400, 'One of the values is too long.'],
+  ER_BAD_NULL_ERROR: [400, 'A required field is missing.'],
+  ER_TRUNCATED_WRONG_VALUE: [400, 'One of the values in the request is malformed.'],
+  ER_TRUNCATED_WRONG_VALUE_FOR_FIELD: [400, 'One of the values in the request is malformed.'],
+  WARN_DATA_TRUNCATED: [400, 'One of the values in the request is malformed.'],
+  ER_WARN_DATA_OUT_OF_RANGE: [400, 'One of the values is outside the allowed range.']
 }
 
 const isProduction = () => process.env.NODE_ENV === 'production'
@@ -59,7 +63,7 @@ function fromSequelize(err) {
   }
 
   if (err instanceof DatabaseError) {
-    const mapped = PG_CODES[err.parent?.code]
+    const mapped = MYSQL_CODES[err.parent?.code]
     if (mapped) return { status: mapped[0], message: mapped[1] }
   }
 
@@ -102,6 +106,7 @@ export function errorHandler(err, req, res, next) {
 
   if (status >= 500) {
     console.error(`${req.method} ${req.originalUrl}`, err)
+    captureException(err, { method: req.method, url: req.originalUrl, userId: req.user?.id })
   }
 
   const payload = {

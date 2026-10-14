@@ -40,12 +40,37 @@ const collectRequestedItems = (rawItems) => {
   return requested;
 };
 
+// Undo a freshly created order whose card payment could not be started, so
+// the customer is not left with a pending order and the stock is not held.
+async function releaseOrder(order, lines) {
+  await sequelize.transaction(async (transaction) => {
+    for (const line of lines) {
+      await Product.increment('stock', {
+        by: line.quantity,
+        where: { id: line.productId },
+        transaction,
+      });
+    }
+
+    await OrderItem.destroy({ where: { orderId: order.id }, transaction });
+    await order.destroy({ transaction });
+  });
+}
+
 export const createOrder = asyncHandler(async (req, res) => {
   const { customerName, customerPhone, address, items } = req.body;
   const paymentMethod = req.body.paymentMethod === 'card' ? 'card' : 'cod';
   const requested = collectRequestedItems(items);
 
-  const created = await sequelize.transaction(async (transaction) => {
+  // Resolve Stripe before touching stock, so an unavailable card payment never
+  // leaves behind a pending order with inventory already reserved.
+  const stripe = paymentMethod === 'card' ? await getStripeClient() : null;
+
+  if (paymentMethod === 'card' && !stripe) {
+    throw new HttpError(400, 'Card payment is not available right now. Choose cash on delivery.');
+  }
+
+  const { order: created, lines } = await sequelize.transaction(async (transaction) => {
     const products = await Product.findAll({
       where: { id: { [Op.in]: [...requested.keys()] }, isPublished: true },
       lock: transaction.LOCK.UPDATE,
@@ -98,32 +123,32 @@ export const createOrder = asyncHandler(async (req, res) => {
       await product.decrement('stock', { by: requested.get(product.id), transaction });
     }
 
-    return order;
+    return { order, lines };
   });
 
   let clientSecret = null;
 
-  if (paymentMethod === 'card') {
-    const stripe = await getStripeClient();
+  if (stripe) {
+    try {
+      const paymentIntent = await stripe.paymentIntents.create(
+        {
+          amount: created.total,
+          currency: 'rwf',
+          automatic_payment_methods: { enabled: true },
+          metadata: { orderId: created.id, orderNumber: created.orderNumber },
+        },
+        { idempotencyKey: `order-intent-${created.id}` }
+      );
 
-    if (!stripe) {
-      throw new HttpError(400, 'Card payment is not available right now. Choose cash on delivery.');
+      created.stripePaymentIntentId = paymentIntent.id;
+      await created.save();
+
+      clientSecret = paymentIntent.client_secret;
+    } catch (error) {
+      console.error('[orders] Could not start card payment for', created.orderNumber, error.message);
+      await releaseOrder(created, lines);
+      throw new HttpError(502, 'We could not start the card payment. Try again or choose cash on delivery.');
     }
-
-    const paymentIntent = await stripe.paymentIntents.create(
-      {
-        amount: created.total,
-        currency: 'rwf',
-        automatic_payment_methods: { enabled: true },
-        metadata: { orderId: created.id, orderNumber: created.orderNumber },
-      },
-      { idempotencyKey: `order-intent-${created.id}` }
-    );
-
-    created.stripePaymentIntentId = paymentIntent.id;
-    await created.save();
-
-    clientSecret = paymentIntent.client_secret;
   }
 
   const order = await Order.findByPk(created.id, {

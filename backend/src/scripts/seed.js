@@ -1,5 +1,12 @@
-import { sequelize, Product, ProductImage } from '../models/index.js'
+import { sequelize, Product, ProductImage, Category } from '../models/index.js'
 import { buildUniqueSlug } from '../utils/slug.js'
+
+const CATEGORIES = [
+  { name: 'Activewear', slug: 'activewear' },
+  { name: 'Accessories', slug: 'accessories' },
+  { name: 'Supplements', slug: 'supplements' },
+  { name: 'Journals', slug: 'journals' }
+]
 
 const products = [
   {
@@ -45,7 +52,7 @@ const products = [
     description: 'Twelve-week hardcover journal for logging workouts, weights and progress photos.',
     price: 15000,
     category: 'journals',
-    stock: 40,
+    stock: 3,
     images: ['https://picsum.photos/seed/sheshape-journal-1/900/900']
   }
 ]
@@ -57,6 +64,16 @@ async function run() {
     await ProductImage.destroy({ where: {}, transaction })
     await Product.destroy({ where: {}, transaction })
 
+    const categoryIds = {}
+    for (const entry of CATEGORIES) {
+      const [category] = await Category.findOrCreate({
+        where: { slug: entry.slug },
+        defaults: entry,
+        transaction
+      })
+      categoryIds[entry.slug] = category.id
+    }
+
     for (const item of products) {
       const slug = await buildUniqueSlug(Product, item.name, { transaction })
 
@@ -65,7 +82,7 @@ async function run() {
         slug,
         description: item.description,
         price: item.price,
-        category: item.category,
+        categoryId: categoryIds[item.category],
         stock: item.stock,
         isPublished: true
       }, { transaction })
@@ -81,7 +98,7 @@ async function run() {
     }
 
     await transaction.commit()
-    console.log(`Seeded ${products.length} products`)
+    console.log(`Seeded ${CATEGORIES.length} categories and ${products.length} products`)
     process.exit(0)
   } catch (error) {
     await transaction.rollback()

@@ -1,11 +1,14 @@
 import app from './app.js'
 import { connectDatabase } from './db.js'
 import { seedAdminUser } from './utils/seedAdminUser.js'
+import { initMonitoring } from './utils/monitoring.js'
 
 const port = Number(process.env.PORT) || 5000
 
 async function start() {
   try {
+    if (await initMonitoring()) console.log('Error monitoring enabled')
+
     await connectDatabase()
     console.log('Database connected')
 

@@ -11,18 +11,19 @@ import {
   changePassword,
 } from '../controllers/auth.controller.js';
 import { protect } from '../middleware/auth.js';
+import { authLimiter } from '../middleware/security.js';
 
 const router = Router();
 
-router.post('/register', register);
-router.post('/login', login);
+router.post('/register', authLimiter, register);
+router.post('/login', authLimiter, login);
 router.post('/logout', logout);
 router.get('/me', protect, me);
 
-router.post('/verify-email', verifyEmail);
-router.post('/resend-otp', resendOtp);
-router.post('/forgot-password', forgotPassword);
-router.post('/reset-password', resetPassword);
+router.post('/verify-email', authLimiter, verifyEmail);
+router.post('/resend-otp', authLimiter, resendOtp);
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password', authLimiter, resetPassword);
 router.post('/change-password', protect, changePassword);
 
 export default router;
