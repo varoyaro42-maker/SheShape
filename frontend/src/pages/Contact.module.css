@@ -25,10 +25,6 @@
   pointer-events: none;
 }
 
-[data-theme='dark'] .headerBlob {
-  opacity: 0.14;
-}
-
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -208,10 +204,6 @@
   font-weight: 700;
   font-size: 18px;
   color: var(--green-dark);
-}
-
-[data-theme='dark'] .infoTitle {
-  color: var(--text);
 }
 
 .infoList {

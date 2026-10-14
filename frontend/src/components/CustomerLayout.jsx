@@ -3,7 +3,6 @@ import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-do
 import { LayoutDashboard, ShoppingBag, Dumbbell, Newspaper, Package, Settings, Menu, X, CalendarCheck } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useCart } from '../context/cart-context.js'
-import { useTheme } from '../hooks/useTheme.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
 import TopbarIcons from './TopbarIcons.jsx'
@@ -41,7 +40,6 @@ const TITLE_LINKS = [
 export default function CustomerLayout() {
   const { user, logout } = useAuth()
   const { count } = useCart()
-  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
   const menu = useMobileMenu()
@@ -78,7 +76,7 @@ export default function CustomerLayout() {
   )
 
   return (
-    <div className={styles.shell} data-theme={theme}>
+    <div className={styles.shell}>
       <aside
         id="customer-sidebar"
         className={menu.open ? `${styles.sidebar} ${styles.sidebarOpen}` : styles.sidebar}
@@ -143,8 +141,6 @@ export default function CustomerLayout() {
           </form>
 
           <TopbarIcons
-            theme={theme}
-            toggleTheme={toggleTheme}
             quickLinks={QUICK_LINKS}
             cartCount={count}
             avatarTo="/dashboard/account"

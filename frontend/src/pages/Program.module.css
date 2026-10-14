@@ -287,10 +287,6 @@
   color: var(--green-dark);
 }
 
-[data-theme='dark'] .othersName {
-  color: var(--text);
-}
-
 .othersTagline {
   display: block;
   margin-top: 2px;

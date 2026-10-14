@@ -63,29 +63,6 @@
   border-bottom-color: var(--green-light);
 }
 
-.themeToggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.15s ease;
-}
-
-.themeToggle:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
-.themeLabel {
-  display: none;
-}
-
 .cart {
   display: inline-flex;
   align-items: center;
@@ -240,21 +217,6 @@
     align-items: stretch;
     gap: 10px;
     padding-top: 16px;
-  }
-
-  .themeToggle {
-    width: auto;
-    height: auto;
-    justify-content: flex-start;
-    gap: 10px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .themeLabel {
-    display: inline;
   }
 
   .cart {

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
 import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X, CalendarCheck, Megaphone } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
-import { useTheme } from '../hooks/useTheme.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
 import { adminMessages, adminBookings } from '../api/admin.js'
@@ -34,7 +33,6 @@ const QUICK_LINKS = [
 
 export default function AdminLayout() {
   const { user, logout } = useAuth()
-  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const menu = useMobileMenu()
   const [unreadMessages, setUnreadMessages] = useState(0)
@@ -62,7 +60,7 @@ export default function AdminLayout() {
   }, [location.pathname])
 
   return (
-    <div className={styles.shell} data-theme={theme}>
+    <div className={styles.shell}>
       <aside
         id="admin-sidebar"
         className={menu.open ? `${styles.sidebar} ${styles.sidebarOpen}` : styles.sidebar}
@@ -137,8 +135,6 @@ export default function AdminLayout() {
           </div>
 
           <TopbarIcons
-            theme={theme}
-            toggleTheme={toggleTheme}
             quickLinks={QUICK_LINKS}
             avatarTo="/admin/account"
             avatarUrl={user?.avatarUrl}

@@ -181,10 +181,6 @@
   letter-spacing: 0.04em;
 }
 
-[data-theme='dark'] .day {
-  color: var(--green-light);
-}
-
 .time {
   font-variant-numeric: tabular-nums;
   color: var(--text);
@@ -207,14 +203,4 @@
 
 .card:hover .link svg {
   transform: translateX(4px);
-}
-
-[data-theme='dark'] .link {
-  color: var(--green-light);
-}
-
-[data-theme='dark'] .status,
-[data-theme='dark'] .price {
-  background: rgba(19, 26, 44, 0.9);
-  color: var(--text-soft);
 }

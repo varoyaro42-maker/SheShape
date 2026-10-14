@@ -181,12 +181,6 @@
   cursor: default;
 }
 
-[data-theme='dark'] .footer a,
-[data-theme='dark'] .hint a,
-[data-theme='dark'] .linkButton {
-  color: var(--green-light);
-}
-
 @media (max-width: 860px) {
   .shell {
     grid-template-columns: 1fr;

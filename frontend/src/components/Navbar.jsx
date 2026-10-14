@@ -1,5 +1,5 @@
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import { Moon, Sun, Menu, X, ShoppingBag } from 'lucide-react'
+import { Menu, X, ShoppingBag } from 'lucide-react'
 import { useCart } from '../context/cart-context.js'
 import { useAuth } from '../context/auth-context.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
@@ -14,7 +14,7 @@ const links = [
   { to: '/contact', label: 'Contact' }
 ]
 
-export default function Navbar({ theme, toggleTheme }) {
+export default function Navbar() {
   const { count } = useCart()
   const { user, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
@@ -74,15 +74,6 @@ export default function Navbar({ theme, toggleTheme }) {
           ))}
 
           <div className={styles.tools}>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className={styles.themeToggle}
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-              <span className={styles.themeLabel}>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-            </button>
             {!isAdmin && (
               <Link to={cartTo} state={cartState} className={styles.cart}>
                 Cart

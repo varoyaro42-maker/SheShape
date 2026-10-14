@@ -79,11 +79,6 @@
   font-weight: 600;
 }
 
-:global([data-theme='dark']) .linkActive {
-  background: rgba(47, 107, 61, 0.28);
-  color: var(--green-light, #9ec6a6);
-}
-
 .linkActive svg {
   opacity: 1;
 }

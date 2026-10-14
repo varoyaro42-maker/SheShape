@@ -508,10 +508,6 @@
   background: var(--cream);
 }
 
-[data-theme='dark'] .appSection {
-  background: var(--surface);
-}
-
 .featureList {
   list-style: none;
   margin: 0 0 26px;
@@ -727,18 +723,4 @@
   .pillDot {
     animation: none;
   }
-}
-
-[data-theme='dark'] .heroTitle,
-[data-theme='dark'] .heroStats dt {
-  color: var(--text);
-}
-
-[data-theme='dark'] .heroAccent {
-  color: var(--green-light);
-}
-
-[data-theme='dark'] .heroSecondary {
-  border-color: var(--green-light);
-  color: var(--green-light);
 }

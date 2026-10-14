@@ -160,17 +160,8 @@
   color: #fff;
 }
 
-[data-theme='dark'] .copy {
-  color: var(--green-light);
-  border-color: var(--green-light);
-}
-
 .instructionsWarn {
   background: #fff7ed;
-}
-
-[data-theme='dark'] .instructionsWarn {
-  background: rgba(217, 154, 78, 0.14);
 }
 
 .instructionsTitle {

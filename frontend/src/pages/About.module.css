@@ -93,10 +93,6 @@
   margin-bottom: 8px;
 }
 
-[data-theme='dark'] .statValue {
-  color: var(--green-light);
-}
-
 .statLabel {
   font-size: 14.5px;
   color: var(--text-soft);
@@ -122,10 +118,6 @@
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-[data-theme='dark'] .press {
-  color: var(--green-light);
 }
 
 .teamGrid {

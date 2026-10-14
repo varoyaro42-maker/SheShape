@@ -66,16 +66,6 @@
   cursor: default;
 }
 
-[data-theme='dark'] .arrow {
-  border-color: var(--green-light);
-  color: var(--green-light);
-}
-
-[data-theme='dark'] .arrow:hover:not(:disabled) {
-  background: var(--green-light);
-  color: var(--green-dark);
-}
-
 /* Auto-gliding mode: no snap points, otherwise the browser fights the glide. */
 .looping {
   scroll-snap-type: none;
