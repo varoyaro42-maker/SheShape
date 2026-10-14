@@ -6,6 +6,7 @@ import { useToast } from '../../context/toast-context.js'
 import HomeImageUploader from '../../components/HomeImageUploader.jsx'
 import Loading from '../../components/Loading.jsx'
 import styles from './ProductForm.module.css'
+import tabs from './HomeSettings.module.css'
 
 const BLANK = {
   hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '', slides: [] },
@@ -119,7 +120,17 @@ function ListEditor({ items, onChange, fields, addLabel, blank, disabled }) {
   )
 }
 
+const TABS = [
+  { key: 'hero', label: 'Hero', hint: 'Photos, headline, scrolling words and numbers' },
+  { key: 'shop', label: 'Shop promo', hint: 'The Nkondo Active block' },
+  { key: 'community', label: 'Community', hint: 'Myths, member quotes and coaches' },
+  { key: 'photos', label: 'Instagram', hint: 'The sliding photo strip' },
+  { key: 'about', label: 'About & app', hint: 'Your story and the app section' },
+  { key: 'contact', label: 'Contact', hint: 'Newsletter copy and contact details' }
+]
+
 export default function AdminHomeSettingsPage() {
+  const [tab, setTab] = useState('hero')
   const { showToast } = useToast()
   const [content, setContent] = useState(BLANK)
   const [loading, setLoading] = useState(true)
@@ -186,7 +197,7 @@ export default function AdminHomeSettingsPage() {
   )
 
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${tabs.page}`}>
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Site content</h1>
@@ -196,8 +207,24 @@ export default function AdminHomeSettingsPage() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      <form onSubmit={submit} className={styles.form} noValidate>
-        <section className={styles.card}>
+      <div className={tabs.bar} role="tablist" aria-label="Site content sections">
+        {TABS.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === item.key}
+            className={tab === item.key ? `${tabs.tab} ${tabs.active}` : tabs.tab}
+            onClick={() => setTab(item.key)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <p className={tabs.hint}>{TABS.find((item) => item.key === tab)?.hint}</p>
+
+      <form onSubmit={submit} className={`${styles.form} ${tabs.grid}`} noValidate>
+        <section className={styles.card} hidden={tab !== 'hero'}>
           <h2 className={styles.sectionTitle}>Hero</h2>
           <p className={styles.hint}>The photos that switch at the top of the home page. Upload, reorder by removing and re-adding, and caption them here. Two or more photos switch automatically; portrait photos (4:5) look best.</p>
           <ListEditor
@@ -222,7 +249,7 @@ export default function AdminHomeSettingsPage() {
           </div>
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'hero'}>
           <h2 className={styles.sectionTitle}>Scrolling words</h2>
           <p className={styles.hint}>The band of words that slides under the hero. Short words work best.</p>
           <Toggle label="Show the scrolling band" checked={content.ticker.enabled !== false} onChange={(value) => set('ticker', 'enabled', value)} />
@@ -237,7 +264,7 @@ export default function AdminHomeSettingsPage() {
           </Field>
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'photos'}>
           <h2 className={styles.sectionTitle}>Instagram photos</h2>
           <p className={styles.hint}>A sliding strip of photos near the bottom of the home page. Six to ten square photos look best. Each links to your Instagram unless you give it its own link.</p>
           <ListEditor
@@ -254,7 +281,7 @@ export default function AdminHomeSettingsPage() {
           />
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'hero'}>
           <h2 className={styles.sectionTitle}>Numbers that matter</h2>
           <p className={styles.hint}>Shown under the hero and on the about page. Keep them true: "250+", "4", "2026".</p>
           <ListEditor
@@ -270,7 +297,7 @@ export default function AdminHomeSettingsPage() {
           />
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'shop'}>
           <h2 className={styles.sectionTitle}>Nkondo Active promo</h2>
           <p className={styles.hint}>The product shown comes from your most recently added product.</p>
           <Field label="Small line">{text('featured', 'eyebrow', { maxLength: 80 })}</Field>
@@ -288,7 +315,7 @@ export default function AdminHomeSettingsPage() {
           <Field label="Button label">{text('featured', 'buttonLabel', { maxLength: 40 })}</Field>
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'community'}>
           <h2 className={styles.sectionTitle}>Myths and tips</h2>
           <p className={styles.hint}>The dark band on the home page. Three reads best. Remove all to hide it.</p>
           <ListEditor
@@ -304,7 +331,7 @@ export default function AdminHomeSettingsPage() {
           />
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'community'}>
           <h2 className={styles.sectionTitle}>What members say</h2>
           <p className={styles.hint}>Short, real quotes with a first name. Shown on the home and about pages.</p>
           <ListEditor
@@ -321,7 +348,7 @@ export default function AdminHomeSettingsPage() {
           />
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'community'}>
           <h2 className={styles.sectionTitle}>Coaches and team</h2>
           <ListEditor
             items={content.team}
@@ -338,14 +365,14 @@ export default function AdminHomeSettingsPage() {
           />
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'about'}>
           <h2 className={styles.sectionTitle}>About page</h2>
           <HomeImageUploader label="About photo" value={content.about.imageUrl} onChange={(url) => set('about', 'imageUrl', url)} disabled={saving} />
           <Field label="Heading">{text('about', 'heading', { maxLength: 120 })}</Field>
           <Field label="Your story" hint="Leave an empty line between paragraphs.">{area('about', 'paragraph', 7)}</Field>
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'about'}>
           <h2 className={styles.sectionTitle}>App section</h2>
           <Toggle label="Show the app section on the home page" checked={content.app.enabled !== false} onChange={(value) => set('app', 'enabled', value)} />
           <HomeImageUploader label="Phone screenshot" value={content.app.imageUrl} onChange={(url) => set('app', 'imageUrl', url)} disabled={saving} />
@@ -366,14 +393,14 @@ export default function AdminHomeSettingsPage() {
           </div>
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'contact'}>
           <h2 className={styles.sectionTitle}>Newsletter</h2>
           <Toggle label="Show newsletter signup on the site" checked={content.newsletter.enabled !== false} onChange={(value) => set('newsletter', 'enabled', value)} />
           <Field label="Heading">{text('newsletter', 'heading', { maxLength: 120 })}</Field>
           <Field label="Paragraph">{text('newsletter', 'paragraph', { maxLength: 160 })}</Field>
         </section>
 
-        <section className={styles.card}>
+        <section className={styles.card} hidden={tab !== 'contact'}>
           <h2 className={styles.sectionTitle}>Contact details</h2>
           <div className={styles.row}>
             <Field label="Phone">{text('contact', 'phone')}</Field>
@@ -386,7 +413,8 @@ export default function AdminHomeSettingsPage() {
           <Field label="Instagram handle">{text('contact', 'instagram', { placeholder: '@sheshape_wellness' })}</Field>
         </section>
 
-        <div className={styles.actions}>
+        <div className={`${styles.actions} ${tabs.saveBar}`}>
+          <span className={tabs.saveNote}>Changes on every tab are saved together.</span>
           <button type="submit" disabled={saving} className={styles.primary}>
             <Check size={16} />
             {saving ? 'Saving' : 'Save content'}
