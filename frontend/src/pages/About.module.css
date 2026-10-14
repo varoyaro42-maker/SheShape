@@ -21,6 +21,7 @@
 
 .title {
   font-size: clamp(36px, 5vw, 58px);
+  font-weight: 700;
   line-height: 1.04;
   letter-spacing: -0.02em;
   margin-bottom: 22px;
@@ -84,8 +85,9 @@
 
 .statValue {
   display: block;
-  font-family: var(--heading);
-  font-size: clamp(34px, 3.8vw, 46px);
+  font-family: var(--accent);
+  font-weight: 900;
+  font-size: clamp(36px, 4vw, 50px);
   line-height: 1;
   color: var(--green-dark);
   margin-bottom: 8px;

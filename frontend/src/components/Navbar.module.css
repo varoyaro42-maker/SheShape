@@ -20,10 +20,10 @@
   align-items: center;
   gap: 10px;
   font-family: var(--heading);
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 700;
   color: #fff;
-  letter-spacing: 0.4px;
+  letter-spacing: -0.01em;
 }
 
 .brandIcon {

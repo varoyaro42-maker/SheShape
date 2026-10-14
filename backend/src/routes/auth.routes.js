@@ -10,7 +10,7 @@ import {
   resetPassword,
   changePassword,
 } from '../controllers/auth.controller.js';
-import { protect } from '../middleware/auth.js';
+import { protect, optionalAuth } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/security.js';
 
 const router = Router();
@@ -18,7 +18,7 @@ const router = Router();
 router.post('/register', authLimiter, register);
 router.post('/login', authLimiter, login);
 router.post('/logout', logout);
-router.get('/me', protect, me);
+router.get('/me', optionalAuth, me);
 
 router.post('/verify-email', authLimiter, verifyEmail);
 router.post('/resend-otp', authLimiter, resendOtp);

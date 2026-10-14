@@ -27,7 +27,8 @@ describe('registration and email verification', () => {
     assert.equal(await OtpCode.count({ where: { userId: user.id, purpose: 'verify_email' } }), 1)
 
     const me = await agent.get('/api/auth/me')
-    assert.equal(me.status, 401, 'no session until the email is verified')
+    assert.equal(me.status, 200)
+    assert.equal(me.body.data, null, 'no session until the email is verified')
   })
 
   test('rejects duplicate emails and bad phone numbers', async () => {
@@ -77,7 +78,8 @@ describe('login and sessions', () => {
 
     await agent.post('/api/auth/logout')
     const after = await agent.get('/api/auth/me')
-    assert.equal(after.status, 401)
+    assert.equal(after.status, 200)
+    assert.equal(after.body.data, null)
   })
 
   test('an unverified user is sent back to verification instead of signed in', async () => {
