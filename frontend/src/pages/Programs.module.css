@@ -1,0 +1,145 @@
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 3rem 1.25rem 5rem;
+}
+
+.header {
+  max-width: 52ch;
+  margin-bottom: 2rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.title {
+  margin: 0.6rem 0 0;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.1;
+}
+
+.intro {
+  margin: 0.85rem 0 0;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  opacity: 0.75;
+}
+
+.banner {
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+}
+
+.error {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.75rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.cover,
+.coverEmpty {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.25rem;
+}
+
+.label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.cardTitle {
+  margin: 0.5rem 0 0;
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+
+.cardLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tagline {
+  margin: 0.55rem 0 0;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  opacity: 0.75;
+}
+
+.highlights {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+}
+
+.highlights li::before {
+  content: "✓";
+  margin-right: 0.5rem;
+  opacity: 0.55;
+}
+
+.badge {
+  margin: 1.25rem 0 0;
+  padding: 0.45rem 0.85rem;
+  align-self: flex-start;
+  border: 1px dashed rgba(0, 0, 0, 0.22);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  opacity: 0.7;
+}
+
+.footer {
+  margin-top: 3rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  opacity: 0.75;
+}

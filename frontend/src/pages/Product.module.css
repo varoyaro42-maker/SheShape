@@ -1,0 +1,163 @@
+.back {
+  display: inline-block;
+  padding: 32px 0 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green-mid);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+  padding-bottom: 40px;
+}
+
+.gallery {
+  display: grid;
+  gap: 14px;
+}
+
+.mainImage {
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.mainImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.thumb {
+  width: 78px;
+  height: 78px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.2s ease;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbActive {
+  border-color: var(--green-dark);
+}
+
+.swatches {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.swatchActive {
+  border-color: var(--green-dark);
+  color: var(--green-dark);
+}
+
+.swatchDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 8px;
+}
+
+.category {
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--green-mid);
+}
+
+.name {
+  font-size: 38px;
+}
+
+.price {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.description {
+  color: var(--text-soft);
+  line-height: 1.75;
+}
+
+.stock {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green-mid);
+}
+
+.stockOut {
+  color: #9a3b2f;
+}
+
+.actions {
+  display: flex;
+  gap: 14px;
+  padding-top: 6px;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .name {
+    font-size: 30px;
+  }
+}
+
+.added {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--green-mid);
+}
+
+.added a {
+  text-decoration: underline;
+}

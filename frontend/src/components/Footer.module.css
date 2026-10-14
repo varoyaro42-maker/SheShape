@@ -1,0 +1,106 @@
+.footer {
+  margin-top: 80px;
+  background: var(--green-dark);
+  color: #cfdcd2;
+  padding: 48px 0 32px;
+}
+
+.inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.inner > div:first-child {
+  max-width: 320px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--heading);
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.brandIcon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cfdcd2;
+  margin-bottom: 12px;
+}
+
+.tagline {
+  font-family: var(--script);
+  font-size: 20px;
+  color: var(--green-light);
+}
+
+.column h3 {
+  font-family: var(--body);
+  font-size: 13px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--green-light);
+  margin-bottom: 12px;
+}
+
+.column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 15px;
+}
+
+.column a:hover {
+  color: #fff;
+}
+
+.contactList {
+  gap: 12px !important;
+}
+
+.contactList li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contactLabel {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--green-light);
+  opacity: 0.85;
+}
+
+.bottom {
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(158, 198, 166, 0.25);
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bottomTagline {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--green-light);
+}

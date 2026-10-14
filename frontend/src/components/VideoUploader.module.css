@@ -1,0 +1,110 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-canvas);
+}
+
+.preview {
+  width: 140px;
+  height: 78px;
+  border-radius: 6px;
+  background: #000;
+  object-fit: cover;
+}
+
+.title {
+  flex: 1;
+  font-size: 0.88rem;
+  color: var(--admin-ink);
+}
+
+.remove {
+  padding: 0.35rem 0.7rem;
+  border: none;
+  border-radius: 6px;
+  background: rgba(28, 25, 23, 0.82);
+  color: #fff;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.remove:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.addRow {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.titleInput {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--admin-ink);
+}
+
+.add {
+  padding: 0.6rem 1.1rem;
+  border: 1px dashed var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.add:hover:not(:disabled) {
+  border-color: var(--admin-muted);
+  color: var(--admin-ink);
+}
+
+.add:disabled {
+  cursor: default;
+}
+
+.input {
+  display: none;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+}
+
+.error {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.85rem;
+}

@@ -1,0 +1,80 @@
+.row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.media {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.name {
+  font-family: var(--heading);
+  font-size: 18px;
+  color: var(--green-dark);
+}
+
+.unit {
+  font-size: 14px;
+  color: var(--text-soft);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.remove {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9a3b2f;
+  text-decoration: underline;
+}
+
+.subtotal {
+  font-weight: 700;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 76px minmax(0, 1fr);
+    row-gap: 12px;
+  }
+
+  .media {
+    width: 76px;
+    height: 76px;
+  }
+
+  .subtotal {
+    grid-column: 2;
+    text-align: right;
+  }
+}

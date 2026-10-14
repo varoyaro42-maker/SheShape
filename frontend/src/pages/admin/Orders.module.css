@@ -1,0 +1,179 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--admin-ink);
+}
+
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--admin-muted);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--admin-ink);
+}
+
+.error {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.88rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  box-shadow: var(--admin-shadow);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  white-space: nowrap;
+}
+
+.table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--admin-muted);
+  border-bottom: 1px solid var(--admin-line);
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--admin-line);
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.numCol {
+  text-align: right;
+}
+
+.number {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.86rem;
+  color: var(--admin-ink);
+  text-decoration: none;
+}
+
+.number:hover {
+  text-decoration: underline;
+}
+
+.name {
+  display: block;
+}
+
+.phone,
+.date {
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+}
+
+.phone {
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+.pending {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.paid {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.shipped {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.delivered {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.cancelled {
+  background: #f5f5f4;
+  color: #78716c;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.pagerLabel {
+  font-size: 0.85rem;
+  color: var(--admin-muted);
+}
+
+.ghost {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--admin-muted);
+  cursor: pointer;
+}
+
+.ghost:hover:not(:disabled) {
+  color: var(--admin-ink);
+}
+
+.ghost:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

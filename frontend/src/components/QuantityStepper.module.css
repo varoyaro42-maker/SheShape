@@ -1,0 +1,36 @@
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-button);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.button {
+  width: 40px;
+  height: 42px;
+  border: none;
+  background: transparent;
+  color: var(--green-dark);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+.button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.value {
+  min-width: 46px;
+  text-align: center;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
