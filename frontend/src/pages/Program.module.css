@@ -27,9 +27,11 @@
   border-radius: 999px;
   background: var(--green-soft);
   color: var(--text-soft);
-  font-size: 12px;
+  font-family: var(--accent);
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   margin-bottom: 18px;
 }
 
