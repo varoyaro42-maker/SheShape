@@ -94,7 +94,7 @@ export default function ProgramPage() {
         </div>
 
         <aside className={styles.aside}>
-          <p className={styles.badge}>Not yet developed</p>
+          <p className={styles.badge}>Coming soon</p>
           <p className={styles.asideText}>
             This program runs today, but you can&apos;t book it on this site yet. Call or message
             us using the number in the footer and we&apos;ll place you.

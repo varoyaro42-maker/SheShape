@@ -7,6 +7,7 @@
 }
 
 .inner {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -36,6 +37,12 @@
   display: flex;
   align-items: center;
   gap: 28px;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 20px;
 }
 
 .link {
@@ -75,6 +82,10 @@
   background: rgba(255, 255, 255, 0.22);
 }
 
+.themeLabel {
+  display: none;
+}
+
 .cart {
   display: inline-flex;
   align-items: center;
@@ -107,21 +118,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 720px) {
-  .inner {
-    height: auto;
-    flex-direction: column;
-    align-items: flex-start;
-    padding-block: 16px;
-    gap: 12px;
-  }
-
-  .nav {
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-}
-
 .account {
   display: flex;
   align-items: center;
@@ -149,4 +145,150 @@
 .logout:hover,
 .login:hover {
   opacity: 1;
+}
+
+/* Phone-only controls, hidden on wide screens. */
+.mobileActions {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobileCart,
+.menuButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.mobileCart .badge {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    height: 64px;
+    gap: 12px;
+  }
+
+  .brand {
+    font-size: 21px;
+  }
+
+  .brandIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .mobileActions {
+    display: flex;
+  }
+
+  /* The menu drops down from the header and takes the full width. */
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 6px 20px 22px;
+    background: var(--green-dark);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.28);
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+  }
+
+  .navOpen {
+    display: flex;
+  }
+
+  .link {
+    padding: 14px 4px;
+    font-size: 17px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .active {
+    color: var(--green-light);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .tools {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-top: 16px;
+  }
+
+  .themeToggle {
+    width: auto;
+    height: auto;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .themeLabel {
+    display: inline;
+  }
+
+  .cart {
+    display: none;
+  }
+
+  .account {
+    justify-content: space-between;
+    padding: 6px 4px;
+  }
+
+  .accountName,
+  .login,
+  .logout {
+    font-size: 15px;
+  }
+
+  .login {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    text-align: center;
+    opacity: 1;
+    font-weight: 600;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 64px 0 0 0;
+    background: rgba(6, 49, 26, 0.45);
+    border: none;
+    padding: 0;
+    z-index: -1;
+    cursor: default;
+  }
 }

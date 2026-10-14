@@ -113,3 +113,21 @@
   height: 100%;
   object-fit: cover;
 }
+
+/* Notifications and quick links are secondary; drop them on narrow phones so
+   the page title keeps room next to the menu button, theme, cart and avatar. */
+@media (max-width: 640px) {
+  .optional {
+    display: none;
+  }
+
+  .iconRow {
+    gap: 6px;
+  }
+
+  .iconButton,
+  .avatarButton {
+    width: 36px;
+    height: 36px;
+  }
+}

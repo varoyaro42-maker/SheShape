@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { NavLink, Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, ShoppingBag, Dumbbell, Newspaper, Package, Settings } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Dumbbell, Newspaper, Package, Settings, Menu, X } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useCart } from '../context/cart-context.js'
 import { useTheme } from '../hooks/useTheme.js'
+import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
 import TopbarIcons from './TopbarIcons.jsx'
 import styles from './CustomerLayout.module.css'
@@ -42,6 +43,7 @@ export default function CustomerLayout() {
   const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
+  const menu = useMobileMenu()
 
   const [search, setSearch] = useState('')
 
@@ -62,43 +64,38 @@ export default function CustomerLayout() {
     )
   }
 
+  const renderLink = (link) => (
+    <NavLink
+      key={link.to}
+      to={link.to}
+      end={link.end}
+      className={({ isActive }) => (isActive ? `${styles.link} ${styles.linkActive}` : styles.link)}
+    >
+      <link.icon size={18} strokeWidth={2} />
+      {link.label}
+    </NavLink>
+  )
+
   return (
     <div className={styles.shell} data-theme={theme}>
-      <aside className={styles.sidebar}>
-        <Link to="/" className={styles.brand}>
-          <img src="/favicon.ico" alt="" className={styles.brandIcon} />
-          She Shape
-        </Link>
+      <aside
+        id="customer-sidebar"
+        className={menu.open ? `${styles.sidebar} ${styles.sidebarOpen}` : styles.sidebar}
+      >
+        <div className={styles.sidebarHead}>
+          <Link to="/" className={styles.brand}>
+            <img src="/favicon.ico" alt="" className={styles.brandIcon} />
+            She Shape
+          </Link>
+          <button type="button" className={styles.sidebarClose} onClick={menu.close} aria-label="Close menu">
+            <X size={20} />
+          </button>
+        </div>
 
         <nav className={styles.nav}>
-          {BROWSE_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.end}
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.linkActive}` : styles.link
-              }
-            >
-              <link.icon size={18} strokeWidth={2} />
-              {link.label}
-            </NavLink>
-          ))}
-
+          {BROWSE_LINKS.map(renderLink)}
           <span className={styles.divider}>Account</span>
-
-          {ACCOUNT_LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.linkActive}` : styles.link
-              }
-            >
-              <link.icon size={18} strokeWidth={2} />
-              {link.label}
-            </NavLink>
-          ))}
+          {ACCOUNT_LINKS.map(renderLink)}
         </nav>
 
         <div className={styles.account}>
@@ -115,8 +112,23 @@ export default function CustomerLayout() {
         </div>
       </aside>
 
+      {menu.open && (
+        <button type="button" className={styles.backdrop} onClick={menu.close} aria-label="Close menu" />
+      )}
+
       <div className={styles.body}>
         <header className={styles.topbar}>
+          <button
+            type="button"
+            className={styles.menuButton}
+            onClick={menu.toggle}
+            aria-expanded={menu.open}
+            aria-controls="customer-sidebar"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+
           <h1 className={styles.pageTitle}>{pageTitle}</h1>
 
           <form onSubmit={handleSearch} className={styles.search}>

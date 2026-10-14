@@ -80,3 +80,28 @@
   font-size: 14px;
   color: var(--text-soft);
 }
+
+@media (max-width: 640px) {
+  .header {
+    padding: 28px 0 18px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .controls {
+    padding-bottom: 20px;
+  }
+
+  .search {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Two products per row on phones halves the scroll length of the shop. */
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}

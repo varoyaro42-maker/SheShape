@@ -78,7 +78,7 @@ export default function ProgramsPage() {
                   </ul>
                 )}
 
-                <p className={styles.badge}>Not yet developed</p>
+                <p className={styles.badge}>Coming soon</p>
               </div>
             </article>
           ))}

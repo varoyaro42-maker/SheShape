@@ -29,7 +29,7 @@ export default function TopbarIcons({
         </Link>
       )}
 
-      <details className={styles.popover}>
+      <details className={`${styles.popover} ${styles.optional}`}>
         <summary className={styles.iconButton} aria-label="Notifications">
           <Bell size={18} />
         </summary>
@@ -39,7 +39,7 @@ export default function TopbarIcons({
       </details>
 
       {quickLinks.length > 0 && (
-        <details className={styles.popover}>
+        <details className={`${styles.popover} ${styles.optional}`}>
           <summary className={styles.iconButton} aria-label="Quick links">
             <LayoutGrid size={18} />
           </summary>

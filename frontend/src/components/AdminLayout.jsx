@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail } from 'lucide-react'
+import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useTheme } from '../hooks/useTheme.js'
+import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
 import { adminMessages } from '../api/admin.js'
 import TopbarIcons from './TopbarIcons.jsx'
@@ -33,6 +34,7 @@ export default function AdminLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const location = useLocation()
+  const menu = useMobileMenu()
   const [unreadMessages, setUnreadMessages] = useState(0)
 
   const initial = user?.name?.trim()?.[0]?.toUpperCase() ?? '?'
@@ -53,11 +55,19 @@ export default function AdminLayout() {
 
   return (
     <div className={styles.shell} data-theme={theme}>
-      <aside className={styles.sidebar}>
-        <Link to="/" className={styles.brand}>
-          <img src="/favicon.ico" alt="" className={styles.brandIcon} />
-          She Shape
-        </Link>
+      <aside
+        id="admin-sidebar"
+        className={menu.open ? `${styles.sidebar} ${styles.sidebarOpen}` : styles.sidebar}
+      >
+        <div className={styles.sidebarHead}>
+          <Link to="/" className={styles.brand}>
+            <img src="/favicon.ico" alt="" className={styles.brandIcon} />
+            She Shape
+          </Link>
+          <button type="button" className={styles.sidebarClose} onClick={menu.close} aria-label="Close menu">
+            <X size={20} />
+          </button>
+        </div>
 
         <nav className={styles.nav}>
           {LINKS.map((link) => (
@@ -92,11 +102,28 @@ export default function AdminLayout() {
         </div>
       </aside>
 
+      {menu.open && (
+        <button type="button" className={styles.backdrop} onClick={menu.close} aria-label="Close menu" />
+      )}
+
       <div className={styles.body}>
         <header className={styles.topbar}>
+          <button
+            type="button"
+            className={styles.menuButton}
+            onClick={menu.toggle}
+            aria-expanded={menu.open}
+            aria-controls="admin-sidebar"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+
           <h1 className={styles.pageTitle}>{pageTitle}</h1>
 
-          <GlobalSearch />
+          <div className={styles.searchSlot}>
+            <GlobalSearch />
+          </div>
 
           <TopbarIcons
             theme={theme}
