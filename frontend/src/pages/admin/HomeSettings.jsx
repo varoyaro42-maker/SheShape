@@ -13,6 +13,8 @@ const BLANK = {
   featured: { eyebrow: '', heading: '', script: '', paragraph: '', tags: [], buttonLabel: '' },
   program: { eyebrow: '', buttonLabel: '' },
   app: { enabled: true, eyebrow: '', heading: '', script: '', paragraph: '', features: [], imageUrl: '', demoUrl: '', demoLabel: '' },
+  ticker: { enabled: true, items: [] },
+  gallery: [],
   tips: [],
   testimonials: [],
   team: [],
@@ -205,6 +207,38 @@ export default function AdminHomeSettingsPage() {
             <Field label="Primary button" hint="Links to programs.">{text('hero', 'primaryButtonLabel', { maxLength: 40 })}</Field>
             <Field label="Secondary button" hint="Links to the shop.">{text('hero', 'secondaryButtonLabel', { maxLength: 40 })}</Field>
           </div>
+        </section>
+
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Scrolling words</h2>
+          <p className={styles.hint}>The band of words that slides under the hero. Short words work best.</p>
+          <Toggle label="Show the scrolling band" checked={content.ticker.enabled !== false} onChange={(value) => set('ticker', 'enabled', value)} />
+          <Field label="Words (comma separated)">
+            <input
+              type="text"
+              value={(content.ticker.items ?? []).join(', ')}
+              onChange={(event) => set('ticker', 'items', event.target.value.split(',').map((word) => word.trim()).filter(Boolean))}
+              className={styles.input}
+              placeholder="Learn, Grow, Thrive, She Strong Classes, Kigali"
+            />
+          </Field>
+        </section>
+
+        <section className={styles.card}>
+          <h2 className={styles.sectionTitle}>Instagram photos</h2>
+          <p className={styles.hint}>A sliding strip of photos near the bottom of the home page. Six to ten square photos look best. Each links to your Instagram unless you give it its own link.</p>
+          <ListEditor
+            items={content.gallery}
+            onChange={(value) => setList('gallery', value)}
+            addLabel="Add a photo"
+            blank={{ imageUrl: '', caption: '', href: '' }}
+            disabled={saving}
+            fields={[
+              { key: 'imageUrl', label: 'Photo', type: 'image' },
+              { key: 'caption', label: 'Caption (shown on hover)', placeholder: 'Saturday session, Remera', max: 80 },
+              { key: 'href', label: 'Link (optional)', placeholder: 'https://instagram.com/p/…', max: 300 }
+            ]}
+          />
         </section>
 
         <section className={styles.card}>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, Quote, ExternalLink } from 'lucide-react'
+import { ArrowRight, Check, Quote, ExternalLink, AtSign } from 'lucide-react'
 import { useApi } from '../hooks/useApi.js'
 import { homeContent } from '../api/home.js'
 import { programs as programsApi } from '../api/programs.js'
@@ -11,6 +11,8 @@ import ProgramCard from '../components/ProgramCard.jsx'
 import SectionHeading from '../components/SectionHeading.jsx'
 import NewsletterForm from '../components/NewsletterForm.jsx'
 import Carousel from '../components/Carousel.jsx'
+import Ticker from '../components/Ticker.jsx'
+import Marquee from '../components/Marquee.jsx'
 import Reveal from '../components/Reveal.jsx'
 import Loading from '../components/Loading.jsx'
 import styles from './Home.module.css'
@@ -97,7 +99,9 @@ export default function Home() {
 
   if (!content) return <Loading />
 
-  const { hero, stats, featured, app, tips, testimonials, team, about, newsletter } = content
+  const { hero, stats, featured, app, tips, testimonials, team, about, newsletter, ticker, gallery, contact } = content
+  const instagram = (contact?.instagram || '').replace(/^@/, '')
+  const instagramUrl = instagram ? `https://instagram.com/${instagram}` : null
   const spotlight = products?.[0] ?? null
   const featuredPrograms = programsList ?? []
 
@@ -123,15 +127,17 @@ export default function Home() {
           <div className={`${styles.heroArt} rise rise-3`}>
             <div className={styles.heroShape} aria-hidden="true" />
             {hero.imageUrl ? (
-              <img src={hero.imageUrl} alt="" className={styles.heroImage} fetchPriority="high" />
+              <img src={hero.imageUrl} alt="" className={`${styles.heroImage} ${styles.float}`} fetchPriority="high" />
             ) : (
-              <div className={styles.heroFrame}>
+              <div className={`${styles.heroFrame} ${styles.float}`}>
                 <img src="/logo.svg" alt="" className={styles.heroFrameLogo} />
               </div>
             )}
           </div>
         </div>
       </section>
+
+      {ticker?.enabled && ticker.items?.length > 0 && <Ticker items={ticker.items} />}
 
       {stats?.length > 0 && (
         <section className={styles.stats}>
@@ -159,7 +165,7 @@ export default function Home() {
                 </Link>
               }
             />
-            <Carousel label="Programs" slideWidth={380}>
+            <Carousel label="Programs" slideWidth={380} autoplay>
               {featuredPrograms.map((program) => (
                 <ProgramCard key={program.id} program={program} />
               ))}
@@ -332,8 +338,43 @@ export default function Home() {
         </section>
       )}
 
+      {gallery?.length > 0 && (
+        <section className={styles.gallery}>
+          <div className="page">
+            <SectionHeading
+              eyebrow="On Instagram"
+              title="Life at She Shape"
+              lead="Classes, challenge groups, workshops and the odd Saturday hike. Follow along."
+              action={
+                instagramUrl && (
+                  <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+                    <AtSign size={16} />
+                    {instagram}
+                  </a>
+                )
+              }
+            />
+          </div>
+          <Marquee duration={Math.max(30, gallery.length * 7)} gap={16}>
+            {gallery.map((photo, index) => (
+              <a
+                key={`${photo.imageUrl}-${index}`}
+                href={photo.href || instagramUrl || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${styles.tile} media-zoom`}
+              >
+                <img src={photo.imageUrl} alt={photo.caption || ''} loading="lazy" />
+                {photo.caption && <span className={styles.tileCaption}>{photo.caption}</span>}
+              </a>
+            ))}
+          </Marquee>
+        </section>
+      )}
+
       {newsletter?.enabled && (
         <section className={styles.newsletter}>
+          <img src="/logo-light.svg" alt="" className={styles.newsletterMark} aria-hidden="true" />
           <div className={`page ${styles.newsletterInner}`}>
             <Reveal className={styles.newsletterCopy}>
               <span className="eyebrow">Newsletter</span>
@@ -341,7 +382,7 @@ export default function Home() {
               <p className={styles.newsletterText}>{newsletter.paragraph}</p>
             </Reveal>
             <Reveal delay={100}>
-              <NewsletterForm />
+              <NewsletterForm light />
             </Reveal>
           </div>
         </section>

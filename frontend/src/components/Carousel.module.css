@@ -75,3 +75,18 @@
   background: var(--green-light);
   color: var(--green-dark);
 }
+
+/* Auto-gliding mode: no snap points, otherwise the browser fights the glide. */
+.looping {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+.looping .slide {
+  scroll-snap-align: none;
+}
+
+.looping {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}

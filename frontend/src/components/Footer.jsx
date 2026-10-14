@@ -30,6 +30,13 @@ export default function Footer() {
 
   return (
     <footer className={styles.footer}>
+      <div className={`page ${styles.statement}`}>
+        <p className={styles.statementText}>Strong is your shape.</p>
+        <Link to="/programs" className="btn btn-light">
+          Find your program
+        </Link>
+      </div>
+
       <div className={`page ${styles.inner}`}>
         <div className={styles.brandCol}>
           <Link to="/" className={styles.brand}>

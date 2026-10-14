@@ -52,6 +52,13 @@ export const DEFAULT_HOME_CONTENT = {
     demoUrl: '/app-demo.html',
     demoLabel: 'Try the prototype'
   },
+  // Scrolling band of short words under the hero.
+  ticker: {
+    enabled: true,
+    items: ['Learn', 'Grow', 'Thrive', 'She Strong Classes', 'Kigali', 'Nkondo Active', 'Women only']
+  },
+  // Photo strip linking to Instagram: [{ imageUrl, caption, href }]
+  gallery: [],
   tips: [
     {
       title: "Lifting won't make you bulky.",
