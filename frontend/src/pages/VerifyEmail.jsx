@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
+import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
 
 export default function VerifyEmail() {
@@ -50,8 +51,7 @@ export default function VerifyEmail() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
+    <AuthShell>
         <h1 className={styles.title}>Check your email</h1>
         <p className={styles.subtitle}>
           {email ? `We sent a 6-digit code to ${email}.` : 'Enter the 6-digit code we emailed you.'}
@@ -95,7 +95,6 @@ export default function VerifyEmail() {
         <p className={styles.footer}>
           <Link to="/login">Back to sign in</Link>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

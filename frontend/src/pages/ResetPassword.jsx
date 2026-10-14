@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
+import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
 
 export default function ResetPassword() {
@@ -37,8 +38,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
+    <AuthShell>
         <h1 className={styles.title}>Set a new password</h1>
         <p className={styles.subtitle}>Enter the code we emailed you along with a new password.</p>
 
@@ -106,7 +106,6 @@ export default function ResetPassword() {
         <p className={styles.footer}>
           <Link to="/login">Back to sign in</Link>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

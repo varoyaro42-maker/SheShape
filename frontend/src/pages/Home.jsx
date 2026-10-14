@@ -10,6 +10,7 @@ import ProductCard from '../components/ProductCard.jsx'
 import ProgramCard from '../components/ProgramCard.jsx'
 import SectionHeading from '../components/SectionHeading.jsx'
 import NewsletterForm from '../components/NewsletterForm.jsx'
+import Carousel from '../components/Carousel.jsx'
 import Reveal from '../components/Reveal.jsx'
 import Loading from '../components/Loading.jsx'
 import styles from './Home.module.css'
@@ -19,18 +20,18 @@ function Testimonials({ items }) {
     <section className={styles.section}>
       <div className="page">
         <SectionHeading eyebrow="From the community" title="Women who train with us" />
-        <div className={styles.quoteRail}>
+        <Carousel label="Member quotes" slideWidth={400}>
           {items.map((item, index) => (
-            <Reveal key={`${item.name}-${index}`} as="figure" delay={index * 80} className={styles.quote}>
+            <figure key={`${item.name}-${index}`} className={styles.quote}>
               <Quote size={22} className={styles.quoteMark} aria-hidden="true" />
               <blockquote>{item.quote}</blockquote>
               <figcaption>
                 <strong>{item.name}</strong>
                 {item.detail && <span>{item.detail}</span>}
               </figcaption>
-            </Reveal>
+            </figure>
           ))}
-        </div>
+        </Carousel>
       </div>
     </section>
   )
@@ -98,7 +99,7 @@ export default function Home() {
 
   const { hero, stats, featured, app, tips, testimonials, team, about, newsletter } = content
   const spotlight = products?.[0] ?? null
-  const featuredPrograms = (programsList ?? []).slice(0, 4)
+  const featuredPrograms = programsList ?? []
 
   return (
     <>
@@ -158,13 +159,11 @@ export default function Home() {
                 </Link>
               }
             />
-            <div className={styles.programGrid}>
-              {featuredPrograms.map((program, index) => (
-                <Reveal key={program.id} delay={index * 80}>
-                  <ProgramCard program={program} />
-                </Reveal>
+            <Carousel label="Programs" slideWidth={380}>
+              {featuredPrograms.map((program) => (
+                <ProgramCard key={program.id} program={program} />
               ))}
-            </div>
+            </Carousel>
           </div>
         </section>
       )}

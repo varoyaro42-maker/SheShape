@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
+import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
 
 export default function ForgotPassword() {
@@ -29,8 +30,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
+    <AuthShell>
         <h1 className={styles.title}>Reset your password</h1>
         <p className={styles.subtitle}>
           Enter your email and we'll send you a 6-digit code to reset your password.
@@ -78,7 +78,6 @@ export default function ForgotPassword() {
         <p className={styles.footer}>
           <Link to="/login">Back to sign in</Link>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

@@ -307,20 +307,9 @@
 }
 
 /* Testimonials */
-.quoteRail {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(300px, 1fr);
-  gap: 20px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 8px;
-  scrollbar-width: thin;
-}
-
 .quote {
-  scroll-snap-align: start;
   margin: 0;
+  height: 100%;
   padding: 30px 28px 26px;
   border-radius: var(--radius-card);
   background: var(--surface);
@@ -577,10 +566,6 @@
   .productGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
-  }
-
-  .quoteRail {
-    grid-auto-columns: 85%;
   }
 
   .teamGrid {

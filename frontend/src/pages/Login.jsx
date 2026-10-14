@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
+import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
 
 function resolveRedirect(fromPath, role) {
@@ -54,8 +55,7 @@ export default function Login() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
+    <AuthShell>
         <h1 className={styles.title}>Welcome back</h1>
         <p className={styles.subtitle}>Sign in to see your orders.</p>
 
@@ -105,7 +105,6 @@ export default function Login() {
         <p className={styles.footer}>
           New here? <Link to="/register">Create an account</Link>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

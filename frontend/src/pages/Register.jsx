@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
+import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
 
 const EMPTY_FORM = { name: '', email: '', phone: '', password: '' };
@@ -40,8 +41,7 @@ export default function Register() {
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
+    <AuthShell>
         <h1 className={styles.title}>Create your account</h1>
         <p className={styles.subtitle}>So you can track what you order.</p>
 
@@ -123,7 +123,6 @@ export default function Register() {
         <p className={styles.footer}>
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
-      </div>
-    </div>
+    </AuthShell>
   );
 }

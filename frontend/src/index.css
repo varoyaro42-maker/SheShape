@@ -306,6 +306,11 @@ button {
   transform: none;
 }
 
+/* Variant that slides in from the right, for carousels. */
+.reveal-x {
+  transform: translateX(32px);
+}
+
 @keyframes rise {
   from {
     opacity: 0;
