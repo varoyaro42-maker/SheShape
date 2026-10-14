@@ -1,6 +1,6 @@
 import { Op } from 'sequelize'
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { sequelize, Product, Program, Post, Order, User, ORDER_STATUSES } from '../models/index.js'
+import { sequelize, Product, Program, Post, Order, User, Booking, Subscriber, ORDER_STATUSES } from '../models/index.js'
 
 const REVENUE_STATUSES = ['paid', 'shipped', 'delivered']
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -129,6 +129,11 @@ export const overview = asyncHandler(async (req, res) => {
     })
   ])
 
+  const [newBookings, subscriberTotal] = await Promise.all([
+    Booking.count({ where: { status: 'new' } }),
+    Subscriber.count({ where: { status: 'subscribed' } })
+  ])
+
   const orderCounts = Object.fromEntries(ORDER_STATUSES.map((status) => [status, 0]))
   for (const row of orderRows) {
     orderCounts[row.status] = Number(row.total)
@@ -181,6 +186,8 @@ export const overview = asyncHandler(async (req, res) => {
       programs: { total: programTotal, open: programOpen },
       posts: { total: postTotal, published: postPublished },
       orders: { total: orderTotal, byStatus: orderCounts },
+      bookings: { new: newBookings },
+      subscribers: { total: subscriberTotal },
       recentOrders,
       analytics: {
         periodDays: PERIOD_DAYS,

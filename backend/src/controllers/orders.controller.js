@@ -1,12 +1,12 @@
 import { Op } from 'sequelize';
 import sequelize from '../db.js';
-import { Order, OrderItem, Product } from '../models/index.js';
+import { Order, OrderItem, Product, PAYMENT_METHODS } from '../models/index.js';
 import { HttpError } from '../utils/httpError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { buildUniqueOrderNumber } from '../utils/orderNumber.js';
 import { normalizePhone } from '../utils/phone.js';
-import { getStripeClient } from '../utils/stripe.js';
-import { sendOrderConfirmationEmail } from '../utils/emails.js';
+import { getPublicPaymentMethods, getXentripayClient } from '../utils/payments/index.js';
+import { sendOrderConfirmationEmail, clientUrl } from '../utils/emails.js';
 
 const MAX_LINES = 50;
 const MAX_QUANTITY = 99;
@@ -40,7 +40,7 @@ const collectRequestedItems = (rawItems) => {
   return requested;
 };
 
-// Undo a freshly created order whose card payment could not be started, so
+// Undo a freshly created order whose online payment could not be started, so
 // the customer is not left with a pending order and the stock is not held.
 async function releaseOrder(order, lines) {
   await sequelize.transaction(async (transaction) => {
@@ -57,17 +57,31 @@ async function releaseOrder(order, lines) {
   });
 }
 
+function paymentSummary(order, methods) {
+  const summary = { method: order.paymentMethod, checkoutUrl: null, momo: null };
+
+  if (order.paymentMethod === 'momo' && methods.momo) summary.momo = methods.momo;
+  if (order.paymentMethod === 'xentripay') summary.checkoutUrl = order.paymentCheckoutUrl;
+
+  return summary;
+}
+
 export const createOrder = asyncHandler(async (req, res) => {
   const { customerName, customerPhone, address, items } = req.body;
-  const paymentMethod = req.body.paymentMethod === 'card' ? 'card' : 'cod';
   const requested = collectRequestedItems(items);
 
-  // Resolve Stripe before touching stock, so an unavailable card payment never
-  // leaves behind a pending order with inventory already reserved.
-  const stripe = paymentMethod === 'card' ? await getStripeClient() : null;
+  const paymentMethod = PAYMENT_METHODS.includes(req.body.paymentMethod) ? req.body.paymentMethod : 'cod';
+  const methods = await getPublicPaymentMethods();
 
-  if (paymentMethod === 'card' && !stripe) {
-    throw new HttpError(400, 'Card payment is not available right now. Choose cash on delivery.');
+  // Resolve the payment route before touching stock, so an unavailable method
+  // never leaves behind a pending order with inventory already reserved.
+  if (paymentMethod === 'momo' && !methods.momo) {
+    throw new HttpError(400, 'Mobile money is not available right now. Choose cash on delivery.');
+  }
+
+  const xentripay = paymentMethod === 'xentripay' ? await getXentripayClient() : null;
+  if (paymentMethod === 'xentripay' && !xentripay) {
+    throw new HttpError(400, 'Online payment is not available right now. Choose another payment method.');
   }
 
   const { order: created, lines } = await sequelize.transaction(async (transaction) => {
@@ -126,28 +140,24 @@ export const createOrder = asyncHandler(async (req, res) => {
     return { order, lines };
   });
 
-  let clientSecret = null;
-
-  if (stripe) {
+  if (xentripay) {
     try {
-      const paymentIntent = await stripe.paymentIntents.create(
-        {
-          amount: created.total,
-          currency: 'rwf',
-          automatic_payment_methods: { enabled: true },
-          metadata: { orderId: created.id, orderNumber: created.orderNumber },
-        },
-        { idempotencyKey: `order-intent-${created.id}` }
-      );
+      const collection = await xentripay.initiateCollection({
+        amount: created.total,
+        reference: created.orderNumber,
+        description: `She Shape order ${created.orderNumber}`,
+        customer: { name: created.customerName, email: req.user.email, phone: created.customerPhone },
+        callbackUrl: clientUrl('/api/payments/xentripay/webhook'),
+        returnUrl: clientUrl(`/dashboard/order/${created.orderNumber}`),
+      });
 
-      created.stripePaymentIntentId = paymentIntent.id;
+      created.paymentReference = collection.id ? String(collection.id) : created.orderNumber;
+      created.paymentCheckoutUrl = collection.checkoutUrl ?? null;
       await created.save();
-
-      clientSecret = paymentIntent.client_secret;
     } catch (error) {
-      console.error('[orders] Could not start card payment for', created.orderNumber, error.message);
+      console.error('[orders] Could not start XentriPay payment for', created.orderNumber, error.message);
       await releaseOrder(created, lines);
-      throw new HttpError(502, 'We could not start the card payment. Try again or choose cash on delivery.');
+      throw new HttpError(502, 'We could not start the online payment. Try again or choose another method.');
     }
   }
 
@@ -155,13 +165,15 @@ export const createOrder = asyncHandler(async (req, res) => {
     include: [{ model: OrderItem, as: 'items' }],
   });
 
+  const payment = paymentSummary(order, methods);
+
   if (req.user.email) {
-    sendOrderConfirmationEmail({ to: req.user.email, order }).catch((error) => {
+    sendOrderConfirmationEmail({ to: req.user.email, order, payment }).catch((error) => {
       console.error('[emails] Order confirmation failed for', order.orderNumber, error.message);
     });
   }
 
-  res.status(201).json({ data: order, clientSecret });
+  res.status(201).json({ data: order, payment });
 });
 
 export const listMyOrders = asyncHandler(async (req, res) => {
@@ -194,5 +206,7 @@ export const getOrderByNumber = asyncHandler(async (req, res) => {
     throw new HttpError(403, 'Confirm the phone number used for this order');
   }
 
-  res.json({ data: order });
+  const methods = await getPublicPaymentMethods();
+
+  res.json({ data: order, payment: paymentSummary(order, methods) });
 });

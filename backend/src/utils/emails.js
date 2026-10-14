@@ -4,8 +4,8 @@ import { renderEmail, toPlainText, escapeHtml, nl2p } from './emailTemplate.js';
 const numberFormat = new Intl.NumberFormat('en-US');
 const formatPrice = (value) => `${numberFormat.format(value)} RWF`;
 
-function clientUrl(path = '') {
-  const base = (process.env.CLIENT_URL || 'https://sheshapeactive.com').replace(/\/$/, '');
+export function clientUrl(path = '') {
+  const base = (process.env.CLIENT_URL || 'https://sheshapewellness.com').replace(/\/$/, '');
   return `${base}${path}`;
 }
 
@@ -115,11 +115,24 @@ function itemsTable(items) {
     </table>`;
 }
 
-export async function sendOrderConfirmationEmail({ to, order }) {
-  const paymentLine =
-    order.paymentMethod === 'card'
-      ? "We're confirming your card payment now — you'll get another email once it clears."
-      : "Pay in cash when your order arrives. We'll call you on the number you gave us to confirm details.";
+function paymentInstructions(order, payment) {
+  if (order.paymentMethod === 'momo') {
+    const momo = payment?.momo;
+    const target = momo ? `<strong>${escapeHtml(momo.number)}</strong> (${escapeHtml(momo.name)})` : 'the MoMo number on our website';
+    return `Send <strong>${formatPrice(order.total)}</strong> by MTN MoMo or Airtel Money to ${target}, using <strong>${escapeHtml(order.orderNumber)}</strong> as the reference. We confirm payment by hand, so allow a little time before the status updates.`;
+  }
+
+  if (order.paymentMethod === 'xentripay') {
+    return payment?.checkoutUrl
+      ? `If you have not finished paying, you can <a href="${escapeHtml(payment.checkoutUrl)}" style="color:#2f6b3d;font-weight:700;">complete your payment here</a>. You will get another email as soon as it clears.`
+      : 'We are confirming your online payment now. You will get another email as soon as it clears.';
+  }
+
+  return "Pay in cash when your order arrives. We'll call you on the number you gave us to confirm details.";
+}
+
+export async function sendOrderConfirmationEmail({ to, order, payment }) {
+  const paymentLine = paymentInstructions(order, payment);
 
   const bodyHtml = `
     <p style="margin:0 0 6px;">Hi ${escapeHtml(order.customerName)},</p>
@@ -132,7 +145,7 @@ export async function sendOrderConfirmationEmail({ to, order }) {
       </tr>
     </table>
     <p style="margin:18px 0 0;font-size:13.5px;color:#3a4740;">Delivering to: ${escapeHtml(order.address)}</p>
-    <p style="margin:14px 0 0;padding:14px 16px;background:#f2f6f2;border-radius:12px;font-size:13.5px;color:#1c2b22;">${escapeHtml(paymentLine)}</p>`;
+    <p style="margin:14px 0 0;padding:14px 16px;background:#f2f6f2;border-radius:12px;font-size:13.5px;color:#1c2b22;">${paymentLine}</p>`;
 
   await dispatch({
     to,
@@ -246,4 +259,120 @@ export async function sendNewPostEmails({ post, recipients }) {
       console.error('[emails] Failed to send blog notification batch:', error.message);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Newsletter
+// ---------------------------------------------------------------------------
+
+export async function sendNewsletterConfirmEmail({ to, name, confirmUrl }) {
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">${name ? `Hi ${escapeHtml(name)},` : 'Hi,'}</p>
+    <p style="margin:0 0 14px;">Tap the button below to confirm you want tips, workouts and early access to new She Shape programs in your inbox.</p>
+    <p style="margin:0;font-size:13px;color:#3a4740;">If you did not ask for this, ignore this email and nothing will be sent.</p>`;
+
+  await dispatch({
+    to,
+    subject: 'Confirm your She Shape subscription',
+    eyebrow: 'One more step',
+    title: 'Confirm your email',
+    bodyHtml,
+    ctaLabel: 'Yes, subscribe me',
+    ctaUrl: confirmUrl,
+    preheader: 'Confirm to join the She Shape newsletter',
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Program bookings
+// ---------------------------------------------------------------------------
+
+function bookingSummary(booking) {
+  const rows = [
+    ['Program', booking.programName],
+    booking.preferredDate ? ['Preferred start', booking.preferredDate] : null,
+    ['Phone', booking.phone],
+  ].filter(Boolean);
+
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:14px 0 0;border-collapse:collapse;">
+      ${rows
+        .map(
+          ([label, value]) => `
+        <tr>
+          <td style="padding:6px 18px 6px 0;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3a4740;">${escapeHtml(label)}</td>
+          <td style="padding:6px 0;font-size:14px;color:#1c2b22;">${escapeHtml(value)}</td>
+        </tr>`
+        )
+        .join('')}
+    </table>`;
+}
+
+export async function sendBookingReceivedEmail({ to, booking }) {
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Hi ${escapeHtml(booking.name)},</p>
+    <p style="margin:0;">Thanks for asking to join <strong>${escapeHtml(booking.programName)}</strong>. A coach will look at your request and reply by email or phone, usually within one business day.</p>
+    ${bookingSummary(booking)}`;
+
+  await dispatch({
+    to,
+    subject: `We got your request: ${booking.programName}`,
+    eyebrow: 'Request received',
+    title: "You're on the list",
+    bodyHtml,
+    preheader: `Your request to join ${booking.programName}`,
+  });
+}
+
+export async function sendBookingNotificationEmail({ to, booking }) {
+  const bodyHtml = `
+    <p style="margin:0 0 6px;"><strong>${escapeHtml(booking.name)}</strong> (${escapeHtml(booking.email)}) wants to join <strong>${escapeHtml(booking.programName)}</strong>.</p>
+    ${bookingSummary(booking)}
+    ${booking.message ? `<div style="margin-top:16px;padding-top:16px;border-top:1px solid #e7e9e0;">${nl2p(booking.message)}</div>` : ''}`;
+
+  await dispatch({
+    to,
+    subject: `New booking request: ${booking.programName}`,
+    eyebrow: 'Booking request',
+    title: `${booking.name} wants to join`,
+    bodyHtml,
+    ctaLabel: 'Open in admin',
+    ctaUrl: clientUrl(`/admin/bookings/${booking.id}`),
+  });
+}
+
+const BOOKING_COPY = {
+  confirmed: {
+    subject: (name) => `You're in: ${name}`,
+    eyebrow: 'Booking confirmed',
+    title: 'See you at training',
+    intro: (name) => `Your place in <strong>${escapeHtml(name)}</strong> is confirmed.`,
+  },
+  declined: {
+    subject: (name) => `About your request: ${name}`,
+    eyebrow: 'Booking update',
+    title: "We couldn't fit this one",
+    intro: (name) => `We could not confirm your request for <strong>${escapeHtml(name)}</strong> this time.`,
+  },
+};
+
+export async function sendBookingStatusEmail({ to, booking, status, note }) {
+  const copy = BOOKING_COPY[status];
+  if (!copy || !to) return;
+
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Hi ${escapeHtml(booking.name)},</p>
+    <p style="margin:0 0 14px;">${copy.intro(booking.programName)}</p>
+    ${note ? `<div style="padding:14px 16px;background:#f2f6f2;border-radius:12px;">${nl2p(note)}</div>` : ''}
+    ${bookingSummary(booking)}`;
+
+  await dispatch({
+    to,
+    subject: copy.subject(booking.programName),
+    eyebrow: copy.eyebrow,
+    title: copy.title,
+    bodyHtml,
+    ctaLabel: 'See all programs',
+    ctaUrl: clientUrl('/programs'),
+  });
 }

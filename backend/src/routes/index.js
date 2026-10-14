@@ -11,6 +11,8 @@ import paymentRoutes from './payments.routes.js'
 import adminRoutes from './admin.routes.js'
 import homeRoutes from './home.routes.js'
 import contactRoutes from './contact.routes.js'
+import newsletterRoutes from './newsletter.routes.js'
+import bookingRoutes from './bookings.routes.js'
 
 const router = Router()
 
@@ -32,6 +34,8 @@ router.use('/users', userRoutes)
 router.use('/payments', paymentRoutes)
 router.use('/home-content', homeRoutes)
 router.use('/contact', contactRoutes)
+router.use('/newsletter', newsletterRoutes)
+router.use('/bookings', bookingRoutes)
 router.use('/admin', adminRoutes)
 
 export default router

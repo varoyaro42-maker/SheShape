@@ -4,6 +4,10 @@ import { PHONE_PATTERN, normalizePhone } from '../utils/phone.js';
 
 export const ORDER_STATUSES = ['pending', 'paid', 'shipped', 'delivered', 'cancelled'];
 
+// cod: pay the courier. momo: customer sends mobile money to the shop's number
+// and an admin confirms. xentripay: online collection through XentriPay.
+export const PAYMENT_METHODS = ['cod', 'momo', 'xentripay'];
+
 const Order = sequelize.define(
   'Order',
   {
@@ -18,11 +22,7 @@ const Order = sequelize.define(
       unique: true,
       field: 'order_number',
     },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      field: 'user_id',
-    },
+    userId: { type: DataTypes.UUID, allowNull: true, field: 'user_id' },
     customerName: {
       type: DataTypes.STRING(80),
       allowNull: false,
@@ -64,22 +64,22 @@ const Order = sequelize.define(
       defaultValue: 'pending',
     },
     paymentMethod: {
-      type: DataTypes.ENUM('cod', 'card'),
+      type: DataTypes.ENUM(...PAYMENT_METHODS),
       allowNull: false,
       defaultValue: 'cod',
       field: 'payment_method',
     },
-    stripePaymentIntentId: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
-      field: 'stripe_payment_intent_id',
-    },
+    // Provider-side id for online payments (XentriPay transaction id).
+    paymentReference: { type: DataTypes.STRING(120), allowNull: true, field: 'payment_reference' },
+    // Hosted checkout link, kept so a customer can resume an unfinished payment.
+    paymentCheckoutUrl: { type: DataTypes.TEXT, allowNull: true, field: 'payment_checkout_url' },
+    paidAt: { type: DataTypes.DATE, allowNull: true, field: 'paid_at' },
   },
   {
     tableName: 'orders',
     underscored: true,
     timestamps: true,
-    indexes: [{ fields: ['stripe_payment_intent_id'] }],
+    indexes: [{ fields: ['payment_reference'] }],
   }
 );
 

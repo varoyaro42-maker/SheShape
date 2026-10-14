@@ -9,8 +9,8 @@ function readLimit(name, fallback) {
 }
 
 // CSP and the cross-origin isolation headers are off for now: the storefront
-// loads Stripe.js, S3 media and Google Fonts, and Stripe opens popups for some
-// payment flows. Turn CSP on once an allowlist for those origins is written.
+// loads S3 media and Google Fonts, and the XentriPay checkout may open in a
+// popup. Turn CSP on once an allowlist for those origins is written.
 export const securityHeaders = helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
@@ -30,9 +30,21 @@ export const authLimiter = rateLimit({
   ...shared
 })
 
-// The public contact form is the usual spam target.
+// Public forms that send email: contact, newsletter signup, booking requests.
 export const contactLimiter = rateLimit({
   windowMs: minutes(60),
   limit: readLimit('CONTACT_RATE_LIMIT_MAX', 5),
+  ...shared
+})
+
+export const newsletterLimiter = rateLimit({
+  windowMs: minutes(60),
+  limit: readLimit('NEWSLETTER_RATE_LIMIT_MAX', 10),
+  ...shared
+})
+
+export const bookingLimiter = rateLimit({
+  windowMs: minutes(60),
+  limit: readLimit('BOOKING_RATE_LIMIT_MAX', 6),
   ...shared
 })

@@ -3,15 +3,17 @@ import User from './User.js'
 import { Product } from './Product.js'
 import { Category } from './Category.js'
 import { ProductImage } from './ProductImage.js'
-import Order, { ORDER_STATUSES } from './Order.js'
+import Order, { ORDER_STATUSES, PAYMENT_METHODS } from './Order.js'
 import OrderItem from './OrderItem.js'
 import Post from './Post.js'
 import Program, { PROGRAM_STATUSES } from './Program.js'
 import ProgramVideo from './ProgramVideo.js'
 import OtpCode, { OTP_PURPOSES } from './OtpCode.js'
-import PaymentSettings from './PaymentSettings.js'
+import PaymentSettings, { XENTRIPAY_ENVIRONMENTS } from './PaymentSettings.js'
 import HomeContent from './HomeContent.js'
 import ContactMessage, { MESSAGE_STATUSES } from './ContactMessage.js'
+import Subscriber, { SUBSCRIBER_STATUSES } from './Subscriber.js'
+import Booking, { BOOKING_STATUSES } from './Booking.js'
 
 Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' })
 Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' })
@@ -53,6 +55,12 @@ ProgramVideo.belongsTo(Program, { as: 'program', foreignKey: { name: 'programId'
 User.hasMany(ContactMessage, { foreignKey: 'repliedById', as: 'repliedMessages', onDelete: 'SET NULL' })
 ContactMessage.belongsTo(User, { foreignKey: 'repliedById', as: 'repliedBy', onDelete: 'SET NULL' })
 
+Program.hasMany(Booking, { foreignKey: 'programId', as: 'bookings', onDelete: 'SET NULL' })
+Booking.belongsTo(Program, { foreignKey: 'programId', as: 'program', onDelete: 'SET NULL' })
+User.hasMany(Booking, { foreignKey: 'userId', as: 'bookings', onDelete: 'SET NULL' })
+Booking.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'SET NULL' })
+Booking.belongsTo(User, { foreignKey: 'respondedById', as: 'respondedBy', onDelete: 'SET NULL' })
+
 export {
   sequelize,
   User,
@@ -68,8 +76,14 @@ export {
   PaymentSettings,
   HomeContent,
   ContactMessage,
+  Subscriber,
+  Booking,
   ORDER_STATUSES,
+  PAYMENT_METHODS,
   PROGRAM_STATUSES,
   OTP_PURPOSES,
-  MESSAGE_STATUSES
+  MESSAGE_STATUSES,
+  SUBSCRIBER_STATUSES,
+  BOOKING_STATUSES,
+  XENTRIPAY_ENVIRONMENTS
 }

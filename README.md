@@ -35,7 +35,7 @@ npm run dev                   # http://localhost:5173, proxies /api to the backe
 
 On macOS, AirPlay already listens on port 5000. Set `PORT=5001` in `backend/.env` and create `frontend/.env.local` with `VITE_API_PROXY_TARGET=http://localhost:5001`.
 
-Email and S3 are optional in development: with `SMTP_HOST` blank, OTP codes and order emails are printed to the backend console instead of sent.
+Email and S3 are optional in development: with neither `BREVO_API_KEY` nor `SMTP_HOST` set, every email (OTP codes, order updates, booking replies, newsletter confirmations) is printed to the backend console instead of sent.
 
 ## Tests
 
@@ -43,7 +43,7 @@ Email and S3 are optional in development: with `SMTP_HOST` blank, OTP codes and 
 cd backend && npm test        # needs the sheshape_test database from step 1
 ```
 
-The suites cover registration, OTP verification, login and sessions, password reset, the admin guard, rate limiting, order creation with stock reservation, and order lookup rules. CI runs them on every push against MariaDB 10.3.
+The suites cover registration, OTP verification, login and sessions, password reset, the admin guard, rate limiting, order creation with stock reservation, mobile money and online payment rules, the XentriPay webhook, newsletter double opt-in, and program booking requests. CI runs them on every push against MariaDB 10.3.
 
 ## Deploying to cPanel
 
@@ -66,6 +66,29 @@ CI also produces the same folder as a downloadable artifact named `sheshape-depl
 
 Tables are created and altered with `npm run db:sync` (`sequelize.sync({ alter: true })`). Before running it against production, take a database backup in cPanel. Proper migrations are the next step on the roadmap.
 
+## Email (Brevo)
+
+Transactional email goes through Brevo's HTTPS API, which works on shared hosting where outbound SMTP is often blocked.
+
+1. In Brevo, verify the sender address you put in `MAIL_FROM_EMAIL` (ideally on the sheshapewellness.com domain, with the SPF and DKIM records Brevo gives you).
+2. Create an API key and set `BREVO_API_KEY`.
+3. Create a contact list for the newsletter and set `BREVO_LIST_ID` to its numeric id. Confirmed subscribers are added to it automatically and removed when they unsubscribe, so campaigns are sent from Brevo itself.
+
+The newsletter uses double opt-in: a signup is stored as pending and only counts once the person taps the confirmation link in the email. Admins see and export the list under **Newsletter** in the dashboard.
+
+## Payments
+
+Cash on delivery is always offered. Two more methods are configured by the admin under **Payment settings**:
+
+- **Mobile money (manual).** Enter the shop's MoMo number and registered name. Customers who choose it get the number and their order number as the reference, on screen and by email. An admin marks the order paid once the money arrives.
+- **XentriPay (online).** Enter the API key from the XentriPay merchant dashboard, pick sandbox or live, and turn the option on. Orders redirect to XentriPay's checkout; the webhook at `/api/payments/xentripay/webhook` marks them paid, and the order page also polls XentriPay as a fallback.
+
+XentriPay does not publish its endpoint reference; the integration pack comes from the Centrika account manager. The adapter in `backend/src/utils/payments/xentripay.js` follows the common request shape and reads every path and header name from the environment (`XENTRIPAY_*` in `.env.example`), so adjusting it to the pack is a config change plus, at most, the request body in one function.
+
+## Bookings
+
+Customers ask to join a program from its page (or send a general enquiry from the programs page). The request is emailed to `ADMIN_EMAIL` and acknowledged to the customer. Admins confirm or decline under **Bookings**, with a note that goes into the customer's email. Signed-in customers see their requests under **My bookings**.
+
 ## Environment variables
 
 See `backend/.env.example`. The ones that matter most:
@@ -78,12 +101,15 @@ See `backend/.env.example`. The ones that matter most:
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Admin account created or promoted on boot. |
 | `CLIENT_URL` | Public site URL, used in emails and CORS. |
 | `AWS_*`, `S3_BUCKET`, `S3_PUBLIC_URL` | Media uploads. |
-| `SMTP_*` | Transactional email. Blank in development prints emails to the console. |
+| `BREVO_API_KEY`, `BREVO_LIST_ID` | Brevo transactional email and the newsletter list. |
+| `SMTP_*` | Fallback SMTP transport if Brevo is not used. |
+| `XENTRIPAY_*` | Base URLs, endpoint paths and signature header for the XentriPay adapter. |
 | `SENTRY_DSN` | Optional error reporting. Nothing is loaded without it. |
-| `AUTH_RATE_LIMIT_MAX`, `CONTACT_RATE_LIMIT_MAX` | Per-IP request budgets for auth routes and the contact form. |
+| `AUTH_RATE_LIMIT_MAX`, `CONTACT_RATE_LIMIT_MAX`, `NEWSLETTER_RATE_LIMIT_MAX`, `BOOKING_RATE_LIMIT_MAX` | Per-IP request budgets for the public forms. |
 
 ## Operations checklist
 
 - Database backups: enable them in cPanel and restore one into a local MariaDB container at least once to prove they work.
 - Error reporting: create a free Sentry project and set `SENTRY_DSN` to hear about production errors before customers do.
-- Email deliverability: shared-host SMTP often lands in spam. If signups look low, check OTP delivery first.
+- Email deliverability: authenticate the sending domain in Brevo (SPF and DKIM). If signups look low, check OTP delivery first.
+- Content: the admin **Home page** screen edits the hero, numbers, tips, member quotes, coaches, about story, app section, newsletter copy and contact details. Programs carry price, schedule, location and coach.

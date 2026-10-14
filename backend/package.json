@@ -29,8 +29,7 @@
     "mysql2": "^3.24.3",
     "nodemailer": "^6.9.16",
     "sequelize": "^6.37.8",
-    "slugify": "^1.6.9",
-    "stripe": "^17.4.0"
+    "slugify": "^1.6.9"
   },
   "devDependencies": {
     "supertest": "^7.3.1"

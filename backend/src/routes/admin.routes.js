@@ -12,6 +12,8 @@ import adminCategoryRoutes from './admin.categories.routes.js';
 import adminUserRoutes from './admin.users.routes.js';
 import adminHomeRoutes from './admin.home.routes.js';
 import adminMessageRoutes from './admin.messages.routes.js';
+import adminSubscriberRoutes from './admin.subscribers.routes.js';
+import adminBookingRoutes from './admin.bookings.routes.js';
 
 const router = Router();
 
@@ -32,5 +34,7 @@ router.use('/categories', adminCategoryRoutes);
 router.use('/users', adminUserRoutes);
 router.use('/home', adminHomeRoutes);
 router.use('/messages', adminMessageRoutes);
+router.use('/subscribers', adminSubscriberRoutes);
+router.use('/bookings', adminBookingRoutes);
 
 export default router;

@@ -67,6 +67,44 @@ function readHighlights(body) {
   return raw.map((item) => String(item).trim()).filter(Boolean)
 }
 
+function readSchedule(body) {
+  const raw = body.schedule
+
+  if (raw === undefined) return undefined
+  if (raw === null) return []
+  if (!Array.isArray(raw)) throw invalid('schedule', 'schedule must be a list of sessions.')
+
+  return raw
+    .map((entry) => ({
+      day: String(entry?.day ?? '').trim().slice(0, 40),
+      time: String(entry?.time ?? '').trim().slice(0, 40),
+      note: String(entry?.note ?? '').trim().slice(0, 120)
+    }))
+    .filter((entry) => entry.day || entry.time || entry.note)
+}
+
+function readNullableInteger(body, field, { min }) {
+  const raw = body[field]
+  if (raw === undefined) return undefined
+  if (raw === null || raw === '') return null
+
+  const value = Number(raw)
+  if (!Number.isInteger(value) || value < min) {
+    throw invalid(field, `${field} must be a whole number of ${min} or more.`)
+  }
+
+  return value
+}
+
+function readBoolean(body, field) {
+  const raw = body[field]
+  if (raw === undefined) return undefined
+  if (typeof raw === 'boolean') return raw
+  if (raw === 'true') return true
+  if (raw === 'false') return false
+  throw invalid(field, `${field} must be true or false.`)
+}
+
 function readInteger(body, field) {
   const raw = body[field]
   if (raw === undefined || raw === null || raw === '') return undefined
@@ -108,6 +146,27 @@ function buildPayload(body, { partial }) {
 
   if (has('slug')) {
     payload.slug = readString(body, 'slug', { max: 140, required: true })
+  }
+
+  if (has('price')) {
+    const price = readNullableInteger(body, 'price', { min: 0 })
+    if (price !== undefined) payload.price = price
+  }
+  if (has('capacity')) {
+    const capacity = readNullableInteger(body, 'capacity', { min: 1 })
+    if (capacity !== undefined) payload.capacity = capacity
+  }
+  if (has('priceNote')) payload.priceNote = readString(body, 'priceNote', { max: 60, required: false })
+  if (has('duration')) payload.duration = readString(body, 'duration', { max: 80, required: false })
+  if (has('location')) payload.location = readString(body, 'location', { max: 120, required: false })
+  if (has('coach')) payload.coach = readString(body, 'coach', { max: 80, required: false })
+  if (has('schedule')) {
+    const schedule = readSchedule(body)
+    if (schedule !== undefined) payload.schedule = schedule
+  }
+  if (has('bookable')) {
+    const bookable = readBoolean(body, 'bookable')
+    if (bookable !== undefined) payload.bookable = bookable
   }
 
   return payload
