@@ -44,6 +44,8 @@ app.use(
   '/uploads',
   express.static(uploadsDir(), { index: false, dotfiles: 'deny', maxAge: '30d', immutable: true, fallthrough: true })
 )
+// A file that is gone (deleted or replaced) is a real 404, not the site's home page.
+app.use('/uploads', (req, res) => res.status(404).end())
 
 if (hasClientBuild) {
   // Vite hashes everything under /assets, so those files can be cached forever.

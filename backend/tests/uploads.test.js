@@ -120,3 +120,8 @@ describe('local file storage', () => {
     assert.equal(res.body.data.partners[0].imageUrl, '/uploads/home/fp.png')
   })
 })
+
+test('a missing upload answers 404 instead of the home page', async () => {
+  const res = await request(app).get('/uploads/home/does-not-exist.png')
+  assert.equal(res.status, 404)
+})
