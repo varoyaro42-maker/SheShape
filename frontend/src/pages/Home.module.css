@@ -672,8 +672,8 @@
 
 /* Hero with the landing video: the video fills the screen, the copy sits over it. */
 .heroWithVideo {
-  min-height: calc(100vh - 84px);
-  min-height: calc(100svh - 84px);
+  min-height: calc(100vh - 100px);
+  min-height: calc(100svh - 100px);
   display: flex;
   background: #0b2416;
   color: #fff;

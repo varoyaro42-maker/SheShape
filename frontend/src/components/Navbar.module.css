@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  height: 84px;
+  height: 100px;
 }
 
 .brand {
@@ -164,7 +164,7 @@
 
 @media (max-width: 900px) {
   .inner {
-    height: 72px;
+    height: 76px;
     gap: 12px;
   }
 
@@ -199,8 +199,8 @@
     background: var(--green-dark);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 18px 32px rgba(0, 0, 0, 0.28);
-    max-height: calc(100vh - 72px);
-    max-height: calc(100dvh - 72px);
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
     overflow-y: auto;
   }
 
@@ -259,5 +259,18 @@
     padding: 0;
     z-index: -1;
     cursor: default;
+  }
+}
+
+/* The full logo exactly as supplied: runner above the "She Shape Wellness" script. */
+.brandLogo {
+  display: block;
+  height: 82px;
+  width: auto;
+}
+
+@media (max-width: 900px) {
+  .brandLogo {
+    height: 58px;
   }
 }

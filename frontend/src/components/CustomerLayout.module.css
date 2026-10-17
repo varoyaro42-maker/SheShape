@@ -301,3 +301,9 @@
     transition: none;
   }
 }
+
+.brandLogo {
+  display: block;
+  height: 78px;
+  width: auto;
+}

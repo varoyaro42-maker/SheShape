@@ -35,8 +35,7 @@ export default function Navbar() {
     <header className={styles.header}>
       <div className={`page ${styles.inner}`}>
         <Link to="/" className={styles.brand} aria-label="She Shape Wellness home">
-          <img src="/brand/mark-white.svg" alt="" className={styles.brandIcon} />
-          <span className={styles.brandWord}>She Shape Wellness</span>
+          <img src="/brand/logo-white.svg" alt="She Shape Wellness" className={styles.brandLogo} />
         </Link>
 
         {/* Phone-only controls: the cart stays one tap away, the rest folds into the menu. */}
