@@ -1,3 +1,4 @@
+import './loadEnv.js'
 import app from './app.js'
 import { connectDatabase } from './db.js'
 import { seedAdminUser } from './utils/seedAdminUser.js'
