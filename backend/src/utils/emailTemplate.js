@@ -48,11 +48,9 @@ function button(label, url) {
  * Table-based + inline styles throughout — the only layout that survives
  * Outlook's Word rendering engine and stripped <style> blocks in webmail.
  */
-// Hosted on S3 (not the frontend build) so the logo renders in every email
-// regardless of whether the frontend is deployed yet — see
-// backend/src/scripts/uploadEmailLogo.js. A white-on-transparent variant,
-// since it sits on the dark green header band below.
-const DEFAULT_LOGO_URL = 'https://she-upgrade.s3.eu-north-1.amazonaws.com/email-assets/logo-light.svg';
+// White-on-transparent logo shipped with the site (frontend/public/media/email),
+// since it sits on the dark green header band below. PNG, not SVG: Gmail and Outlook do not display SVG images.
+const DEFAULT_LOGO_URL = `${(process.env.CLIENT_URL || 'https://sheshapewellness.com').replace(/\/$/, '')}/media/email/logo-white.png`;
 
 export function renderEmail({ preheader = '', eyebrow = '', title, bodyHtml, ctaLabel, ctaUrl, footerNote }) {
   const logoUrl = process.env.EMAIL_LOGO_URL || DEFAULT_LOGO_URL;
@@ -75,7 +73,7 @@ export function renderEmail({ preheader = '', eyebrow = '', title, bodyHtml, cta
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
             <tr>
               <td align="center" style="background:${BRAND.greenDark};border-radius:18px 18px 0 0;padding:26px 24px;">
-                <img src="${logoUrl}" alt="She Shape" height="34" style="display:block;height:34px;width:auto;border:0;" />
+                <img src="${logoUrl}" alt="She Shape Wellness" width="180" height="143" style="display:block;width:180px;height:143px;border:0;" />
               </td>
             </tr>
             <tr>
@@ -90,8 +88,8 @@ export function renderEmail({ preheader = '', eyebrow = '', title, bodyHtml, cta
             </tr>
             <tr>
               <td style="background:${BRAND.cream};border:1px solid ${BRAND.border};border-top:none;border-radius:0 0 18px 18px;padding:22px 32px;text-align:center;">
-                <p style="margin:0 0 6px;font-family:${FONT};font-size:12px;color:${BRAND.textSoft};">${escapeHtml(footerNote || 'She Shape · Kigali, Rwanda')}</p>
-                <p style="margin:0;font-family:${FONT};font-size:11px;color:${BRAND.textSoft};">© ${year} She Shape. All rights reserved.</p>
+                <p style="margin:0 0 6px;font-family:${FONT};font-size:12px;color:${BRAND.textSoft};">${escapeHtml(footerNote || 'She Shape Wellness · Kigali, Rwanda')}</p>
+                <p style="margin:0;font-family:${FONT};font-size:11px;color:${BRAND.textSoft};">© ${year} She Shape Wellness. All rights reserved.</p>
               </td>
             </tr>
           </table>

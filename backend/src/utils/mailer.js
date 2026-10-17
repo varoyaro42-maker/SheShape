@@ -18,7 +18,7 @@ export const testOutbox = [];
 
 function sender() {
   return {
-    name: process.env.MAIL_FROM_NAME ?? 'She Shape',
+    name: process.env.MAIL_FROM_NAME ?? 'She Shape Wellness',
     email: process.env.MAIL_FROM_EMAIL ?? 'no-reply@sheshape.local',
   };
 }
