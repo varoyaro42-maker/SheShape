@@ -10,24 +10,28 @@ const SETTINGS_ID = 1
 export const DEFAULT_HOME_CONTENT = {
   hero: {
     eyebrow: 'Kigali · Rwanda',
-    title: 'Strong is your shape.',
-    script: "Let's build it together.",
+    title: "Together, we're making women's wellness",
+    script: 'a movement.',
     paragraph:
-      'Coached strength classes, small-group programs and honest nutrition guidance for women in Kigali. Train with intention and feel at home in your body.',
+      "Join our women's health, fitness and wellness platform on a mission to build stronger, healthier lives for women and their communities through movement, prevention, science-based information and community.",
     primaryButtonLabel: 'See programs',
     secondaryButtonLabel: 'Shop Nkondo Active',
     imageUrl: '',
     // Slideshow photos: [{ imageUrl, label, caption }]. Falls back to imageUrl when empty.
     slides: [],
     // A landing video takes over from the photos when set. 16:9 MP4 works best.
-    videoUrl: '',
-    // Optional lighter (720p) copy served to phones.
-    videoSmallUrl: '',
-    videoPoster: '',
+    // The brand film ships with the site (frontend/public/media/landing).
+    videoUrl: '/media/landing/she-shape-online-1080p.mp4',
+    // Lighter (720p) copy served to phones.
+    videoSmallUrl: '/media/landing/she-shape-online-720p.mp4',
+    videoPoster: '/media/landing/poster.jpg',
     videoTitle: 'She Shape Online'
   },
   // Logos of organisations that back She Shape: [{ name, imageUrl, href }]
-  partners: [],
+  partners: [
+    { name: 'Fitnesspoint', imageUrl: '/partners/fitnesspoint.png', href: '' },
+    { name: 'Vitaway', imageUrl: '/partners/vitaway.png', href: '' }
+  ],
   stats: [
     { value: '250+', label: 'women in the community' },
     { value: '4', label: 'Fitnesspoint gyms across Kigali' },
@@ -64,7 +68,8 @@ export const DEFAULT_HOME_CONTENT = {
   },
   // Scrolling band of short words under the hero.
   ticker: {
-    enabled: true,
+    // Off by request; switch it on under Site content → Hero.
+    enabled: false,
     items: ['Learn', 'Grow', 'Thrive', 'She Strong Classes', 'Kigali', 'Nkondo Active', 'Women only']
   },
   // Photo strip linking to Instagram: [{ imageUrl, caption, href }]
