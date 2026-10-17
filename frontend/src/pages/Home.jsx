@@ -14,6 +14,7 @@ import AppPreview from '../components/AppPreview.jsx'
 import Ticker from '../components/Ticker.jsx'
 import Marquee from '../components/Marquee.jsx'
 import HeroSlideshow from '../components/HeroSlideshow.jsx'
+import HeroVideo from '../components/HeroVideo.jsx'
 import Reveal from '../components/Reveal.jsx'
 import Loading from '../components/Loading.jsx'
 import styles from './Home.module.css'
@@ -100,7 +101,7 @@ export default function Home() {
 
   if (!content) return <Loading />
 
-  const { hero, stats, featured, app, tips, testimonials, team, about, ticker, gallery, contact } = content
+  const { hero, stats, featured, app, tips, testimonials, team, about, ticker, gallery, contact, partners } = content
   const nextSession = (() => {
     const open = (programsList ?? []).find((p) => p.status === 'open' && p.schedule?.length)
     if (!open) return null
@@ -108,6 +109,7 @@ export default function Home() {
     return { day: String(slot.day).slice(0, 3), time: String(slot.time).split(/\s*[–-]\s*/)[0], program: open.name }
   })()
   const heroSlides = hero.slides?.length ? hero.slides : hero.imageUrl ? [{ imageUrl: hero.imageUrl, caption: '' }] : []
+  const heroVideo = hero.videoUrl ? { src: hero.videoUrl, smallSrc: hero.videoSmallUrl, poster: hero.videoPoster, title: hero.videoTitle || 'She Shape' } : null
   const instagram = (contact?.instagram || '').replace(/^@/, '')
   const instagramUrl = instagram ? `https://instagram.com/${instagram}` : null
   const spotlight = products?.[0] ?? null
@@ -115,8 +117,20 @@ export default function Home() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <div className={styles.heroGrid} aria-hidden="true" />
+      <section className={heroVideo ? `${styles.hero} ${styles.heroWithVideo}` : styles.hero}>
+        {heroVideo ? <HeroVideo {...heroVideo} cover /> : <div className={styles.heroGrid} aria-hidden="true" />}
+        {heroVideo && <div className={styles.heroShade} aria-hidden="true" />}
+        {heroVideo && nextSession && (
+          <div className={`${styles.heroChip} ${styles.heroChipVideo} rise rise-3`}>
+            <span className={styles.heroChipIcon}>
+              <CalendarDays size={16} />
+            </span>
+            <span>
+              <b>Next class · {nextSession.day} {nextSession.time}</b>
+              <small>{nextSession.program}</small>
+            </span>
+          </div>
+        )}
         <div className={`page ${styles.heroInner}`}>
           <div className={styles.heroCopy}>
             <span className={`${styles.pill} rise`}>
@@ -139,7 +153,7 @@ export default function Home() {
                 <ArrowRight size={18} />
               </Link>
             </div>
-            {stats?.length > 0 && (
+            {!heroVideo && stats?.length > 0 && (
               <dl className={`${styles.heroStats} rise rise-4`}>
                 {stats.map((stat, index) => (
                   <div key={`${stat.label}-${index}`}>
@@ -151,6 +165,7 @@ export default function Home() {
             )}
           </div>
 
+          {!heroVideo && (
           <div className={`${styles.heroArt} rise rise-3`}>
             {nextSession && (
               <div className={styles.heroChip}>
@@ -171,11 +186,48 @@ export default function Home() {
               </div>
             )}
           </div>
+          )}
         </div>
-
       </section>
 
+      {heroVideo && stats?.length > 0 && (
+        <div className={styles.heroStatsBand}>
+          <dl className={`page ${styles.heroStats} ${styles.heroStatsRow}`}>
+            {stats.map((stat, index) => (
+              <div key={`${stat.label}-${index}`}>
+                <dt>{stat.value}</dt>
+                <dd>{stat.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+
       {ticker?.enabled && ticker.items?.length > 0 && <Ticker items={ticker.items} />}
+
+      {partners?.length > 0 && (
+        <section className={styles.partners} aria-label="Partners">
+          <Reveal className={`page ${styles.partnersInner}`}>
+            <p className={styles.partnersLabel}>Backed by</p>
+            <ul className={styles.partnerList}>
+              {partners.map((partner, index) => {
+                const logo = <img src={partner.imageUrl} alt={partner.name || ''} loading="lazy" decoding="async" />
+                return (
+                  <li key={`${partner.name}-${index}`}>
+                    {partner.href ? (
+                      <a href={partner.href} target="_blank" rel="noreferrer" title={partner.name}>
+                        {logo}
+                      </a>
+                    ) : (
+                      logo
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          </Reveal>
+        </section>
+      )}
 
       {featuredPrograms.length > 0 && (
         <section className={styles.section}>

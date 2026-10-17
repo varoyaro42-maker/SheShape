@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { presignProductImage, presignProgramVideo, presignHomeImage } from '../controllers/uploads.controller.js';
+import { prepare, receiveFile } from '../controllers/uploads.controller.js';
 import { overview } from '../controllers/admin.dashboard.controller.js';
 import { search } from '../controllers/admin.search.controller.js';
 import { protect, adminOnly } from '../middleware/auth.js';
@@ -22,9 +22,8 @@ router.use(protect, adminOnly);
 router.get('/check', (req, res) => res.json({ data: { ok: true } }));
 router.get('/dashboard', overview);
 router.get('/search', search);
-router.post('/uploads/presign', presignProductImage);
-router.post('/uploads/presign-video', presignProgramVideo);
-router.post('/uploads/presign-home', presignHomeImage);
+router.post('/uploads/prepare', prepare(['product', 'home', 'video']));
+router.post('/uploads/file', receiveFile(['product', 'home', 'video']));
 router.use('/products', adminProductRoutes);
 router.use('/orders', adminOrderRoutes);
 router.use('/posts', adminPostRoutes);

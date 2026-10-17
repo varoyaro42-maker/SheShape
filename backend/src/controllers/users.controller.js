@@ -1,8 +1,6 @@
 import { HttpError } from '../utils/httpError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { deleteImageByUrl } from '../utils/s3.js';
-
-const uploadsBase = () => (process.env.S3_PUBLIC_URL || '').replace(/\/$/, '');
+import { deleteImageByUrl, isOwnUpload, UPLOAD_KINDS } from '../utils/storage.js';
 
 export const updateAvatar = asyncHandler(async (req, res) => {
   const url = String(req.body?.url ?? '').trim();
@@ -12,7 +10,7 @@ export const updateAvatar = asyncHandler(async (req, res) => {
   }
 
   // Avatars must be files we uploaded to our own bucket.
-  if (!uploadsBase() || !url.startsWith(`${uploadsBase()}/avatars/`)) {
+  if (!isOwnUpload(url, UPLOAD_KINDS.avatar)) {
     throw new HttpError(400, 'Upload the photo through the account page.');
   }
 

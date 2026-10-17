@@ -35,7 +35,7 @@ npm run dev                   # http://localhost:5173, proxies /api to the backe
 
 On macOS, AirPlay already listens on port 5000. Set `PORT=5001` in `backend/.env` and create `frontend/.env.local` with `VITE_API_PROXY_TARGET=http://localhost:5001`.
 
-Email and S3 are optional in development: with neither `BREVO_API_KEY` nor `SMTP_HOST` set, every email (OTP codes, order updates, booking replies, newsletter confirmations) is printed to the backend console instead of sent.
+Email is optional in development: with neither `BREVO_API_KEY` nor `SMTP_HOST` set, every email (OTP codes, order updates, booking replies, newsletter confirmations) is printed to the backend console instead of sent. Uploads land in `backend/uploads/` (git-ignored), so nothing else needs configuring.
 
 ## Fonts
 
@@ -85,6 +85,21 @@ CI also produces the same folder as a downloadable artifact named `sheshape-depl
 
 Tables are created and altered with `npm run db:sync` (`sequelize.sync({ alter: true })`). Before running it against production, take a database backup in cPanel. Proper migrations are the next step on the roadmap.
 
+## Uploads and the landing video
+
+Photos, logos, avatars and program videos are stored on the server itself, under `backend/uploads/` (or wherever `UPLOADS_DIR` points), and served at `/uploads/...` with long cache headers. Every uploader in the app follows the same two steps: `POST .../prepare` with the file's type and size, then a multipart `POST .../file`. The deploy folder never includes `uploads/`, so files survive redeploys; include that folder in the cPanel backups.
+
+Limits: images 5 MB (JPEG, PNG, WebP), videos 1 GB (MP4, MOV, WebM). On cPanel the web server may cap request bodies lower than that; if a large video fails to upload, raise `LimitRequestBody` or upload the file over FTP into `uploads/videos/` and paste its `/uploads/videos/...` path into the admin field.
+
+The landing video (admin → **Site content** → **Hero**) plays at the top of the home page. It starts with sound where the browser allows it; otherwise it starts silent and switches the sound on at the visitor's first tap or key press anywhere on the page ("Tap for sound"). It pauses while scrolled out of view and resumes when it is back. Encode as 16:9 H.264 + AAC, 1080p at 30 fps (about 40 MB for two minutes), and optionally upload a 720p copy for phones:
+
+```bash
+ffmpeg -i "she shape online.mov" -vf "scale=-2:1080,fps=30" -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart she-shape-online-1080p.mp4
+ffmpeg -i "she shape online.mov" -vf "scale=-2:720,fps=30"  -c:v libx264 -preset slow -crf 24 -pix_fmt yuv420p -c:a aac -b:a 96k  -movflags +faststart she-shape-online-720p.mp4
+```
+
+Setting `STORAGE_DRIVER=s3` with the `AWS_*` variables switches uploads to a bucket instead; the browser then PUTs straight to S3 with a presigned URL.
+
 ## Email (Brevo)
 
 Transactional email goes through Brevo's HTTPS API, which works on shared hosting where outbound SMTP is often blocked.
@@ -125,7 +140,8 @@ See `backend/.env.example`. The ones that matter most:
 | `ENCRYPTION_KEY` | 32 random bytes, base64. Encrypts Stripe keys stored by admins. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Admin account created or promoted on boot. |
 | `CLIENT_URL` | Public site URL, used in emails and CORS. |
-| `AWS_*`, `S3_BUCKET`, `S3_PUBLIC_URL` | Media uploads. |
+| `UPLOADS_DIR` | Where uploaded files live. Defaults to `backend/uploads`. |
+| `STORAGE_DRIVER`, `AWS_*`, `S3_BUCKET`, `S3_PUBLIC_URL` | Only when uploads should go to S3 instead of the server. |
 | `BREVO_API_KEY`, `BREVO_LIST_ID` | Brevo transactional email and the newsletter list. |
 | `SMTP_*` | Fallback SMTP transport if Brevo is not used. |
 | `XENTRIPAY_LIVE_URL`, `XENTRIPAY_SANDBOX_URL` | XentriPay base URLs; only override if XentriPay says so. |
@@ -137,4 +153,4 @@ See `backend/.env.example`. The ones that matter most:
 - Database backups: enable them in cPanel and restore one into a local MariaDB container at least once to prove they work.
 - Error reporting: create a free Sentry project and set `SENTRY_DSN` to hear about production errors before customers do.
 - Email deliverability: authenticate the sending domain in Brevo (SPF and DKIM). If signups look low, check OTP delivery first.
-- Content: the admin **Site content** screen edits the hero slideshow photos, the scrolling words, the Instagram strip, and the hero, numbers, tips, member quotes, coaches, about story, app section, newsletter copy and contact details. Programs carry price, schedule, location and coach.
+- Content: the admin **Site content** screen edits the landing video, the hero slideshow photos, the scrolling words, partner logos, the Instagram strip, and the hero, numbers, tips, member quotes, coaches, about story, app section, newsletter copy and contact details. Programs carry price, schedule, location and coach.

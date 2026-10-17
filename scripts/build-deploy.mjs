@@ -14,7 +14,8 @@ const out = path.join(root, 'deploy')
 const dist = path.join(frontend, 'dist')
 
 // Never shipped: dependencies (cPanel installs them), local secrets, tests.
-const EXCLUDE = new Set(['node_modules', 'public', 'tests', '.env', '.env.test', '.DS_Store', '.gitignore'])
+// 'uploads' stays on the server between deploys: it holds customer photos.
+const EXCLUDE = new Set(['node_modules', 'public', 'tests', 'uploads', '.env', '.env.test', '.DS_Store', '.gitignore'])
 
 if (!process.argv.includes('--skip-frontend-build')) {
   console.log('Building frontend…')

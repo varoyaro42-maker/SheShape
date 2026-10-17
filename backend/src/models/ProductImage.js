@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize'
+import { mediaUrl } from '../utils/safeUrl.js';
 import { sequelize } from '../db.js'
 
 export const ProductImage = sequelize.define('product_images', {
@@ -10,7 +11,7 @@ export const ProductImage = sequelize.define('product_images', {
   url: {
     type: DataTypes.TEXT,
     allowNull: false,
-    validate: { isUrl: true }
+    validate: { mediaUrl }
   },
   sortOrder: {
     type: DataTypes.INTEGER,

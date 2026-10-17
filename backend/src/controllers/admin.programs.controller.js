@@ -1,5 +1,5 @@
 import { asyncHandler } from '../utils/asyncHandler.js'
-import { deleteImageByUrl } from '../utils/s3.js'
+import { deleteImageByUrl } from '../utils/storage.js'
 import { buildUniqueSlug } from '../utils/slug.js'
 import { sequelize, Program, ProgramVideo, PROGRAM_STATUSES } from '../models/index.js'
 

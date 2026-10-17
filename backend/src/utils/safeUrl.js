@@ -14,7 +14,17 @@ export function safeUrl(value) {
   }
 }
 
-const URL_KEYS = /(url|href|image)$/i
+/** Sequelize validator for stored file addresses: our own /uploads path or an http(s) URL. */
+export function mediaUrl(value) {
+  // Sequelize runs custom validators on null too; an empty address is "no file".
+  if (value === null || value === undefined || value === '') return
+  const raw = String(value).trim()
+  if (/^\/uploads\/[a-z]+\/[\w.-]+$/i.test(raw)) return
+  if (safeUrl(raw) && /^https?:\/\//i.test(raw)) return
+  throw new Error('Must be a file uploaded here or an http(s) URL')
+}
+
+const URL_KEYS = /(url|href|image|poster)$/i
 
 /** Walks a JSON value and cleans every string under a key that names a URL. */
 export function sanitizeUrls(value, key = '') {

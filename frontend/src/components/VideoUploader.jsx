@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { adminUploads } from '../api/admin.js'
 import { readError } from '../api/client.js'
+import { uploadFile, ADMIN_PREPARE } from '../utils/upload.js'
 import styles from './VideoUploader.module.css'
 
 const ACCEPT = 'video/mp4,video/quicktime,video/webm'
@@ -9,6 +9,7 @@ const MAX_BYTES = 1024 * 1024 * 1024
 export default function VideoUploader({ videos, onAdd, onRemove, disabled }) {
   const inputRef = useRef(null)
   const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
   const [removingId, setRemovingId] = useState(null)
   const [title, setTitle] = useState('')
@@ -29,21 +30,8 @@ export default function VideoUploader({ videos, onAdd, onRemove, disabled }) {
     setUploading(true)
 
     try {
-      const { uploadUrl, url } = await adminUploads.presignVideo({
-        contentType: file.type,
-        size: file.size
-      })
-
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
-      })
-
-      if (!response.ok) {
-        throw new Error(`Upload failed for ${file.name} (${response.status}).`)
-      }
-
+      setProgress(0)
+      const url = await uploadFile({ prepareUrl: ADMIN_PREPARE, kind: 'video', file, onProgress: setProgress })
       await onAdd({ url, title: title.trim() || file.name })
       setTitle('')
     } catch (err) {
@@ -102,7 +90,7 @@ export default function VideoUploader({ videos, onAdd, onRemove, disabled }) {
           onClick={() => inputRef.current?.click()}
           className={styles.add}
         >
-          {uploading ? 'Uploading…' : 'Add video'}
+          {uploading ? `Uploading ${Math.round(progress * 100)}%` : 'Add video'}
         </button>
       </div>
 

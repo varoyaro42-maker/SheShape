@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { Check, Plus, Trash2 } from 'lucide-react'
-import { adminPrograms, adminUploads } from '../../api/admin.js'
+import { adminPrograms } from '../../api/admin.js'
+import { uploadFile, ADMIN_PREPARE } from '../../utils/upload.js'
 import { readError } from '../../api/client.js'
 import { useToast } from '../../context/toast-context.js'
 import VideoUploader from '../../components/VideoUploader.jsx'
@@ -106,10 +107,7 @@ export default function AdminProgramFormPage() {
     setError('')
 
     try {
-      const { uploadUrl, url } = await adminUploads.presign({ contentType: file.type, size: file.size })
-      const response = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
-      if (!response.ok) throw new Error(`Upload failed (${response.status}).`)
-      setCoverImage(url)
+      setCoverImage(await uploadFile({ prepareUrl: ADMIN_PREPARE, kind: 'home', file }))
     } catch (err) {
       setError(err.response ? readError(err) : err.message)
     } finally {

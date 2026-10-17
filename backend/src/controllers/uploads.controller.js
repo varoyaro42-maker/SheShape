@@ -1,90 +1,94 @@
+import path from 'node:path';
+import multer from 'multer';
 import { HttpError } from '../utils/httpError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import {
-  ALLOWED_IMAGE_TYPES,
-  ALLOWED_VIDEO_TYPES,
-  MAX_IMAGE_BYTES,
-  MAX_VIDEO_BYTES,
-  createProductImageUpload,
-  createAvatarUpload,
-  createProgramVideoUpload,
-  createHomeImageUpload,
-} from '../utils/s3.js';
+import { kindFor, checkFile, localPathFor, storageDriver } from '../utils/storage.js';
 
-function readContentTypeAndSize(req) {
-  const contentType = String(req.body?.contentType ?? '').toLowerCase();
-  const size = Number(req.body?.size);
-  return { contentType, size };
-}
+/**
+ * Two-step upload used by every uploader in the app:
+ *  1. POST .../prepare { kind, contentType, size } -> how to send the file
+ *  2. send it: PUT to S3 (s3 driver) or multipart POST to .../file (local)
+ */
+export const prepare = (allowed) =>
+  asyncHandler(async (req, res) => {
+    const name = String(req.body?.kind ?? allowed[0]).toLowerCase();
+    if (!allowed.includes(name)) throw new HttpError(400, 'That upload is not allowed here');
 
-export const presignProductImage = asyncHandler(async (req, res) => {
-  const { contentType, size } = readContentTypeAndSize(req);
+    const kind = kindFor(name);
+    const contentType = String(req.body?.contentType ?? '').toLowerCase();
+    const extension = checkFile(kind, { contentType, size: Number(req.body?.size) });
 
-  if (!ALLOWED_IMAGE_TYPES[contentType]) {
-    throw new HttpError(400, 'Images must be JPEG, PNG or WebP');
-  }
+    if (storageDriver() === 's3') {
+      const { createS3Upload } = await import('../utils/s3.js');
+      const upload = await createS3Upload({
+        prefix: kind.prefix,
+        contentType,
+        extension,
+        expiresIn: kind.prefix === 'videos' ? 900 : 60,
+      });
+      return res.json({ data: { method: 'PUT', uploadUrl: upload.uploadUrl, url: upload.url } });
+    }
 
-  if (!Number.isFinite(size) || size <= 0) {
-    throw new HttpError(400, 'The file size is missing');
-  }
+    const fileUrl = req.originalUrl.replace(/\/prepare(\?.*)?$/, '/file');
+    res.json({ data: { method: 'POST', uploadUrl: `${fileUrl}?kind=${name}`, url: null } });
+  });
 
-  if (size > MAX_IMAGE_BYTES) {
-    throw new HttpError(400, 'Images must be smaller than 5 MB');
-  }
-
-  res.json({ data: await createProductImageUpload(contentType) });
+// The file streams straight to its final name under the uploads folder, so a
+// 1 GB video never sits in memory.
+const storage = multer.diskStorage({
+  destination: (req, file, done) => {
+    try {
+      const kind = kindFor(req.query.kind);
+      const extension = checkFile(kind, { contentType: file.mimetype, size: 1 });
+      req.uploadTarget = localPathFor(kind, extension);
+      done(null, path.dirname(req.uploadTarget.file));
+    } catch (error) {
+      done(error);
+    }
+  },
+  filename: (req, file, done) => done(null, path.basename(req.uploadTarget.file)),
 });
 
-export const presignAvatarImage = asyncHandler(async (req, res) => {
-  const { contentType, size } = readContentTypeAndSize(req);
-
-  if (!ALLOWED_IMAGE_TYPES[contentType]) {
-    throw new HttpError(400, 'Images must be JPEG, PNG or WebP');
+// One multer instance per size limit, so an image upload is cut off at the
+// image limit instead of streaming a whole video's worth to disk first.
+const receivers = new Map();
+const receiverFor = (kind) => {
+  if (!receivers.has(kind.max)) {
+    receivers.set(
+      kind.max,
+      multer({
+        storage,
+        limits: { fileSize: kind.max, files: 1 },
+        fileFilter: (req, file, done) => {
+          try {
+            checkFile(kindFor(req.query.kind), { contentType: file.mimetype, size: 1 });
+            done(null, true);
+          } catch (error) {
+            done(error);
+          }
+        },
+      }).single('file')
+    );
   }
+  return receivers.get(kind.max);
+};
 
-  if (!Number.isFinite(size) || size <= 0) {
-    throw new HttpError(400, 'The file size is missing');
-  }
+export const receiveFile = (allowed) => [
+  (req, res, next) => {
+    const name = String(req.query.kind ?? '').toLowerCase();
+    if (!allowed.includes(name)) return next(new HttpError(400, 'That upload is not allowed here'));
+    next();
+  },
+  (req, res, next) =>
+    receiverFor(kindFor(req.query.kind))(req, res, (error) => {
+      if (error instanceof multer.MulterError) {
+        return next(new HttpError(400, error.code === 'LIMIT_FILE_SIZE' ? 'That file is too large' : error.message));
+      }
+      next(error);
+    }),
+  asyncHandler(async (req, res) => {
+    if (!req.file) throw new HttpError(400, 'No file was sent');
 
-  if (size > MAX_IMAGE_BYTES) {
-    throw new HttpError(400, 'Images must be smaller than 5 MB');
-  }
-
-  res.json({ data: await createAvatarUpload(contentType) });
-});
-
-export const presignHomeImage = asyncHandler(async (req, res) => {
-  const { contentType, size } = readContentTypeAndSize(req);
-
-  if (!ALLOWED_IMAGE_TYPES[contentType]) {
-    throw new HttpError(400, 'Images must be JPEG, PNG or WebP');
-  }
-
-  if (!Number.isFinite(size) || size <= 0) {
-    throw new HttpError(400, 'The file size is missing');
-  }
-
-  if (size > MAX_IMAGE_BYTES) {
-    throw new HttpError(400, 'Images must be smaller than 5 MB');
-  }
-
-  res.json({ data: await createHomeImageUpload(contentType) });
-});
-
-export const presignProgramVideo = asyncHandler(async (req, res) => {
-  const { contentType, size } = readContentTypeAndSize(req);
-
-  if (!ALLOWED_VIDEO_TYPES[contentType]) {
-    throw new HttpError(400, 'Videos must be MP4, MOV or WebM');
-  }
-
-  if (!Number.isFinite(size) || size <= 0) {
-    throw new HttpError(400, 'The file size is missing');
-  }
-
-  if (size > MAX_VIDEO_BYTES) {
-    throw new HttpError(400, 'Videos must be smaller than 1 GB');
-  }
-
-  res.json({ data: await createProgramVideoUpload(contentType) });
-});
+    res.status(201).json({ data: { url: req.uploadTarget.url, size: req.file.size } });
+  }),
+];

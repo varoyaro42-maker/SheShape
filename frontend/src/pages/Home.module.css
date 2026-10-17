@@ -670,7 +670,202 @@
   transform: none;
 }
 
+/* Hero with the landing video: the video fills the screen, the copy sits over it. */
+.heroWithVideo {
+  min-height: calc(100vh - 72px);
+  min-height: calc(100svh - 72px);
+  display: flex;
+  background: #0b2416;
+  color: #fff;
+}
+
+.heroShade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(4, 30, 15, 0.86) 0%, rgba(4, 30, 15, 0.55) 38%, rgba(4, 30, 15, 0.08) 68%, transparent 100%),
+    linear-gradient(to top, rgba(4, 30, 15, 0.55) 0%, transparent 32%),
+    linear-gradient(to bottom, rgba(4, 30, 15, 0.35) 0%, transparent 22%);
+  pointer-events: none;
+}
+
+.heroWithVideo .heroInner {
+  z-index: 2;
+  grid-template-columns: 1fr;
+  align-items: center;
+  flex: 1;
+  padding-top: clamp(40px, 6vw, 72px);
+  padding-bottom: clamp(96px, 12vw, 128px);
+  pointer-events: none;
+}
+
+.heroWithVideo .heroCopy {
+  max-width: 640px;
+  pointer-events: auto;
+}
+
+.heroWithVideo .pill {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.heroWithVideo .pillDot {
+  background: var(--green-light);
+  box-shadow: 0 0 0 4px rgba(158, 198, 166, 0.25);
+}
+
+.heroWithVideo .heroTitle {
+  font-size: clamp(38px, 4.8vw, 64px);
+  color: #fff;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.25);
+}
+
+.heroWithVideo .heroAccent {
+  color: var(--green-light);
+}
+
+.heroWithVideo .heroLead {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: clamp(16px, 1.35vw, 19px);
+}
+
+.heroWithVideo .heroPrimary {
+  background: #fff;
+  border-color: #fff;
+  color: var(--green-dark);
+}
+
+.heroWithVideo .heroPrimary:hover {
+  background: var(--green-light);
+  border-color: var(--green-light);
+}
+
+.heroWithVideo .heroSecondary {
+  border-color: rgba(255, 255, 255, 0.55);
+  color: #fff;
+}
+
+.heroWithVideo .heroSecondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #fff;
+  color: #fff;
+}
+
+.heroChipVideo {
+  left: auto;
+  right: max(24px, calc((100% - var(--page)) / 2 + var(--gap)));
+  top: 28px;
+  z-index: 3;
+}
+
+.heroStatsBand {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.heroStatsRow {
+  margin: 0 auto;
+  padding-top: 26px;
+  padding-bottom: 26px;
+  border-top: none;
+  gap: 12px 56px;
+}
+
+/* Partner logos */
+.partners {
+  padding: 28px 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.partnersInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 18px clamp(28px, 5vw, 64px);
+}
+
+.partnersLabel {
+  margin: 0;
+  font-family: var(--accent);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.partnerList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 18px clamp(28px, 5vw, 64px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.partnerList li {
+  display: flex;
+  align-items: center;
+}
+
+.partnerList a {
+  display: flex;
+  align-items: center;
+}
+
+.partnerList img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 56px;
+  max-width: 200px;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.72;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s var(--ease-out);
+}
+
+.partnerList li:hover img {
+  filter: none;
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 900px) {
+  .heroWithVideo .heroInner {
+    align-items: end;
+    padding-top: 96px;
+    padding-bottom: 84px;
+  }
+
+  .heroShade {
+    background:
+      linear-gradient(to top, rgba(4, 30, 15, 0.92) 0%, rgba(4, 30, 15, 0.6) 45%, rgba(4, 30, 15, 0.15) 75%, transparent 100%),
+      linear-gradient(to bottom, rgba(4, 30, 15, 0.4) 0%, transparent 22%);
+  }
+
+  .heroChipVideo {
+    right: 16px;
+    top: 16px;
+    left: auto;
+  }
+
+  .heroStatsRow {
+    gap: 12px 32px;
+  }
+
+  .partnerList img {
+    max-height: 44px;
+    max-width: 150px;
+  }
+
   .heroInner {
     grid-template-columns: 1fr;
     padding-top: 36px;

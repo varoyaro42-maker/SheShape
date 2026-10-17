@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import { mediaUrl } from '../utils/safeUrl.js';
 import bcrypt from 'bcryptjs';
 import sequelize from '../db.js';
 import { PHONE_PATTERN, normalizePhone } from '../utils/phone.js';
@@ -72,7 +73,7 @@ const User = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
       field: 'avatar_url',
-      validate: { isUrl: { msg: 'Avatar must be a URL' } },
+      validate: { mediaUrl },
     },
   },
   {

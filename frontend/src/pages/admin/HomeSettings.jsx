@@ -9,7 +9,8 @@ import styles from './ProductForm.module.css'
 import tabs from './HomeSettings.module.css'
 
 const BLANK = {
-  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '', slides: [] },
+  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '', slides: [], videoUrl: '', videoSmallUrl: '', videoPoster: '', videoTitle: '' },
+  partners: [],
   stats: [],
   featured: { eyebrow: '', heading: '', script: '', paragraph: '', tags: [], buttonLabel: '' },
   program: { eyebrow: '', buttonLabel: '' },
@@ -77,6 +78,7 @@ function ListEditor({ items, onChange, fields, addLabel, blank, disabled }) {
                 value={item[field.key] ?? ''}
                 onChange={(url) => update(index, field.key, url)}
                 disabled={disabled}
+                contain={field.contain}
               />
             ) : field.type === 'textarea' ? (
               <Field key={field.key} label={field.label}>
@@ -121,11 +123,11 @@ function ListEditor({ items, onChange, fields, addLabel, blank, disabled }) {
 }
 
 const TABS = [
-  { key: 'hero', label: 'Hero', hint: 'Photos, headline, scrolling words and numbers' },
+  { key: 'hero', label: 'Hero', hint: 'Video, photos, headline, scrolling words and numbers' },
   { key: 'shop', label: 'Shop promo', hint: 'The Nkondo Active block' },
   { key: 'community', label: 'Community', hint: 'Myths, member quotes and coaches' },
   { key: 'photos', label: 'Instagram', hint: 'The sliding photo strip' },
-  { key: 'about', label: 'About & app', hint: 'Your story and the app section' },
+  { key: 'about', label: 'About & app', hint: 'Your story, the app section and partner logos' },
   { key: 'contact', label: 'Contact', hint: 'Newsletter copy and contact details' }
 ]
 
@@ -225,8 +227,19 @@ export default function AdminHomeSettingsPage() {
 
       <form onSubmit={submit} className={`${styles.form} ${tabs.grid}`} noValidate>
         <section className={styles.card} hidden={tab !== 'hero'}>
-          <h2 className={styles.sectionTitle}>Hero</h2>
-          <p className={styles.hint}>The photos that switch at the top of the home page. Upload, reorder by removing and re-adding, and caption them here. Two or more photos switch automatically; portrait photos (4:5) look best.</p>
+          <h2 className={styles.sectionTitle}>Landing video</h2>
+          <p className={styles.hint}>Plays at the top of the home page on its own, with sound wherever the browser allows it (otherwise visitors see "Tap for sound"). Use a 16:9 MP4 (H.264 video, AAC audio) at 1080p and under 100 MB. While a video is set it takes the place of the hero photos.</p>
+          <div className={styles.row}>
+            <HomeImageUploader media="video" label="Video" value={content.hero.videoUrl} onChange={(url) => set('hero', 'videoUrl', url)} disabled={saving} hint="1080p, 30 fps, under 100 MB." />
+            <HomeImageUploader media="video" label="Lighter copy for phones (optional)" value={content.hero.videoSmallUrl} onChange={(url) => set('hero', 'videoSmallUrl', url)} disabled={saving} hint="A 720p version saves data on mobile." />
+            <HomeImageUploader label="Poster (optional)" value={content.hero.videoPoster} onChange={(url) => set('hero', 'videoPoster', url)} disabled={saving} hint="Shown while the video loads." />
+          </div>
+          <Field label="Video title" hint="Read by screen readers.">{text('hero', 'videoTitle', { maxLength: 80, placeholder: 'She Shape Online' })}</Field>
+        </section>
+
+        <section className={styles.card} hidden={tab !== 'hero'}>
+          <h2 className={styles.sectionTitle}>Hero photos</h2>
+          <p className={styles.hint}>The photos that switch at the top of the home page when no video is set. Upload, reorder by removing and re-adding, and caption them here. Two or more photos switch automatically; portrait photos (4:5) look best.</p>
           <ListEditor
             items={content.hero.slides ?? []}
             onChange={(value) => set('hero', 'slides', value)}
@@ -361,6 +374,23 @@ export default function AdminHomeSettingsPage() {
               { key: 'name', label: 'Name', placeholder: 'Arnoldine Urukundo', max: 80 },
               { key: 'role', label: 'Role', placeholder: 'Co-founder and head coach', max: 80 },
               { key: 'bio', label: 'Short bio', type: 'textarea', rows: 3 }
+            ]}
+          />
+        </section>
+
+        <section className={styles.card} hidden={tab !== 'about'}>
+          <h2 className={styles.sectionTitle}>Partners</h2>
+          <p className={styles.hint}>Logos shown in a "Backed by" row under the hero. Transparent PNGs look best; they appear in grey and colour up on hover.</p>
+          <ListEditor
+            items={content.partners ?? []}
+            onChange={(value) => setList('partners', value)}
+            addLabel="Add a partner"
+            blank={{ name: '', imageUrl: '', href: '' }}
+            disabled={saving}
+            fields={[
+              { key: 'imageUrl', label: 'Logo', type: 'image', contain: true },
+              { key: 'name', label: 'Name', placeholder: 'Fitnesspoint', max: 60 },
+              { key: 'href', label: 'Website (optional)', placeholder: 'https://…', max: 300 }
             ]}
           />
         </section>

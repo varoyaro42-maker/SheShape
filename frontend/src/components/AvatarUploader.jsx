@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
 import { usersApi } from '../api/users.js'
 import { readError } from '../api/client.js'
+import { uploadFile, AVATAR_PREPARE } from '../utils/upload.js'
 import styles from './AvatarUploader.module.css'
 
 const ACCEPT = 'image/jpeg,image/png,image/webp'
@@ -30,21 +31,7 @@ export default function AvatarUploader({ user, onChange }) {
     setUploading(true)
 
     try {
-      const { uploadUrl, url } = await usersApi.presignAvatar({
-        contentType: file.type,
-        size: file.size
-      })
-
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
-      })
-
-      if (!response.ok) {
-        throw new Error(`Upload failed (${response.status}).`)
-      }
-
+      const url = await uploadFile({ prepareUrl: AVATAR_PREPARE, kind: 'avatar', file })
       const updated = await usersApi.updateAvatar(url)
       onChange(updated)
     } catch (err) {

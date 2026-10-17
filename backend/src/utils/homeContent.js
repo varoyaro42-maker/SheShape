@@ -17,9 +17,17 @@ export const DEFAULT_HOME_CONTENT = {
     primaryButtonLabel: 'See programs',
     secondaryButtonLabel: 'Shop Nkondo Active',
     imageUrl: '',
-    // Slideshow photos: [{ imageUrl, caption }]. Falls back to imageUrl when empty.
-    slides: []
+    // Slideshow photos: [{ imageUrl, label, caption }]. Falls back to imageUrl when empty.
+    slides: [],
+    // A landing video takes over from the photos when set. 16:9 MP4 works best.
+    videoUrl: '',
+    // Optional lighter (720p) copy served to phones.
+    videoSmallUrl: '',
+    videoPoster: '',
+    videoTitle: 'She Shape Online'
   },
+  // Logos of organisations that back She Shape: [{ name, imageUrl, href }]
+  partners: [],
   stats: [
     { value: '250+', label: 'women in the community' },
     { value: '4', label: 'Fitnesspoint gyms across Kigali' },

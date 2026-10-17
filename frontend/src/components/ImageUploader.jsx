@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
-import { adminUploads } from '../api/admin.js'
 import { readError } from '../api/client.js'
+import { uploadFile, ADMIN_PREPARE } from '../utils/upload.js'
 import styles from './ImageUploader.module.css'
 
 const ACCEPT = 'image/jpeg,image/png,image/webp'
@@ -19,22 +19,7 @@ export default function ImageUploader({ images, onAdd, onRemove, onColorChange, 
       throw new Error(`${file.name} is larger than 5 MB.`)
     }
 
-    const { uploadUrl, url } = await adminUploads.presign({
-      contentType: file.type,
-      size: file.size
-    })
-
-    const response = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type },
-      body: file
-    })
-
-    if (!response.ok) {
-      throw new Error(`Upload failed for ${file.name} (${response.status}).`)
-    }
-
-    return url
+    return uploadFile({ prepareUrl: ADMIN_PREPARE, kind: 'product', file })
   }
 
   async function handleFiles(event) {
@@ -47,7 +32,7 @@ export default function ImageUploader({ images, onAdd, onRemove, onColorChange, 
     setUploading(true)
 
     try {
-      // Upload every selected file to S3 at the same time, then attach them to
+      // Upload every selected file at the same time, then attach them to
       // the product one by one (fast DB writes) so gallery order stays predictable.
       const results = await Promise.allSettled(files.map(uploadOne))
       const failures = []

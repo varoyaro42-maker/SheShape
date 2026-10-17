@@ -91,3 +91,49 @@
 .input {
   display: none;
 }
+
+.wide {
+  max-width: 420px;
+  aspect-ratio: 16 / 9;
+  background: #0b2416;
+}
+
+.wide .image {
+  object-fit: contain;
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--admin-line);
+}
+
+.bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform: scaleX(var(--progress, 0));
+  background: var(--admin-primary, #2f6b3d);
+  transition: transform 0.2s ease;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+}
+
+/* Logos: show the whole image on a neutral background instead of cropping. */
+.contain {
+  aspect-ratio: 16 / 7;
+}
+
+.contain .image {
+  object-fit: contain;
+  padding: 16px;
+  box-sizing: border-box;
+}

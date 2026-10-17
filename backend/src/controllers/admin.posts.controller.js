@@ -2,7 +2,7 @@ import { Op } from 'sequelize';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { HttpError } from '../utils/httpError.js';
 import { buildUniqueSlug } from '../utils/slug.js';
-import { deleteImageByUrl } from '../utils/s3.js';
+import { deleteImageByUrl } from '../utils/storage.js';
 import { sendNewPostEmails } from '../utils/emails.js';
 import { Post, User } from '../models/index.js';
 import sequelize from '../db.js';

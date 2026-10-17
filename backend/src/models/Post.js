@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import { mediaUrl } from '../utils/safeUrl.js';
 import sequelize from '../db.js';
 
 const Post = sequelize.define(
@@ -36,7 +37,7 @@ const Post = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
       field: 'cover_image',
-      validate: { isUrl: { msg: 'Cover image must be a URL' } },
+      validate: { mediaUrl },
     },
     authorId: {
       type: DataTypes.UUID,

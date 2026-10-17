@@ -75,11 +75,7 @@ export const adminMessages = {
   reply: (id, reply) => api.post(`/admin/messages/${id}/reply`, { reply }).then(unwrap)
 }
 
-export const adminUploads = {
-  presign: (payload) => api.post('/admin/uploads/presign', payload).then(unwrap),
-  presignVideo: (payload) => api.post('/admin/uploads/presign-video', payload).then(unwrap),
-  presignHome: (payload) => api.post('/admin/uploads/presign-home', payload).then(unwrap)
-}
+// File uploads go through utils/upload.js (uploadFile).
 
 export const adminBookings = {
   list: (params) => api.get('/admin/bookings', { params }).then((r) => r.data),

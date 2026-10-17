@@ -9,6 +9,7 @@ import routes from './routes/index.js'
 import { xentripayWebhook } from './controllers/payments.controller.js'
 import { notFound, errorHandler } from './middleware/error.js'
 import { securityHeaders } from './middleware/security.js'
+import { uploadsDir } from './utils/storage.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const clientDist = path.join(__dirname, '../public')
@@ -37,6 +38,12 @@ app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 app.use('/api', routes)
+
+// Files uploaded through the admin and account pages (local storage driver).
+app.use(
+  '/uploads',
+  express.static(uploadsDir(), { index: false, dotfiles: 'deny', maxAge: '30d', immutable: true, fallthrough: true })
+)
 
 if (hasClientBuild) {
   // Vite hashes everything under /assets, so those files can be cached forever.

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Check } from 'lucide-react'
-import { adminPosts, adminUploads } from '../../api/admin.js'
+import { adminPosts } from '../../api/admin.js'
+import { uploadFile, ADMIN_PREPARE } from '../../utils/upload.js'
 import { readError } from '../../api/client.js'
 import { useToast } from '../../context/toast-context.js'
 import Loading from '../../components/Loading.jsx'
@@ -81,20 +82,7 @@ export default function AdminPostEditorPage() {
     setUploading(true)
 
     try {
-      const { uploadUrl, url } = await adminUploads.presign({
-        contentType: file.type,
-        size: file.size
-      })
-
-      const response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
-      })
-
-      if (!response.ok) throw new Error(`Upload failed (${response.status}).`)
-
-      set('coverImage', url)
+      set('coverImage', await uploadFile({ prepareUrl: ADMIN_PREPARE, kind: 'home', file }))
     } catch (err) {
       setError(err.response ? readError(err) : err.message)
     } finally {

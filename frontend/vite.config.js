@@ -15,6 +15,11 @@ export default defineConfig(({ mode }) => {
           // API runs on another port (e.g. macOS AirPlay already holds 5000).
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:5000',
           changeOrigin: true
+        },
+        // Uploaded files are served by the backend from its uploads folder.
+        '/uploads': {
+          target: env.VITE_API_PROXY_TARGET || 'http://localhost:5000',
+          changeOrigin: true
         }
       }
     }

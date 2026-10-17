@@ -1,4 +1,5 @@
 import { DataTypes } from 'sequelize';
+import { mediaUrl } from '../utils/safeUrl.js';
 import sequelize from '../db.js';
 
 const ProgramVideo = sequelize.define(
@@ -22,7 +23,7 @@ const ProgramVideo = sequelize.define(
     url: {
       type: DataTypes.TEXT,
       allowNull: false,
-      validate: { isUrl: { msg: 'url must be a URL' } },
+      validate: { mediaUrl },
     },
     sortOrder: {
       type: DataTypes.INTEGER,
