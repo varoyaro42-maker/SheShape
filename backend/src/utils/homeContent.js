@@ -17,8 +17,12 @@ export const DEFAULT_HOME_CONTENT = {
     primaryButtonLabel: 'See programs',
     secondaryButtonLabel: 'Shop Nkondo Active',
     imageUrl: '',
-    // Slideshow photos: [{ imageUrl, label, caption }]. Falls back to imageUrl when empty.
-    slides: [],
+    // Slideshow photos: [{ imageUrl, label, caption }]. Shown when there is no video.
+    slides: [
+      { imageUrl: '/media/instagram/community-grows.jpg', label: 'She Strong Classes', caption: 'The community keeps growing' },
+      { imageUrl: '/media/instagram/she-strong-class.jpg', label: 'On the floor', caption: 'Strength, coached and shared' },
+      { imageUrl: '/media/instagram/launch-audience.jpg', label: 'Launch night', caption: "International Women's Day 2026" }
+    ],
     // A landing video takes over from the photos when set. 16:9 MP4 works best.
     // The brand film ships with the site (frontend/public/media/landing).
     videoUrl: '/media/landing/she-shape-online-1080p.mp4',
@@ -73,7 +77,17 @@ export const DEFAULT_HOME_CONTENT = {
     items: ['Learn', 'Grow', 'Thrive', 'She Strong Classes', 'Kigali', 'Nkondo Active', 'Women only']
   },
   // Photo strip linking to Instagram: [{ imageUrl, caption, href }]
-  gallery: [],
+  // Photos from @sheshape_wellness, each linking to its post.
+  gallery: [
+    { imageUrl: '/media/instagram/community-grows.jpg', caption: 'The community keeps growing', href: 'https://www.instagram.com/p/DU5hqdHDI6f/' },
+    { imageUrl: '/media/instagram/pedal-for-a-purpose.jpg', caption: 'Pedal for a Purpose · Breast Cancer Awareness Month', href: 'https://www.instagram.com/p/Dely8ZrDoRE/' },
+    { imageUrl: '/media/instagram/she-strong-class.jpg', caption: 'She Strong class, Kigali', href: 'https://www.instagram.com/p/DOjLRcPjMPL/' },
+    { imageUrl: '/media/instagram/she-strong-tee.jpg', caption: 'The She Strong tee', href: 'https://www.instagram.com/p/DeMazMTDtb4/' },
+    { imageUrl: '/media/instagram/launch-audience.jpg', caption: "Official launch, International Women's Day", href: 'https://www.instagram.com/p/DV3RO7tDGyu/' },
+    { imageUrl: '/media/instagram/body-composition-day.jpg', caption: 'Body composition check day', href: 'https://www.instagram.com/p/DZ0ItR8sWC2/' },
+    { imageUrl: '/media/instagram/launch-panel.jpg', caption: "Launch panel on women's health and fitness", href: 'https://www.instagram.com/p/DV1Q5jejIbY/' },
+    { imageUrl: '/media/instagram/community-session.jpg', caption: 'Community session', href: 'https://www.instagram.com/p/DIEINH-Mylk/' }
+  ],
   tips: [
     {
       title: "Lifting won't make you bulky.",
@@ -94,7 +108,7 @@ export const DEFAULT_HOME_CONTENT = {
     heading: 'Fitness made for women. Practical, not punishing.',
     paragraph:
       'She Shape helps women in Rwanda feel strong, capable and confident through structured training, honest nutrition guidance and a community that shows up for each other.',
-    imageUrl: ''
+    imageUrl: '/media/instagram/community-session.jpg'
   },
   contact: {
     phone: '',
