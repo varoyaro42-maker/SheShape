@@ -9,8 +9,38 @@ export async function getSettingsRow() {
   return row;
 }
 
+/**
+ * XentriPay credentials come from the admin screen (encrypted in the
+ * database) or, until an admin saves a key there, from the environment:
+ * XENTRIPAY_API_KEY, XENTRIPAY_WEBHOOK_SECRET, XENTRIPAY_ENVIRONMENT
+ * (sandbox|live) and XENTRIPAY_ENABLED (true unless set to "false").
+ */
+export function xentripayConfig(row) {
+  if (row.xentripayApiKeyEnc) {
+    return {
+      source: 'admin',
+      apiKey: decrypt(row.xentripayApiKeyEnc),
+      webhookSecret: row.xentripayWebhookSecretEnc ? decrypt(row.xentripayWebhookSecretEnc) : null,
+      environment: row.xentripayEnvironment,
+      enabled: Boolean(row.xentripayEnabled),
+    };
+  }
+
+  const apiKey = (process.env.XENTRIPAY_API_KEY || '').trim();
+  if (!apiKey) return null;
+
+  return {
+    source: 'env',
+    apiKey,
+    webhookSecret: (process.env.XENTRIPAY_WEBHOOK_SECRET || '').trim() || null,
+    environment: process.env.XENTRIPAY_ENVIRONMENT === 'live' ? 'live' : 'sandbox',
+    enabled: process.env.XENTRIPAY_ENABLED !== 'false',
+  };
+}
+
 export function xentripayReady(row) {
-  return Boolean(row.xentripayEnabled && row.xentripayApiKeyEnc);
+  const config = xentripayConfig(row);
+  return Boolean(config?.enabled && config.apiKey);
 }
 
 export function momoReady(row) {
@@ -41,26 +71,28 @@ export async function getXentripayClient() {
   const row = await getSettingsRow();
   if (!xentripayReady(row)) return null;
 
-  return createXentripayClient({
-    apiKey: decrypt(row.xentripayApiKeyEnc),
-    environment: row.xentripayEnvironment,
-  });
+  const { apiKey, environment } = xentripayConfig(row);
+  return createXentripayClient({ apiKey, environment });
 }
 
 export async function getXentripayWebhookSecret() {
   const row = await getSettingsRow();
-  return row.xentripayWebhookSecretEnc ? decrypt(row.xentripayWebhookSecretEnc) : null;
+  return xentripayConfig(row)?.webhookSecret ?? null;
 }
 
 export function publicSettings(row) {
+  const config = xentripayConfig(row);
+
   return {
     momoNumber: row.momoNumber ?? '',
     momoName: row.momoName ?? '',
-    xentripayEnabled: Boolean(row.xentripayEnabled),
-    xentripayEnvironment: row.xentripayEnvironment,
+    xentripayEnabled: Boolean(config?.enabled),
+    xentripayEnvironment: config?.environment ?? row.xentripayEnvironment,
     xentripayChargesIncluded: row.xentripayChargesIncluded !== false,
-    hasXentripayApiKey: Boolean(row.xentripayApiKeyEnc),
-    hasXentripayWebhookSecret: Boolean(row.xentripayWebhookSecretEnc),
+    hasXentripayApiKey: Boolean(config?.apiKey),
+    hasXentripayWebhookSecret: Boolean(config?.webhookSecret),
+    // "env" means the server's environment variables are in use; saving a key in admin takes over.
+    xentripaySource: config?.source ?? null,
     payoutNote: row.payoutNote ?? '',
   };
 }

@@ -249,4 +249,45 @@ describe('XentriPay collections', () => {
     assert.equal(methods.body.data.momo.number, '+250788000111')
     assert.equal(methods.body.data.card, null)
   })
+
+  test('with no key saved in admin, XENTRIPAY_* environment variables take over', async () => {
+    const cleared = await admin.put('/api/admin/settings').send({ clearXentripay: true })
+    assert.equal(cleared.status, 200)
+    assert.equal(cleared.body.data.hasXentripayApiKey, false)
+
+    process.env.XENTRIPAY_API_KEY = API_KEY
+    process.env.XENTRIPAY_WEBHOOK_SECRET = 'env-secret'
+    process.env.XENTRIPAY_ENVIRONMENT = 'sandbox'
+    try {
+      const settings = await admin.get('/api/admin/settings')
+      assert.equal(settings.body.data.xentripaySource, 'env')
+      assert.equal(settings.body.data.hasXentripayApiKey, true)
+      assert.equal(settings.body.data.hasXentripayWebhookSecret, true)
+
+      const methods = await request(app).get('/api/payments/methods')
+      assert.equal(methods.body.data.momo.provider, 'xentripay')
+      assert.equal(methods.body.data.card.provider, 'xentripay')
+
+      // The env secret is what signs webhooks now.
+      const product = await createProduct({ price: 7000, stock: 2 })
+      const agent = await signIn(await createUser())
+      mock.status = 'PENDING'
+      const placed = await agent.post('/api/orders').send({ ...delivery, paymentMethod: 'momo', items: [{ productId: product.id, quantity: 1 }] })
+      assert.equal(placed.status, 201, JSON.stringify(placed.body))
+      const payload = JSON.stringify({ event: 'COLLECTION_SUCCESSFUL', data: { customerRef: placed.body.data.orderNumber, status: 'SUCCESS' } })
+      const signature = 'sha256=' + crypto.createHmac('sha256', 'env-secret').update(payload).digest('hex')
+      const res = await request(app).post('/api/payments/xentripay/webhook').set('Content-Type', 'application/json').set('X-Xentripay-Signature', signature).send(payload)
+      assert.equal(res.status, 200)
+      assert.equal((await Order.findByPk(placed.body.data.id)).status, 'paid')
+
+      process.env.XENTRIPAY_ENABLED = 'false'
+      const off = await request(app).get('/api/payments/methods')
+      assert.equal(off.body.data.momo.provider, 'manual')
+    } finally {
+      delete process.env.XENTRIPAY_API_KEY
+      delete process.env.XENTRIPAY_WEBHOOK_SECRET
+      delete process.env.XENTRIPAY_ENVIRONMENT
+      delete process.env.XENTRIPAY_ENABLED
+    }
+  })
 })

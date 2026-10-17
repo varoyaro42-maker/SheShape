@@ -53,7 +53,7 @@ export const updateSettings = asyncHandler(async (req, res) => {
   }
 
   if (typeof body.xentripayEnabled === 'boolean') {
-    if (body.xentripayEnabled && !row.xentripayApiKeyEnc) {
+    if (body.xentripayEnabled && !row.xentripayApiKeyEnc && !(process.env.XENTRIPAY_API_KEY || '').trim()) {
       throw new HttpError(400, 'Save a XentriPay API key before turning online payments on.', [
         { field: 'xentripayApiKey', message: 'API key is required.' },
       ]);

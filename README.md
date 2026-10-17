@@ -146,6 +146,7 @@ See `backend/.env.example`. The ones that matter most:
 | `STORAGE_DRIVER`, `AWS_*`, `S3_BUCKET`, `S3_PUBLIC_URL` | Only when uploads should go to S3 instead of the server. |
 | `BREVO_API_KEY`, `BREVO_LIST_ID` | Brevo transactional email and the newsletter list. |
 | `SMTP_*` | Fallback SMTP transport if Brevo is not used. |
+| `XENTRIPAY_API_KEY`, `XENTRIPAY_WEBHOOK_SECRET`, `XENTRIPAY_ENVIRONMENT`, `XENTRIPAY_ENABLED` | XentriPay credentials when you prefer env vars over the admin screen (a key saved in admin wins). |
 | `XENTRIPAY_LIVE_URL`, `XENTRIPAY_SANDBOX_URL` | XentriPay base URLs; only override if XentriPay says so. |
 | `SENTRY_DSN` | Optional error reporting. Nothing is loaded without it. |
 | `AUTH_RATE_LIMIT_MAX`, `CONTACT_RATE_LIMIT_MAX`, `NEWSLETTER_RATE_LIMIT_MAX`, `BOOKING_RATE_LIMIT_MAX` | Per-IP request budgets for the public forms. |
