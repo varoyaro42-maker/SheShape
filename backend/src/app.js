@@ -53,6 +53,8 @@ if (hasClientBuild) {
     '/assets',
     express.static(path.join(clientDist, 'assets'), { immutable: true, maxAge: '1y', index: false })
   )
+  // A missing bundle must fail loudly, not come back as the HTML page (which leaves a blank screen).
+  app.use('/assets', (req, res) => res.status(404).end())
   app.use(express.static(clientDist, { index: false, maxAge: '1h' }))
 
   // index.html must always be revalidated or users keep an old asset manifest.
