@@ -47,7 +47,7 @@ export default function Footer() {
         <div className={styles.brandCol}>
           <Link to="/" className={styles.brand}>
             <img src="/brand/mark-white.svg" alt="" className={styles.brandIcon} />
-            <img src="/brand/wordmark-white.svg" alt="She Shape Wellness" className={styles.brandWord} />
+            <span className={styles.brandWord}>She Shape Wellness</span>
           </Link>
           <p className={styles.description}>
             Coached strength training, small-group programs and nutrition guidance for women in Kigali.

@@ -64,6 +64,8 @@ export async function getPublicPaymentMethods() {
         ? { provider: 'manual', number: row.momoNumber, name: row.momoName || 'She Shape Wellness' }
         : null,
     card: online ? { provider: 'xentripay' } : null,
+    // True when XentriPay adds its service fee on top of the order total.
+    customerPaysFee: online && row.xentripayChargesIncluded !== true,
   };
 }
 
@@ -88,7 +90,7 @@ export function publicSettings(row) {
     momoName: row.momoName ?? '',
     xentripayEnabled: Boolean(config?.enabled),
     xentripayEnvironment: config?.environment ?? row.xentripayEnvironment,
-    xentripayChargesIncluded: row.xentripayChargesIncluded !== false,
+    xentripayChargesIncluded: row.xentripayChargesIncluded === true,
     hasXentripayApiKey: Boolean(config?.apiKey),
     hasXentripayWebhookSecret: Boolean(config?.webhookSecret),
     // "env" means the server's environment variables are in use; saving a key in admin takes over.

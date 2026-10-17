@@ -181,7 +181,7 @@ export const createOrder = asyncHandler(async (req, res) => {
         method: paymentMethod,
         redirectUrl: orderUrl,
         returnUrl: orderUrl,
-        chargesIncluded: settings.xentripayChargesIncluded !== false,
+        chargesIncluded: settings.xentripayChargesIncluded === true,
       });
 
       created.paymentAttempts = 1;

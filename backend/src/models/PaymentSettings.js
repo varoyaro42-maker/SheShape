@@ -32,7 +32,8 @@ const PaymentSettings = sequelize.define(
     xentripayChargesIncluded: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: true,
+      // false: XentriPay adds its fee on top and the customer pays it.
+      defaultValue: false,
       field: 'xentripay_charges_included',
     },
 

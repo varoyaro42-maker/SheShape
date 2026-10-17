@@ -50,9 +50,7 @@
 }
 
 .brandWord {
-  display: block;
-  height: 22px;
-  width: auto;
+  white-space: nowrap;
 }
 
 .nav {

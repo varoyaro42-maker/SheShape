@@ -84,7 +84,7 @@ export default function CustomerLayout() {
         <div className={styles.sidebarHead}>
           <Link to="/" className={styles.brand}>
             <img src="/brand/mark-green.svg" alt="" className={styles.brandIcon} />
-            <img src="/brand/wordmark-green.svg" alt="She Shape Wellness" className={styles.brandWord} />
+            <span className={styles.brandWord}>She Shape Wellness</span>
           </Link>
           <button type="button" className={styles.sidebarClose} onClick={menu.close} aria-label="Close menu">
             <X size={20} />

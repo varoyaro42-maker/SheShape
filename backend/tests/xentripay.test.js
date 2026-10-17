@@ -98,7 +98,7 @@ describe('XentriPay collections', () => {
     assert.equal(sent.customerRef, order.orderNumber)
     assert.equal(sent.cname, 'Ama Uwase')
     assert.equal(sent.email, 'ama@example.com')
-    assert.equal(sent.chargesIncluded, true)
+    assert.equal(sent.chargesIncluded, false, "the customer pays the XentriPay fee by default")
     assert.equal(sent.redirecturl, undefined)
 
     const pending = await agent.get(`/api/payments/orders/${order.orderNumber}`)

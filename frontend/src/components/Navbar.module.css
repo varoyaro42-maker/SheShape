@@ -33,9 +33,7 @@
 }
 
 .brandWord {
-  display: block;
-  height: 34px;
-  width: auto;
+  white-space: nowrap;
 }
 
 .nav {
@@ -180,7 +178,7 @@
   }
 
   .brandWord {
-    height: 26px;
+    font-size: 19px;
   }
 
   .mobileActions {

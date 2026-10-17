@@ -96,11 +96,12 @@ export default function Checkout() {
         ? 'Send the payment prompt'
         : 'Place order';
 
+  const feeNote = methods.customerPaysFee ? ' A small XentriPay service fee is added to the total when you pay.' : ''
   const note =
     paymentMethod === 'card'
-      ? "You'll be taken to XentriPay's secure page to enter your card details."
+      ? `You'll be taken to XentriPay's secure page to enter your card details.${feeNote}`
       : momoPrompt
-        ? 'A prompt for the total goes to the phone number above. Enter your MoMo PIN to approve it.'
+        ? `A prompt for the total goes to the phone number above. Enter your MoMo PIN to approve it.${feeNote}`
         : paymentMethod === 'momo' && methods.momo
           ? `After you place the order we show you the MoMo number (${methods.momo.number}) and your order number to use as the reference.`
           : 'No payment is taken here. We confirm your order by phone and arrange payment with you.';
