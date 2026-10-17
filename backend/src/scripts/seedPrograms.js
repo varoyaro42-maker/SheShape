@@ -1,3 +1,4 @@
+import '../loadEnv.js'
 import sequelize from '../db.js';
 import { Program } from '../models/index.js';
 import { buildUniqueSlug } from '../utils/slug.js';

@@ -1,3 +1,4 @@
+import '../loadEnv.js'
 import { sequelize, Product, ProductImage, Category } from '../models/index.js'
 import { buildUniqueSlug } from '../utils/slug.js'
 

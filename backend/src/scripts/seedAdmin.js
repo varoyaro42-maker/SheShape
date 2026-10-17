@@ -1,3 +1,4 @@
+import '../loadEnv.js'
 import sequelize from '../db.js';
 import { seedAdminUser } from '../utils/seedAdminUser.js';
 

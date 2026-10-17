@@ -1,3 +1,4 @@
+import '../loadEnv.js'
 import { sequelize } from '../models/index.js'
 
 async function run() {
