@@ -5,7 +5,9 @@ import nodemailer from 'nodemailer';
  *  1. Brevo HTTPS API when BREVO_API_KEY is set (recommended on shared hosting,
  *     where outbound SMTP ports are often blocked).
  *  2. Plain SMTP when SMTP_HOST is set (Brevo's relay also works here).
- *  3. Console, so development never needs credentials.
+ *  3. The server's own sendmail when MAIL_TRANSPORT=sendmail (cPanel: sends
+ *     as a local mailbox without storing its password in the app).
+ *  4. Console, so development never needs credentials.
  */
 const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 
@@ -19,6 +21,10 @@ function sender() {
 }
 
 function getSmtpTransporter() {
+  if (process.env.MAIL_TRANSPORT === 'sendmail') {
+    transporter ??= nodemailer.createTransport({ sendmail: true, newline: 'unix', path: process.env.SENDMAIL_PATH || '/usr/sbin/sendmail' });
+    return transporter;
+  }
   if (!process.env.SMTP_HOST) return null;
 
   if (!transporter) {
@@ -72,7 +78,7 @@ async function sendViaBrevo({ to, bcc, subject, html, text, replyTo }) {
 
 export function emailTransport() {
   if (process.env.BREVO_API_KEY) return 'brevo';
-  if (process.env.SMTP_HOST) return 'smtp';
+  if (process.env.MAIL_TRANSPORT === 'sendmail' || process.env.SMTP_HOST) return 'smtp';
   return 'console';
 }
 
