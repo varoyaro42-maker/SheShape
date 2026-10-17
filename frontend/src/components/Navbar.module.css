@@ -12,7 +12,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  height: 72px;
+  height: 84px;
 }
 
 .brand {
@@ -27,8 +27,8 @@
 }
 
 .brandIcon {
-  width: 32px;
-  height: 32px;
+  width: 54px;
+  height: 54px;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
 }
@@ -161,7 +161,7 @@
 
 @media (max-width: 900px) {
   .inner {
-    height: 64px;
+    height: 72px;
     gap: 12px;
   }
 
@@ -170,8 +170,8 @@
   }
 
   .brandIcon {
-    width: 28px;
-    height: 28px;
+    width: 44px;
+    height: 44px;
   }
 
   .mobileActions {
@@ -192,8 +192,8 @@
     background: var(--green-dark);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 18px 32px rgba(0, 0, 0, 0.28);
-    max-height: calc(100vh - 64px);
-    max-height: calc(100dvh - 64px);
+    max-height: calc(100vh - 72px);
+    max-height: calc(100dvh - 72px);
     overflow-y: auto;
   }
 

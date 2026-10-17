@@ -73,7 +73,7 @@ export function renderEmail({ preheader = '', eyebrow = '', title, bodyHtml, cta
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
             <tr>
               <td align="center" style="background:${BRAND.greenDark};border-radius:18px 18px 0 0;padding:26px 24px;">
-                <img src="${logoUrl}" alt="She Shape Wellness" width="180" height="143" style="display:block;width:180px;height:143px;border:0;" />
+                <img src="${logoUrl}" alt="She Shape Wellness" width="260" height="206" style="display:block;width:260px;max-width:80%;height:auto;border:0;" />
               </td>
             </tr>
             <tr>
