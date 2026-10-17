@@ -184,7 +184,7 @@ export const retryPayment = asyncHandler(async (req, res) => {
   const collection = await client.initiateCollection({
     amount: order.total,
     reference: customerRef,
-    description: `She Shape order ${order.orderNumber}`,
+    description: `She Shape Wellness order ${order.orderNumber}`,
     customer: { name: order.customerName, email: order.user?.email ?? '', phone: order.customerPhone },
     method: order.paymentMethod,
     redirectUrl: orderUrl,

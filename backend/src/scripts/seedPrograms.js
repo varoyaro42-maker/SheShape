@@ -3,7 +3,7 @@ import sequelize from '../db.js';
 import { Program } from '../models/index.js';
 import { buildUniqueSlug } from '../utils/slug.js';
 
-// The four programs She Shape runs today. Prices and times are placeholders
+// The four programs She Shape Wellness runs today. Prices and times are placeholders
 // for the admin to correct in the dashboard.
 const PROGRAMS = [
   {
@@ -70,7 +70,7 @@ const PROGRAMS = [
     label: 'Events',
     tagline: 'Retreats, bootcamps and community days.',
     description:
-      'Seasonal retreats, bootcamps and community days that bring the She Shape community together to move, learn and recharge.',
+      'Seasonal retreats, bootcamps and community days that bring the She Shape Wellness community together to move, learn and recharge.',
     highlights: ['Seasonal retreats and bootcamps', 'Community days', 'Open to members and newcomers'],
     status: 'coming_soon',
     price: null,

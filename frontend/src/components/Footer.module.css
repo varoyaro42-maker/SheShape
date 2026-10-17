@@ -68,6 +68,12 @@
   flex-shrink: 0;
 }
 
+.brandWord {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+
 .description {
   font-size: 14.5px;
   line-height: 1.65;

@@ -25,7 +25,7 @@ export default function Dashboard() {
         <h1 className={styles.heroTitle}>
           Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}! 👋
         </h1>
-        <p className={styles.heroSubtitle}>Here's what's happening with your She Shape account.</p>
+        <p className={styles.heroSubtitle}>Here's what's happening with your She Shape Wellness account.</p>
 
         <div className={styles.heroStats}>
           <span>

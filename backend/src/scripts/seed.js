@@ -10,7 +10,7 @@ const products = [
   {
     name: 'She Strong Crop T-shirt',
     description:
-      'More than a T-shirt: a statement that she is strong. Designed by She Shape with Shield Activewear for the women in our community. A soft, fitted crop tee with the she strong print across the chest and the She Strong mark at the back. Five colours: white, black, steel blue, navy and sage green.',
+      'More than a T-shirt: a statement that she is strong. Designed by She Shape Wellness with Shield Activewear for the women in our community. A soft, fitted crop tee with the she strong print across the chest and the She Strong mark at the back. Five colours: white, black, steel blue, navy and sage green.',
     price: 25000,
     category: 'activewear',
     stock: 50,

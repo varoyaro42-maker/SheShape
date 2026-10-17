@@ -21,13 +21,13 @@ async function dispatch({ to, subject, eyebrow, title, bodyHtml, ctaLabel, ctaUr
 
 const OTP_COPY = {
   verify_email: {
-    subject: 'Verify your She Shape account',
+    subject: 'Verify your She Shape Wellness account',
     eyebrow: 'Confirm your email',
     title: "You're almost in",
     intro: 'Use this code to verify your email address and finish setting up your account.',
   },
   reset_password: {
-    subject: 'Reset your She Shape password',
+    subject: 'Reset your She Shape Wellness password',
     eyebrow: 'Password reset',
     title: 'Reset your password',
     intro: "Use this code to reset your password. If you didn't request this, you can safely ignore this email.",
@@ -87,8 +87,8 @@ export async function sendContactReplyEmail({ to, name, originalMessage, reply }
 
   await dispatch({
     to,
-    subject: 'She Shape replied to your message',
-    eyebrow: 'Reply from She Shape',
+    subject: 'She Shape Wellness replied to your message',
+    eyebrow: 'Reply from She Shape Wellness',
     title: `Hi ${name}, we replied`,
     bodyHtml,
   });
@@ -180,7 +180,7 @@ const STATUS_COPY = {
     subject: (n) => `Delivered — ${n}`,
     eyebrow: 'Order delivered',
     title: 'Delivered!',
-    message: 'Your order has been delivered. Thank you for shopping with She Shape.',
+    message: 'Your order has been delivered. Thank you for shopping with She Shape Wellness.',
   },
   cancelled: {
     subject: (n) => `Order cancelled — ${n}`,
@@ -234,7 +234,7 @@ export async function sendNewPostEmails({ post, recipients }) {
   const postUrl = clientUrl(`/blog/${post.slug}`);
 
   const bodyHtml = `
-    <p style="margin:0 0 18px;">We just published something new on the She Shape journal.</p>
+    <p style="margin:0 0 18px;">We just published something new on the She Shape Wellness journal.</p>
     <h2 style="margin:0 0 10px;font-family:Georgia,'Playfair Display',serif;font-size:19px;color:#06311a;">${escapeHtml(post.title)}</h2>
     ${post.excerpt ? `<p style="margin:0;color:#3a4740;">${escapeHtml(post.excerpt)}</p>` : ''}`;
 
@@ -272,18 +272,18 @@ export async function sendNewPostEmails({ post, recipients }) {
 export async function sendNewsletterConfirmEmail({ to, name, confirmUrl }) {
   const bodyHtml = `
     <p style="margin:0 0 14px;">${name ? `Hi ${escapeHtml(name)},` : 'Hi,'}</p>
-    <p style="margin:0 0 14px;">Tap the button below to confirm you want tips, workouts and early access to new She Shape programs in your inbox.</p>
+    <p style="margin:0 0 14px;">Tap the button below to confirm you want tips, workouts and early access to new She Shape Wellness programs in your inbox.</p>
     <p style="margin:0;font-size:13px;color:#3a4740;">If you did not ask for this, ignore this email and nothing will be sent.</p>`;
 
   await dispatch({
     to,
-    subject: 'Confirm your She Shape subscription',
+    subject: 'Confirm your She Shape Wellness subscription',
     eyebrow: 'One more step',
     title: 'Confirm your email',
     bodyHtml,
     ctaLabel: 'Yes, subscribe me',
     ctaUrl: confirmUrl,
-    preheader: 'Confirm to join the She Shape newsletter',
+    preheader: 'Confirm to join the She Shape Wellness newsletter',
   });
 }
 
@@ -388,18 +388,18 @@ export async function sendBookingStatusEmail({ to, booking, status, note }) {
 export async function sendAdminInviteEmail({ to, name, invitedBy, acceptUrl, expiresDays }) {
   const bodyHtml = `
     <p style="margin:0 0 14px;">${name ? `Hi ${escapeHtml(name)},` : 'Hi,'}</p>
-    <p style="margin:0 0 14px;">${invitedBy ? escapeHtml(invitedBy) : 'The She Shape team'} invited you to help run the She Shape website as an admin: programs, the shop, orders, bookings, the blog and site content.</p>
+    <p style="margin:0 0 14px;">${invitedBy ? escapeHtml(invitedBy) : 'The She Shape Wellness team'} invited you to help run the She Shape Wellness website as an admin: programs, the shop, orders, bookings, the blog and site content.</p>
     <p style="margin:0 0 14px;">Tap the button to set your password and get started. The link works once and expires in ${expiresDays} days.</p>
     <p style="margin:0;font-size:13px;color:#3a4740;">If you were not expecting this, ignore this email.</p>`;
 
   await dispatch({
     to,
-    subject: "You're invited to the She Shape admin",
+    subject: "You're invited to the She Shape Wellness admin",
     eyebrow: 'Admin invite',
-    title: 'Join the She Shape team',
+    title: 'Join the She Shape Wellness team',
     bodyHtml,
     ctaLabel: 'Accept the invite',
     ctaUrl: acceptUrl,
-    preheader: 'Set your password to start managing She Shape',
+    preheader: 'Set your password to start managing She Shape Wellness',
   });
 }

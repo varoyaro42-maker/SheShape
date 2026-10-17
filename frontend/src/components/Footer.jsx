@@ -46,8 +46,8 @@ export default function Footer() {
       <div className={`page ${styles.inner}`}>
         <div className={styles.brandCol}>
           <Link to="/" className={styles.brand}>
-            <img src="/logo-light.svg" alt="" className={styles.brandIcon} />
-            She Shape
+            <img src="/brand/mark-white.svg" alt="" className={styles.brandIcon} />
+            <img src="/brand/wordmark-white.svg" alt="She Shape Wellness" className={styles.brandWord} />
           </Link>
           <p className={styles.description}>
             Coached strength training, small-group programs and nutrition guidance for women in Kigali.
@@ -99,7 +99,7 @@ export default function Footer() {
       </div>
 
       <div className={`page ${styles.bottom}`}>
-        <span>© {new Date().getFullYear()} She Shape. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} She Shape Wellness. All rights reserved.</span>
         <span className={styles.bottomTagline}>Learn · Grow · Thrive</span>
       </div>
     </footer>

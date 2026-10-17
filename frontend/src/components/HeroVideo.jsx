@@ -20,7 +20,7 @@ const ACTIVATION_EVENTS = ['pointerup', 'keydown', 'touchend']
  * `cover` stretches it behind whatever the parent lays over it (the full
  * screen hero); clicks then only ever switch the sound on, never pause.
  */
-export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', className = '', cover = false, sound = true }) {
+export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape Wellness', className = '', cover = false, sound = true }) {
   const videoRef = useRef(null)
   const barRef = useRef(null)
   const lastAutoUnmute = useRef(0)

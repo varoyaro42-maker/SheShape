@@ -1,4 +1,4 @@
-# She Shape
+# She Shape Wellness
 
 Women's fitness in Kigali: coaching programs, a shop for activewear and supplements, a journal, and an admin area to run it all.
 

@@ -144,7 +144,7 @@ export default function AdminDashboardPage() {
     <div className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Welcome{user?.name ? `, ${user.name.split(' ')[0]}` : ''}</h1>
-        <p className={styles.subtitle}>Here's what's happening across She Shape.</p>
+        <p className={styles.subtitle}>Here's what's happening across She Shape Wellness.</p>
       </header>
 
       {error && <p className={styles.error}>{error}</p>}

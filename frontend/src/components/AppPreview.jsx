@@ -167,7 +167,7 @@ export default function AppPreview() {
     <div className={styles.stage} onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <div className={styles.glow} aria-hidden="true" />
 
-      <div className={styles.phone} role="img" aria-label="Preview of the She Shape app: weekly plan, workout player and progress tracking">
+      <div className={styles.phone} role="img" aria-label="Preview of the She Shape Wellness app: weekly plan, workout player and progress tracking">
         <div className={styles.notch} />
         <div className={styles.statusBar}>
           <span>9:41</span>

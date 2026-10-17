@@ -45,14 +45,14 @@ export default function AboutPage() {
     <div className="page">
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <span className="eyebrow rise">About She Shape</span>
-          <h1 className={`${styles.title} rise rise-2`}>{about.heading || 'About She Shape'}</h1>
+          <span className="eyebrow rise">About She Shape Wellness</span>
+          <h1 className={`${styles.title} rise rise-2`}>{about.heading || 'About She Shape Wellness'}</h1>
           <div className={`${styles.story} rise rise-3`}>
             {paragraphs.length > 0 ? (
               paragraphs.map((line, index) => <p key={index}>{line}</p>)
             ) : (
               <p>
-                She Shape is a women's fitness community in Kigali: coached strength training, small-group
+                She Shape Wellness is a women's fitness community in Kigali: coached strength training, small-group
                 programs and honest nutrition guidance, backed by Fitnesspoint gyms.
               </p>
             )}
@@ -73,7 +73,7 @@ export default function AboutPage() {
             <img src={about.imageUrl} alt="" className={styles.image} fetchPriority="high" />
           ) : (
             <div className={styles.placeholder}>
-              <img src="/logo.svg" alt="" className={styles.placeholderLogo} />
+              <img src="/brand/logo-green.svg" alt="" className={styles.placeholderLogo} />
             </div>
           )}
         </div>
@@ -95,7 +95,7 @@ export default function AboutPage() {
         <p>
           Featured in The New Times:{' '}
           <a href={PRESS_URL} target="_blank" rel="noopener noreferrer">
-            How She Shape is creating the safest space for women at Fitnesspoint and other gyms
+            How She Shape Wellness is creating the safest space for women at Fitnesspoint and other gyms
           </a>
         </p>
       </Reveal>

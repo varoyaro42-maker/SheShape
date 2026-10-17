@@ -34,7 +34,7 @@ export const DEFAULT_HOME_CONTENT = {
     videoEnabled: true,
     videoSound: true
   },
-  // Logos of organisations that back She Shape: [{ name, imageUrl, href }]
+  // Logos of organisations that back She Shape Wellness: [{ name, imageUrl, href }]
   partners: [
     { name: 'Fitnesspoint', imageUrl: '/partners/fitnesspoint.png', href: '' },
     { name: 'Vitaway', imageUrl: '/partners/vitaway.png', href: '' }
@@ -45,7 +45,7 @@ export const DEFAULT_HOME_CONTENT = {
     { value: '2026', label: "launched on International Women's Day" }
   ],
   featured: {
-    eyebrow: 'By She Shape × Shield Activewear',
+    eyebrow: 'By She Shape Wellness × Shield Activewear',
     heading: 'SHE STRONG CROP T-SHIRTS',
     script: 'more than a T-shirt',
     paragraph:
@@ -59,7 +59,7 @@ export const DEFAULT_HOME_CONTENT = {
   },
   app: {
     enabled: true,
-    eyebrow: 'She Shape App',
+    eyebrow: 'She Shape Wellness App',
     heading: 'Your coach, in your pocket',
     script: '',
     paragraph:
@@ -110,7 +110,7 @@ export const DEFAULT_HOME_CONTENT = {
   about: {
     heading: 'Fitness made for women. Practical, not punishing.',
     paragraph:
-      'She Shape helps women in Rwanda feel strong, capable and confident through structured training, honest nutrition guidance and a community that shows up for each other.',
+      'She Shape Wellness helps women in Rwanda feel strong, capable and confident through structured training, honest nutrition guidance and a community that shows up for each other.',
     imageUrl: '/media/instagram/community-session.jpg'
   },
   contact: {

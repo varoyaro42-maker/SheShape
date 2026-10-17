@@ -44,7 +44,7 @@ export default function Shop() {
       <header className={styles.header}>
         <h1 className={styles.title}>Shop</h1>
         <p className={styles.subtitle}>
-          Everything you need for training, picked by the She Shape team.
+          Everything you need for training, picked by the She Shape Wellness team.
         </p>
       </header>
 

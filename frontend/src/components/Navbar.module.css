@@ -30,7 +30,12 @@
   width: 54px;
   height: 54px;
   flex-shrink: 0;
-  filter: brightness(0) invert(1);
+}
+
+.brandWord {
+  display: block;
+  height: 34px;
+  width: auto;
 }
 
 .nav {
@@ -172,6 +177,10 @@
   .brandIcon {
     width: 44px;
     height: 44px;
+  }
+
+  .brandWord {
+    height: 26px;
   }
 
   .mobileActions {

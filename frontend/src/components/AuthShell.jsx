@@ -10,8 +10,8 @@ export default function AuthShell({ children }) {
     <div className={styles.page}>
       <div className={`${styles.shell} rise`}>
         <aside className={styles.brand}>
-          <Link to="/" className={styles.brandLogo} aria-label="She Shape home">
-            <img src="/logo-light.svg" alt="" />
+          <Link to="/" className={styles.brandLogo} aria-label="She Shape Wellness home">
+            <img src="/brand/logo-white.svg" alt="She Shape Wellness" />
           </Link>
           <div>
             <p className={styles.brandTitle}>Strong is your shape.</p>

@@ -111,7 +111,7 @@ export default function Home() {
   const heroSlides = hero.slides?.length ? hero.slides : hero.imageUrl ? [{ imageUrl: hero.imageUrl, caption: '' }] : []
   const heroVideo =
     hero.videoUrl && hero.videoEnabled !== false
-      ? { src: hero.videoUrl, smallSrc: hero.videoSmallUrl, poster: hero.videoPoster, title: hero.videoTitle || 'She Shape', sound: hero.videoSound !== false }
+      ? { src: hero.videoUrl, smallSrc: hero.videoSmallUrl, poster: hero.videoPoster, title: hero.videoTitle || 'She Shape Wellness', sound: hero.videoSound !== false }
       : null
   const instagram = (contact?.instagram || '').replace(/^@/, '')
   const instagramUrl = instagram ? `https://instagram.com/${instagram}` : null
@@ -185,7 +185,7 @@ export default function Home() {
               <HeroSlideshow slides={heroSlides} label="" />
             ) : (
               <div className={styles.heroFrame}>
-                <img src="/logo-light.svg" alt="" className={styles.heroFrameLogo} />
+                <img src="/brand/logo-white.svg" alt="" className={styles.heroFrameLogo} />
               </div>
             )}
           </div>
@@ -336,7 +336,7 @@ export default function Home() {
           </Reveal>
 
           <Reveal delay={120} className={styles.splitCopy}>
-            <span className="eyebrow">About She Shape</span>
+            <span className="eyebrow">About She Shape Wellness</span>
             <h2 className={styles.sectionTitle}>{about.heading}</h2>
             <p className={styles.lead}>{about.paragraph}</p>
             <Link to="/about" className="btn btn-outline">
@@ -419,7 +419,7 @@ export default function Home() {
           <div className="page">
             <SectionHeading
               eyebrow="On Instagram"
-              title="Life at She Shape"
+              title="Life at She Shape Wellness"
               lead="Classes, challenge groups, workshops and the odd Saturday hike. Follow along."
               action={
                 instagramUrl && (

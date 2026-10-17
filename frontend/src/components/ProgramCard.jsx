@@ -18,7 +18,7 @@ export default function ProgramCard({ program }) {
           <img src={program.coverImage} alt="" loading="lazy" />
         ) : (
           <span className={styles.placeholder} aria-hidden="true">
-            <img src="/logo.svg" alt="" />
+            <img src="/brand/logo-green.svg" alt="" />
           </span>
         )}
         <span className={open ? `${styles.status} ${styles.statusOpen}` : styles.status}>

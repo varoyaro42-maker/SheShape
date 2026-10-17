@@ -176,7 +176,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       const collection = await xentripay.initiateCollection({
         amount: created.total,
         reference: created.orderNumber,
-        description: `She Shape order ${created.orderNumber}`,
+        description: `She Shape Wellness order ${created.orderNumber}`,
         customer: { name: created.customerName, email: req.user.email, phone: created.customerPhone },
         method: paymentMethod,
         redirectUrl: orderUrl,

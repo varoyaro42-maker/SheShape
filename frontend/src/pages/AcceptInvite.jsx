@@ -58,7 +58,7 @@ export default function AcceptInvite() {
 
   return (
     <AuthShell>
-      <h1 className={styles.title}>Join the She Shape admin</h1>
+      <h1 className={styles.title}>Join the She Shape Wellness admin</h1>
       <p className={styles.subtitle}>
         {invite.hasAccount
           ? `You already have an account as ${invite.email}. Enter your password to accept.`

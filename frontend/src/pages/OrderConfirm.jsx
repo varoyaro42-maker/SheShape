@@ -13,7 +13,7 @@ const HEADINGS = {
   pending: ['Thank you', "Your order is placed. Keep the number below, you'll need it to check on your order."],
   paid: ['Payment received', 'We have your payment. Your order is being prepared.'],
   shipped: ['On its way', 'Your order has left us. We will call you when it arrives.'],
-  delivered: ['Delivered', 'Your order has been delivered. Thank you for shopping with She Shape.'],
+  delivered: ['Delivered', 'Your order has been delivered. Thank you for shopping with She Shape Wellness.'],
   cancelled: ['Order cancelled', 'This order was cancelled. Nothing is owed. Call us if this is unexpected.']
 };
 

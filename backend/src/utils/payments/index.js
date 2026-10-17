@@ -61,7 +61,7 @@ export async function getPublicPaymentMethods() {
     momo: online
       ? { provider: 'xentripay' }
       : momoReady(row)
-        ? { provider: 'manual', number: row.momoNumber, name: row.momoName || 'She Shape' }
+        ? { provider: 'manual', number: row.momoNumber, name: row.momoName || 'She Shape Wellness' }
         : null,
     card: online ? { provider: 'xentripay' } : null,
   };

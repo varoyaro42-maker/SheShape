@@ -118,7 +118,7 @@ export default function AdminMessageDetailPage() {
         <section className={styles.card}>
           <h2 className={styles.sectionTitle}>Reply by email</h2>
           <p className={formStyles.hint} style={{ marginBottom: '0.85rem' }}>
-            This is sent straight to {message.email} — they'll get it as an email from She Shape.
+            This is sent straight to {message.email} — they'll get it as an email from She Shape Wellness.
           </p>
 
           <form onSubmit={submit}>
