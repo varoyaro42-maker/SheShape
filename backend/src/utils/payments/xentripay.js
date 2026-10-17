@@ -142,10 +142,13 @@ export function createXentripayClient({ apiKey, environment = 'sandbox' }) {
         throw error;
       }
 
+      // The sandbox answers momo requests with url: " ".
+      const checkoutUrl = typeof data.url === 'string' ? data.url.trim() : '';
+
       return {
         reference: data.refid ? String(data.refid) : null,
         transactionId: data.tid ? String(data.tid) : null,
-        checkoutUrl: data.url || null,
+        checkoutUrl: checkoutUrl || null,
         message: data.reply || '',
       };
     },
