@@ -20,7 +20,7 @@ const ACTIVATION_EVENTS = ['pointerup', 'keydown', 'touchend']
  * `cover` stretches it behind whatever the parent lays over it (the full
  * screen hero); clicks then only ever switch the sound on, never pause.
  */
-export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', className = '', cover = false }) {
+export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', className = '', cover = false, sound = true }) {
   const videoRef = useRef(null)
   const barRef = useRef(null)
   const lastAutoUnmute = useRef(0)
@@ -37,6 +37,11 @@ export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', 
     let cancelled = false
 
     const start = async () => {
+      if (!sound) {
+        video.muted = true
+        await video.play().catch(() => {})
+        return
+      }
       video.muted = false
       try {
         await video.play()
@@ -56,7 +61,7 @@ export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', 
     return () => {
       cancelled = true
     }
-  }, [still, source])
+  }, [still, source, sound])
 
   // The first real interaction anywhere on the page turns the sound on.
   useEffect(() => {
@@ -107,6 +112,10 @@ export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', 
   function soundOn() {
     const video = videoRef.current
     if (!video) return
+    if (!sound) {
+      video.play().catch(() => {})
+      return
+    }
     video.muted = false
     setNeedsTap(false)
     if (video.paused) video.play().catch(() => {})
@@ -150,6 +159,7 @@ export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', 
         src={source}
         poster={poster || undefined}
         loop
+        muted={!sound}
         playsInline
         preload={still ? 'metadata' : 'auto'}
         aria-label={title}
@@ -176,9 +186,11 @@ export default function HeroVideo({ src, smallSrc, poster, title = 'She Shape', 
         <button type="button" className={styles.control} data-sound-control onClick={togglePlay} aria-label={playing ? 'Pause' : 'Play'}>
           {playing ? <Pause size={17} /> : <Play size={17} />}
         </button>
+        {sound && (
         <button type="button" className={styles.control} data-sound-control onClick={toggleSound} aria-label={muted ? 'Sound on' : 'Sound off'} aria-pressed={!muted}>
           {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
         </button>
+        )}
       </div>
 
       <div className={styles.progress} aria-hidden="true">

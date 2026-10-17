@@ -380,3 +380,26 @@ export async function sendBookingStatusEmail({ to, booking, status, note }) {
     ctaUrl: clientUrl('/programs'),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Admin invites
+// ---------------------------------------------------------------------------
+
+export async function sendAdminInviteEmail({ to, name, invitedBy, acceptUrl, expiresDays }) {
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">${name ? `Hi ${escapeHtml(name)},` : 'Hi,'}</p>
+    <p style="margin:0 0 14px;">${invitedBy ? escapeHtml(invitedBy) : 'The She Shape team'} invited you to help run the She Shape website as an admin: programs, the shop, orders, bookings, the blog and site content.</p>
+    <p style="margin:0 0 14px;">Tap the button to set your password and get started. The link works once and expires in ${expiresDays} days.</p>
+    <p style="margin:0;font-size:13px;color:#3a4740;">If you were not expecting this, ignore this email.</p>`;
+
+  await dispatch({
+    to,
+    subject: "You're invited to the She Shape admin",
+    eyebrow: 'Admin invite',
+    title: 'Join the She Shape team',
+    bodyHtml,
+    ctaLabel: 'Accept the invite',
+    ctaUrl: acceptUrl,
+    preheader: 'Set your password to start managing She Shape',
+  });
+}

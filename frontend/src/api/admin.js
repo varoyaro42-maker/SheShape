@@ -90,3 +90,11 @@ export const adminSubscribers = {
   exportUrl: '/api/admin/subscribers/export.csv',
   remove: (id) => api.delete(`/admin/subscribers/${id}`)
 }
+
+export const adminAdmins = {
+  list: () => api.get('/admin/admins').then(unwrap),
+  invite: (payload) => api.post('/admin/admins/invites', payload).then(unwrap),
+  resend: (id) => api.post(`/admin/admins/invites/${id}/resend`).then(unwrap),
+  revoke: (id) => api.delete(`/admin/admins/invites/${id}`),
+  remove: (id) => api.delete(`/admin/admins/${id}`)
+}

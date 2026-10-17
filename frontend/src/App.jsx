@@ -50,6 +50,8 @@ const AdminMessageDetailPage = lazy(() => import('./pages/admin/MessageDetail.js
 const AdminBookingsPage = lazy(() => import('./pages/admin/Bookings.jsx'))
 const AdminBookingDetailPage = lazy(() => import('./pages/admin/BookingDetail.jsx'))
 const AdminSubscribersPage = lazy(() => import('./pages/admin/Subscribers.jsx'))
+const AdminAdminsPage = lazy(() => import('./pages/admin/Admins.jsx'))
+const AcceptInvite = lazy(() => import('./pages/AcceptInvite.jsx'))
 
 export default function App() {
   return (
@@ -70,6 +72,7 @@ export default function App() {
           <Route path="verify-email" element={<VerifyEmail />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
+          <Route path="invite/:token" element={<AcceptInvite />} />
           <Route path="newsletter/:state" element={<NewsletterStatus />} />
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -103,6 +106,7 @@ export default function App() {
           <Route path="bookings" element={<AdminBookingsPage />} />
           <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
           <Route path="subscribers" element={<AdminSubscribersPage />} />
+          <Route path="admins" element={<AdminAdminsPage />} />
           <Route path="account" element={<Account />} />
         </Route>
 

@@ -29,7 +29,10 @@ export const DEFAULT_HOME_CONTENT = {
     // Lighter (720p) copy served to phones.
     videoSmallUrl: '/media/landing/she-shape-online-720p.mp4',
     videoPoster: '/media/landing/poster.jpg',
-    videoTitle: 'She Shape Online'
+    videoTitle: 'She Shape Online',
+    // Admin switches: hide the video without deleting it, and allow sound or keep it silent.
+    videoEnabled: true,
+    videoSound: true
   },
   // Logos of organisations that back She Shape: [{ name, imageUrl, href }]
   partners: [

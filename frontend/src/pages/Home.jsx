@@ -109,7 +109,10 @@ export default function Home() {
     return { day: String(slot.day).slice(0, 3), time: String(slot.time).split(/\s*[–-]\s*/)[0], program: open.name }
   })()
   const heroSlides = hero.slides?.length ? hero.slides : hero.imageUrl ? [{ imageUrl: hero.imageUrl, caption: '' }] : []
-  const heroVideo = hero.videoUrl ? { src: hero.videoUrl, smallSrc: hero.videoSmallUrl, poster: hero.videoPoster, title: hero.videoTitle || 'She Shape' } : null
+  const heroVideo =
+    hero.videoUrl && hero.videoEnabled !== false
+      ? { src: hero.videoUrl, smallSrc: hero.videoSmallUrl, poster: hero.videoPoster, title: hero.videoTitle || 'She Shape', sound: hero.videoSound !== false }
+      : null
   const instagram = (contact?.instagram || '').replace(/^@/, '')
   const instagramUrl = instagram ? `https://instagram.com/${instagram}` : null
   const spotlight = products?.[0] ?? null

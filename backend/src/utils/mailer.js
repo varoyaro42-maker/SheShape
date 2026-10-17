@@ -13,6 +13,9 @@ const BREVO_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 
 let transporter = null;
 
+/** Emails "sent" during tests, newest last. */
+export const testOutbox = [];
+
 function sender() {
   return {
     name: process.env.MAIL_FROM_NAME ?? 'She Shape',
@@ -104,7 +107,11 @@ export async function sendMail({ to, bcc, subject, html, text, replyTo }) {
     return;
   }
 
-  if (process.env.NODE_ENV !== 'test') {
+  if (process.env.NODE_ENV === 'test') {
+    testOutbox.push({ to, subject, text, html });
+    return;
+  }
+  {
     console.log(
       `[mailer] No email transport configured — printing instead.\nTo: ${to}\nBcc: ${bcc ?? '-'}\nSubject: ${subject}\n${text ?? html}`
     );

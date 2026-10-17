@@ -9,7 +9,7 @@ import styles from './ProductForm.module.css'
 import tabs from './HomeSettings.module.css'
 
 const BLANK = {
-  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '', slides: [], videoUrl: '', videoSmallUrl: '', videoPoster: '', videoTitle: '' },
+  hero: { eyebrow: '', title: '', script: '', paragraph: '', primaryButtonLabel: '', secondaryButtonLabel: '', imageUrl: '', slides: [], videoUrl: '', videoSmallUrl: '', videoPoster: '', videoTitle: '', videoEnabled: true, videoSound: true },
   partners: [],
   stats: [],
   featured: { eyebrow: '', heading: '', script: '', paragraph: '', tags: [], buttonLabel: '' },
@@ -229,6 +229,8 @@ export default function AdminHomeSettingsPage() {
         <section className={styles.card} hidden={tab !== 'hero'}>
           <h2 className={styles.sectionTitle}>Landing video</h2>
           <p className={styles.hint}>Plays at the top of the home page on its own, with sound wherever the browser allows it (otherwise visitors see "Tap for sound"). Use a 16:9 MP4 (H.264 video, AAC audio) at 1080p and under 100 MB. While a video is set it takes the place of the hero photos.</p>
+          <Toggle label="Show the video on the home page (off: the hero photos show instead; the video is kept)" checked={content.hero.videoEnabled !== false} onChange={(value) => set('hero', 'videoEnabled', value)} />
+          <Toggle label="Allow sound (off: the video always plays silently with no sound button)" checked={content.hero.videoSound !== false} onChange={(value) => set('hero', 'videoSound', value)} />
           <div className={styles.row}>
             <HomeImageUploader media="video" label="Video" value={content.hero.videoUrl} onChange={(url) => set('hero', 'videoUrl', url)} disabled={saving} hint="1080p, 30 fps, under 100 MB." />
             <HomeImageUploader media="video" label="Lighter copy for phones (optional)" value={content.hero.videoSmallUrl} onChange={(url) => set('hero', 'videoSmallUrl', url)} disabled={saving} hint="A 720p version saves data on mobile." />

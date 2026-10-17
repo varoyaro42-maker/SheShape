@@ -12,6 +12,7 @@ import {
 } from '../controllers/auth.controller.js';
 import { protect, optionalAuth } from '../middleware/auth.js';
 import { authLimiter } from '../middleware/security.js';
+import { lookup as inviteLookup, accept as inviteAccept } from '../controllers/invites.controller.js';
 
 const router = Router();
 
@@ -25,5 +26,7 @@ router.post('/resend-otp', authLimiter, resendOtp);
 router.post('/forgot-password', authLimiter, forgotPassword);
 router.post('/reset-password', authLimiter, resetPassword);
 router.post('/change-password', protect, changePassword);
+router.get('/invites/:token', authLimiter, inviteLookup);
+router.post('/invites/:token/accept', authLimiter, inviteAccept);
 
 export default router;

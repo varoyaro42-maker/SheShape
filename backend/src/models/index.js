@@ -14,6 +14,7 @@ import HomeContent from './HomeContent.js'
 import ContactMessage, { MESSAGE_STATUSES } from './ContactMessage.js'
 import Subscriber, { SUBSCRIBER_STATUSES } from './Subscriber.js'
 import Booking, { BOOKING_STATUSES } from './Booking.js'
+import AdminInvite from './AdminInvite.js'
 
 Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' })
 Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' })
@@ -60,6 +61,7 @@ Booking.belongsTo(Program, { foreignKey: 'programId', as: 'program', onDelete: '
 User.hasMany(Booking, { foreignKey: 'userId', as: 'bookings', onDelete: 'SET NULL' })
 Booking.belongsTo(User, { foreignKey: 'userId', as: 'user', onDelete: 'SET NULL' })
 Booking.belongsTo(User, { foreignKey: 'respondedById', as: 'respondedBy', onDelete: 'SET NULL' })
+AdminInvite.belongsTo(User, { foreignKey: 'invitedById', as: 'invitedBy', onDelete: 'SET NULL' })
 
 export {
   sequelize,
@@ -78,6 +80,7 @@ export {
   ContactMessage,
   Subscriber,
   Booking,
+  AdminInvite,
   ORDER_STATUSES,
   PAYMENT_METHODS,
   PAYMENT_PROVIDERS,
