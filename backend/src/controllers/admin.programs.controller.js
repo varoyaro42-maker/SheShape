@@ -220,7 +220,12 @@ export const update = asyncHandler(async (req, res) => {
     payload.slug = await buildUniqueSlug(Program, payload.slug, { excludeId: program.id })
   }
 
+  const previousCover = program.coverImage
   await program.update(payload)
+
+  if (previousCover && payload.coverImage !== undefined && payload.coverImage !== previousCover) {
+    deleteImageByUrl(previousCover).catch((error) => console.error('Delete failed for', previousCover, error.message))
+  }
 
   const fresh = await Program.findByPk(program.id, { include: [withVideos], order: videosFirst })
   res.json({ data: fresh })

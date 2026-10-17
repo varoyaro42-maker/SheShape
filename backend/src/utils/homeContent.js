@@ -15,7 +15,7 @@ export const DEFAULT_HOME_CONTENT = {
     paragraph:
       "Join our women's health, fitness and wellness platform on a mission to build stronger, healthier lives for women and their communities through movement, prevention, science-based information and community.",
     primaryButtonLabel: 'See programs',
-    secondaryButtonLabel: 'Shop Nkondo Active',
+    secondaryButtonLabel: 'Shop the She Strong tee',
     imageUrl: '',
     // Slideshow photos: [{ imageUrl, label, caption }]. Shown when there is no video.
     slides: [
@@ -42,13 +42,13 @@ export const DEFAULT_HOME_CONTENT = {
     { value: '2026', label: "launched on International Women's Day" }
   ],
   featured: {
-    eyebrow: 'By She Shape · Activewear',
-    heading: 'NKONDO ACTIVE',
-    script: 'made to move with you',
+    eyebrow: 'By She Shape × Shield Activewear',
+    heading: 'SHE STRONG CROP T-SHIRTS',
+    script: 'more than a T-shirt',
     paragraph:
-      'Gym clothes, training accessories and nutrition products designed for women who move. Comfort, support and quality that keeps up with every session.',
-    tags: ['Gym clothes', 'Accessories', 'Nutrition products'],
-    buttonLabel: 'Shop Nkondo Active'
+      'Designed for the women who make up our community. A statement that you show up for yourself, move your body and get stronger together. Crop fit, five colours, 25,000 RWF.',
+    tags: ['White', 'Black', 'Steel blue', 'Navy', 'Sage green'],
+    buttonLabel: 'Shop the tee'
   },
   program: {
     eyebrow: 'Featured program',
@@ -74,7 +74,7 @@ export const DEFAULT_HOME_CONTENT = {
   ticker: {
     // Off by request; switch it on under Site content → Hero.
     enabled: false,
-    items: ['Learn', 'Grow', 'Thrive', 'She Strong Classes', 'Kigali', 'Nkondo Active', 'Women only']
+    items: ['Learn', 'Grow', 'Thrive', 'She Strong Classes', 'Kigali', 'She Strong', 'Women only']
   },
   // Photo strip linking to Instagram: [{ imageUrl, caption, href }]
   // Photos from @sheshape_wellness, each linking to its post.

@@ -1,59 +1,24 @@
 import { sequelize, Product, ProductImage, Category } from '../models/index.js'
 import { buildUniqueSlug } from '../utils/slug.js'
 
-const CATEGORIES = [
-  { name: 'Activewear', slug: 'activewear' },
-  { name: 'Accessories', slug: 'accessories' },
-  { name: 'Supplements', slug: 'supplements' },
-  { name: 'Journals', slug: 'journals' }
-]
+const CATEGORIES = [{ name: 'Activewear', slug: 'activewear' }]
 
+// The shop sells the She Strong crop tee; its photos ship with the site in
+// frontend/public/media/shop so no upload is needed.
 const products = [
   {
-    name: 'She Shape Performance Leggings',
-    description: 'High-waisted squat-proof leggings in a four-way stretch fabric with a hidden waistband pocket.',
-    price: 38000,
-    category: 'activewear',
-    stock: 24,
-    images: [
-      'https://picsum.photos/seed/sheshape-leggings-1/900/900',
-      'https://picsum.photos/seed/sheshape-leggings-2/900/900'
-    ]
-  },
-  {
-    name: 'She Shape Sports Bra',
-    description: 'Medium-support sports bra with removable pads and a racerback cut for full shoulder movement.',
+    name: 'She Strong Crop T-shirt',
+    description:
+      'More than a T-shirt: a statement that she is strong. Designed by She Shape with Shield Activewear for the women in our community. A soft, fitted crop tee with the she strong print across the chest and the She Strong mark at the back. Five colours: white, black, steel blue, navy and sage green.',
     price: 25000,
     category: 'activewear',
-    stock: 30,
-    images: ['https://picsum.photos/seed/sheshape-bra-1/900/900']
-  },
-  {
-    name: 'She Shape Gym Bag',
-    description: 'Water-resistant duffel with a separate shoe compartment and a padded shoulder strap.',
-    price: 45000,
-    category: 'accessories',
-    stock: 12,
+    stock: 50,
+    // Portrait photo first: it fills the promo frame and product cards without cropping.
     images: [
-      'https://picsum.photos/seed/sheshape-bag-1/900/900',
-      'https://picsum.photos/seed/sheshape-bag-2/900/900'
+      { url: '/media/shop/she-strong-tee-black.jpg', color: 'Black', colorHex: '#111111' },
+      { url: '/media/shop/she-strong-tee-colours.jpg' },
+      { url: '/media/shop/she-strong-tee-navy.jpg', color: 'Navy', colorHex: '#1f2a44' }
     ]
-  },
-  {
-    name: 'She Shape Whey Protein 1kg',
-    description: 'Twenty-four grams of protein per serving, vanilla flavour, thirty servings per tub.',
-    price: 52000,
-    category: 'supplements',
-    stock: 18,
-    images: ['https://picsum.photos/seed/sheshape-protein-1/900/900']
-  },
-  {
-    name: 'She Shape Training Journal',
-    description: 'Twelve-week hardcover journal for logging workouts, weights and progress photos.',
-    price: 15000,
-    category: 'journals',
-    stock: 3,
-    images: ['https://picsum.photos/seed/sheshape-journal-1/900/900']
   }
 ]
 
@@ -88,9 +53,11 @@ async function run() {
       }, { transaction })
 
       await ProductImage.bulkCreate(
-        item.images.map((url, index) => ({
+        item.images.map((image, index) => ({
           productId: created.id,
-          url,
+          url: image.url,
+          color: image.color ?? null,
+          colorHex: image.colorHex ?? null,
           sortOrder: index
         })),
         { transaction }

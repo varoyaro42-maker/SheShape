@@ -14,12 +14,13 @@ export function safeUrl(value) {
   }
 }
 
-/** Sequelize validator for stored file addresses: our own /uploads path or an http(s) URL. */
+/** Sequelize validator for stored file addresses: a path on this site or an http(s) URL. */
 export function mediaUrl(value) {
   // Sequelize runs custom validators on null too; an empty address is "no file".
   if (value === null || value === undefined || value === '') return
   const raw = String(value).trim()
-  if (/^\/uploads\/[a-z]+\/[\w.-]+$/i.test(raw)) return
+  // Files we store (/uploads) or ship with the site (/media, /partners).
+  if (/^\/(uploads|media|partners)\/[\w-]+(\/[\w.-]+)*$/i.test(raw) && !raw.includes('..')) return
   if (safeUrl(raw) && /^https?:\/\//i.test(raw)) return
   throw new Error('Must be a file uploaded here or an http(s) URL')
 }

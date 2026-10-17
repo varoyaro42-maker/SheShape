@@ -124,7 +124,7 @@ function ListEditor({ items, onChange, fields, addLabel, blank, disabled }) {
 
 const TABS = [
   { key: 'hero', label: 'Hero', hint: 'Video, photos, headline, scrolling words and numbers' },
-  { key: 'shop', label: 'Shop promo', hint: 'The Nkondo Active block' },
+  { key: 'shop', label: 'Shop promo', hint: 'The She Strong tee block on the home page' },
   { key: 'community', label: 'Community', hint: 'Myths, member quotes and coaches' },
   { key: 'photos', label: 'Instagram', hint: 'The sliding photo strip' },
   { key: 'about', label: 'About & app', hint: 'Your story, the app section and partner logos' },
@@ -311,7 +311,7 @@ export default function AdminHomeSettingsPage() {
         </section>
 
         <section className={styles.card} hidden={tab !== 'shop'}>
-          <h2 className={styles.sectionTitle}>Nkondo Active promo</h2>
+          <h2 className={styles.sectionTitle}>Shop promo</h2>
           <p className={styles.hint}>The product shown comes from your most recently added product.</p>
           <Field label="Small line">{text('featured', 'eyebrow', { maxLength: 80 })}</Field>
           <Field label="Heading">{text('featured', 'heading', { maxLength: 80 })}</Field>

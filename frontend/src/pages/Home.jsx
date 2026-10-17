@@ -149,7 +149,7 @@ export default function Home() {
                 <ArrowRight size={18} />
               </Link>
               <Link to="/shop" className={`btn btn-lg ${styles.heroSecondary}`}>
-                {hero.secondaryButtonLabel || 'Shop Nkondo Active'}
+                {hero.secondaryButtonLabel || 'Shop the She Strong tee'}
                 <ArrowRight size={18} />
               </Link>
             </div>
@@ -389,7 +389,7 @@ export default function Home() {
           <div className="page">
             <SectionHeading
               eyebrow="Shop"
-              title="Latest from Nkondo Active"
+              title="Latest in the shop"
               action={
                 <Link to="/shop" className="btn btn-outline">
                   View all

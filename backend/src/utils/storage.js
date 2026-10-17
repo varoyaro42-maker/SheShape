@@ -89,6 +89,19 @@ export async function deleteByUrl(url) {
 
 export const deleteImageByUrl = deleteByUrl;
 
+/** Collects every address in a JSON value that points at a file this app stored. */
+export function collectOwnUploads(value, into = new Set()) {
+  if (typeof value === 'string') {
+    const publicUrl = (process.env.S3_PUBLIC_URL || '').replace(/\/$/, '');
+    if (value.startsWith('/uploads/') || (publicUrl && value.startsWith(`${publicUrl}/`))) into.add(value);
+  } else if (Array.isArray(value)) {
+    value.forEach((item) => collectOwnUploads(item, into));
+  } else if (value && typeof value === 'object') {
+    Object.values(value).forEach((item) => collectOwnUploads(item, into));
+  }
+  return into;
+}
+
 /** True when a URL points at a file this app stored under the given kind. */
 export function isOwnUpload(url, kind) {
   if (typeof url !== 'string') return false;

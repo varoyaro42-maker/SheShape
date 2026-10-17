@@ -1,6 +1,7 @@
 import { Op } from 'sequelize'
 import { asyncHandler } from '../utils/asyncHandler.js'
 import { sequelize, User, Order } from '../models/index.js'
+import { deleteImageByUrl } from '../utils/storage.js'
 
 const MAX_LIMIT = 50
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -114,7 +115,9 @@ export const remove = asyncHandler(async (req, res) => {
 
   if (!user) throw fail(404, 'Customer not found.')
 
+  const { avatarUrl } = user
   await user.destroy()
+  if (avatarUrl) deleteImageByUrl(avatarUrl).catch((error) => console.error('Delete failed for', avatarUrl, error.message))
 
   res.status(204).end()
 })

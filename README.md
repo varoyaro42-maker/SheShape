@@ -45,7 +45,7 @@ The brand fonts are self-hosted from `frontend/public/fonts` as Latin-subset wof
 |---|---|---|
 | Aeonik | Headlines, brand name | 400, 400 italic, 500, 700 |
 | Sofia Pro | Body text, buttons, forms | 400, 400 italic, 500, 600, 700 |
-| Bicyclette | Labels, numbers, the Nkondo Active wordmark | 400, 700, 900 |
+| Bicyclette | Labels, numbers, the shop wordmark | 400, 700, 900 |
 
 To add a weight, subset the original file with fontTools and drop in a matching `@font-face` rule:
 
@@ -88,6 +88,8 @@ Tables are created and altered with `npm run db:sync` (`sequelize.sync({ alter: 
 ## Uploads and the landing video
 
 Photos, logos, avatars and program videos are stored on the server itself, under `backend/uploads/` (or wherever `UPLOADS_DIR` points), and served at `/uploads/...` with long cache headers. Every uploader in the app follows the same two steps: `POST .../prepare` with the file's type and size, then a multipart `POST .../file`. The deploy folder never includes `uploads/`, so files survive redeploys; include that folder in the cPanel backups.
+
+When an image or video is removed or replaced in admin (site content, product photos, program covers and videos, blog covers, avatars, or a deleted customer) the file is deleted from the server as well. Uploads that never got saved are swept by `npm run uploads:prune` (add `--dry-run` to preview); it skips anything referenced in the database or younger than an hour, so it is safe to run from a cPanel cron job once a day.
 
 Limits: images 5 MB (JPEG, PNG, WebP), videos 1 GB (MP4, MOV, WebM). On cPanel the web server may cap request bodies lower than that; if a large video fails to upload, raise `LimitRequestBody` or upload the file over FTP into `uploads/videos/` and paste its `/uploads/videos/...` path into the admin field.
 
