@@ -10,7 +10,7 @@ const SETTINGS_ID = 1
 export const DEFAULT_HOME_CONTENT = {
   hero: {
     eyebrow: 'Kigali · Rwanda',
-    title: "Together, we're making women's wellness",
+    title: "Together, we are making women's wellness",
     script: 'a movement.',
     paragraph:
       "Join our women's health, fitness and wellness platform on a mission to build stronger, healthier lives for women and their communities through movement, prevention, science-based information and community.",
