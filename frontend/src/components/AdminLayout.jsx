@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X, CalendarCheck, Megaphone, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X, CalendarCheck, Megaphone, ShieldCheck, Ticket } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
@@ -14,6 +14,7 @@ const LINKS = [
   { to: '/admin/users', label: 'Customers', icon: Users },
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/programs', label: 'Programs', icon: Dumbbell },
+  { to: '/admin/events', label: 'Events', icon: Ticket },
   { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
   { to: '/admin/bookings', label: 'Bookings', icon: CalendarCheck },
   { to: '/admin/messages', label: 'Messages', icon: Mail },

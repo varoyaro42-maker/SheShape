@@ -96,5 +96,6 @@ export const adminAdmins = {
   invite: (payload) => api.post('/admin/admins/invites', payload).then(unwrap),
   resend: (id) => api.post(`/admin/admins/invites/${id}/resend`).then(unwrap),
   revoke: (id) => api.delete(`/admin/admins/invites/${id}`),
-  remove: (id) => api.delete(`/admin/admins/${id}`)
+  remove: (id) => api.delete(`/admin/admins/${id}`),
+  setClinical: (id, isClinical) => api.put(`/admin/admins/${id}/clinical`, { isClinical }).then(unwrap)
 }

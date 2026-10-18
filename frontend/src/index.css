@@ -353,3 +353,10 @@ button {
     transition: none;
   }
 }
+
+/* Event pages follow each event's flyer: Lora headings, Poppins text (self-hosted). */
+@font-face { font-family: 'Lora'; font-weight: 500 700; font-style: normal; font-display: swap; src: url('/fonts/Lora-600.woff2') format('woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 300; font-style: normal; font-display: swap; src: url('/fonts/Poppins-300.woff2') format('woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 400; font-style: normal; font-display: swap; src: url('/fonts/Poppins-400.woff2') format('woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 500; font-style: normal; font-display: swap; src: url('/fonts/Poppins-500.woff2') format('woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 600; font-style: normal; font-display: swap; src: url('/fonts/Poppins-600.woff2') format('woff2'); }

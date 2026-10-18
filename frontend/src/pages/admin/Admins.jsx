@@ -167,7 +167,18 @@ export default function AdminAdminsPage() {
                   {person.isYou && <span className={`${styles.badge} ${styles.delivered}`} style={{ marginLeft: 8 }}>You</span>}
                   {person.isOwner && <span className={`${styles.badge} ${styles.pending}`} style={{ marginLeft: 8 }}>Main account</span>}
                 </td>
-                <td>{person.email}</td>
+                <td>
+                  {person.email}
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: '0.8rem' }}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(person.isClinical)}
+                      disabled={busyId === person.id}
+                      onChange={(e) => act(person.id, () => adminAdmins.setClinical(person.id, e.target.checked), e.target.checked ? `${person.name} can now read health answers.` : `${person.name} can no longer read health answers.`)}
+                    />
+                    Medical access (can read health answers)
+                  </label>
+                </td>
                 <td className={styles.date}>{formatOrderDate(person.createdAt)}</td>
                 <td style={{ textAlign: 'right' }}>
                   {!person.isYou && !person.isOwner && (

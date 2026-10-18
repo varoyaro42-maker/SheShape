@@ -70,6 +70,7 @@ export default function Footer() {
           <h3>Explore</h3>
           <ul>
             <li><Link to="/programs">Programs</Link></li>
+            <li><Link to="/events">Events</Link></li>
             <li><Link to="/shop">Shop</Link></li>
             <li><Link to="/blog">Blog</Link></li>
             <li><Link to="/about">About</Link></li>

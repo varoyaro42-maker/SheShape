@@ -52,6 +52,14 @@ const AdminBookingDetailPage = lazy(() => import('./pages/admin/BookingDetail.js
 const AdminSubscribersPage = lazy(() => import('./pages/admin/Subscribers.jsx'))
 const AdminAdminsPage = lazy(() => import('./pages/admin/Admins.jsx'))
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite.jsx'))
+const EventsPage = lazy(() => import('./pages/Events.jsx'))
+const EventPage = lazy(() => import('./pages/EventPage.jsx'))
+const TicketPage = lazy(() => import('./pages/Ticket.jsx'))
+const AdminEventsPage = lazy(() => import('./pages/admin/Events.jsx'))
+const AdminEventEditorPage = lazy(() => import('./pages/admin/EventEditor.jsx'))
+const AdminEventRegistrationsPage = lazy(() => import('./pages/admin/EventRegistrations.jsx'))
+const AdminEventRosterPage = lazy(() => import('./pages/admin/EventRoster.jsx'))
+const AdminCheckInPage = lazy(() => import('./pages/admin/CheckIn.jsx'))
 
 export default function App() {
   return (
@@ -74,6 +82,11 @@ export default function App() {
           <Route path="reset-password" element={<ResetPassword />} />
           <Route path="invite/:token" element={<AcceptInvite />} />
           <Route path="newsletter/:state" element={<NewsletterStatus />} />
+          <Route path="events" element={<EventsPage />} />
+          <Route path="events/:slug" element={<EventPage />} />
+          <Route path="tickets/:token" element={<TicketPage />} />
+          {/* Short event links for Instagram bios, e.g. /her-wellness-experience. Unknown slugs show Not found. */}
+          <Route path=":slug" element={<EventPage />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 
@@ -107,6 +120,12 @@ export default function App() {
           <Route path="bookings/:id" element={<AdminBookingDetailPage />} />
           <Route path="subscribers" element={<AdminSubscribersPage />} />
           <Route path="admins" element={<AdminAdminsPage />} />
+          <Route path="events" element={<AdminEventsPage />} />
+          <Route path="events/new" element={<AdminEventEditorPage />} />
+          <Route path="events/:id" element={<AdminEventEditorPage />} />
+          <Route path="events/:id/registrations" element={<AdminEventRegistrationsPage />} />
+          <Route path="events/:id/roster" element={<AdminEventRosterPage />} />
+          <Route path="check-in/:token" element={<AdminCheckInPage />} />
           <Route path="account" element={<Account />} />
         </Route>
 
