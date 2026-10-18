@@ -3,6 +3,7 @@ import app from './app.js'
 import { connectDatabase } from './db.js'
 import { seedAdminUser } from './utils/seedAdminUser.js'
 import { initMonitoring } from './utils/monitoring.js'
+import { expireHolds, purgeHealthAnswers } from './utils/events.js'
 
 const port = Number(process.env.PORT) || 5000
 
@@ -37,6 +38,8 @@ async function start() {
     const admin = await seedAdminUser()
     if (admin) console.log(`Admin account ready: ${admin.email}`)
 
+    startBackgroundJobs()
+
     app.listen(port, () => {
       console.log(`API running on http://localhost:${port}`)
     })
@@ -47,3 +50,12 @@ async function start() {
 }
 
 start()
+
+/** Unpaid event holds go back to the pool on their own; health answers are deleted after the retention period. */
+function startBackgroundJobs() {
+  if (process.env.NODE_ENV === 'test') return
+  const run = (name, job) => job().catch((error) => console.error(`[jobs] ${name} failed:`, error.message))
+  setInterval(() => run('expire holds', () => expireHolds()), 60 * 1000).unref()
+  setInterval(() => run('purge health answers', purgeHealthAnswers), 6 * 60 * 60 * 1000).unref()
+  run('purge health answers', purgeHealthAnswers)
+}

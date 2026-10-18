@@ -63,6 +63,13 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: 'user',
     },
+    // Medical access: may read the health answers on event registrations.
+    isClinical: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'is_clinical',
+    },
     isVerified: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

@@ -35,7 +35,7 @@ const inviteView = (invite) => ({
 
 export const list = asyncHandler(async (req, res) => {
   const [admins, invites] = await Promise.all([
-    User.findAll({ where: { role: 'admin' }, attributes: ['id', 'name', 'email', 'createdAt'], order: [['createdAt', 'ASC']] }),
+    User.findAll({ where: { role: 'admin' }, attributes: ['id', 'name', 'email', 'isClinical', 'createdAt'], order: [['createdAt', 'ASC']] }),
     AdminInvite.findAll({
       where: { acceptedAt: null },
       include: [{ model: User, as: 'invitedBy', attributes: ['name'] }],
@@ -103,4 +103,13 @@ export const removeAdmin = asyncHandler(async (req, res) => {
   admin.role = 'user';
   await admin.save();
   res.status(204).end();
+});
+
+/** Medical access: may read the health answers on event registrations. */
+export const setClinical = asyncHandler(async (req, res) => {
+  const admin = await User.findOne({ where: { id: req.params.id, role: 'admin' } });
+  if (!admin) throw new HttpError(404, 'Admin not found');
+  admin.isClinical = req.body?.isClinical === true;
+  await admin.save();
+  res.json({ data: { id: admin.id, isClinical: admin.isClinical } });
 });

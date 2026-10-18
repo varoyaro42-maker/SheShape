@@ -403,3 +403,46 @@ export async function sendAdminInviteEmail({ to, name, invitedBy, acceptUrl, exp
     preheader: 'Set your password to start managing She Shape Wellness',
   });
 }
+
+// ---------------------------------------------------------------------------
+// Event tickets: one email that is both the receipt and the ticket. Nothing medical.
+// ---------------------------------------------------------------------------
+
+const eventDate = (date) =>
+  new Date(`${date}T12:00:00+02:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Kigali' });
+
+export async function sendEventTicketEmail({ to, ticket, qrImageUrl, ticketUrl }) {
+  const e = ticket.event;
+  const rows = [
+    ['Ticket', ticket.ticketNumber],
+    ['Name', ticket.name],
+    ['Date', eventDate(e.date)],
+    e.startTime ? ['Time', e.endTime ? `${e.startTime} to ${e.endTime}` : `From ${e.startTime}`] : null,
+    e.venue ? ['Venue', e.venue] : null,
+    ticket.activities.length ? [ticket.activities.length > 1 ? 'Your activities' : 'Your activity', ticket.activities.join(', ')] : null,
+    ticket.amount ? ['Paid', formatPrice(ticket.amount)] : null,
+    ticket.paymentReference ? ['Payment reference', ticket.paymentReference] : null,
+  ].filter(Boolean);
+
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Hi ${escapeHtml(ticket.name.split(' ')[0])}, your place at ${escapeHtml(e.title)} is confirmed. This email is your ticket and your receipt.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px;border-collapse:collapse;">
+      ${rows.map(([k, v]) => `<tr><td style="padding:6px 18px 6px 0;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3a4740;vertical-align:top;">${escapeHtml(k)}</td><td style="padding:6px 0;font-size:14px;color:#1c2b22;">${escapeHtml(v)}</td></tr>`).join('')}
+    </table>
+    <p style="margin:0 0 8px;font-size:13px;color:#3a4740;">Show this code at the entrance:</p>
+    <img src="${qrImageUrl}" alt="Ticket ${escapeHtml(ticket.ticketNumber)}" width="180" height="180" style="display:block;width:180px;height:180px;border:0;margin:0 0 18px;" />
+    ${e.dressCode ? `<p style="margin:0 0 6px;font-weight:700;">Dress code</p><p style="margin:0 0 14px;">${escapeHtml(e.dressCode)}</p>` : ''}
+    ${e.ticketNote ? nl2p(escapeHtml(e.ticketNote)) : ''}
+    ${e.contactWhatsapp ? `<p style="margin:14px 0 0;font-size:13px;color:#3a4740;">Questions: WhatsApp ${escapeHtml(e.contactWhatsapp)}</p>` : ''}`;
+
+  await dispatch({
+    to,
+    subject: `Your ticket: ${e.title} (${ticket.ticketNumber})`,
+    eyebrow: 'Your ticket',
+    title: e.title,
+    bodyHtml,
+    ctaLabel: 'Open my ticket',
+    ctaUrl: ticketUrl,
+    preheader: `Ticket ${ticket.ticketNumber} · ${eventDate(e.date)}`,
+  });
+}

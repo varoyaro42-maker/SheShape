@@ -13,6 +13,7 @@ import homeRoutes from './home.routes.js'
 import contactRoutes from './contact.routes.js'
 import newsletterRoutes from './newsletter.routes.js'
 import bookingRoutes from './bookings.routes.js'
+import eventRoutes from './events.routes.js'
 
 const router = Router()
 
@@ -36,6 +37,7 @@ router.use('/home-content', homeRoutes)
 router.use('/contact', contactRoutes)
 router.use('/newsletter', newsletterRoutes)
 router.use('/bookings', bookingRoutes)
+router.use('/events', eventRoutes)
 router.use('/admin', adminRoutes)
 
 export default router

@@ -88,7 +88,7 @@ function fromKnown(err) {
 
 function resolve(err) {
   if (err.status) {
-    return { status: err.status, message: err.message, details: err.details }
+    return { status: err.status, message: err.message, details: err.details, meta: err.meta }
   }
 
   return (
@@ -102,7 +102,7 @@ export function notFound(req, res) {
 }
 
 export function errorHandler(err, req, res, next) {
-  const { status, message, details } = resolve(err)
+  const { status, message, details, meta } = resolve(err)
 
   if (status >= 500) {
     console.error(`${req.method} ${req.originalUrl}`, err)
@@ -114,6 +114,7 @@ export function errorHandler(err, req, res, next) {
   }
 
   if (details?.length) payload.details = details
+  if (meta) payload.meta = meta
   if (!isProduction()) payload.stack = err.stack
 
   res.status(status).json(payload)

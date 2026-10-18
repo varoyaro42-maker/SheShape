@@ -10,6 +10,7 @@ import {
 } from '../utils/payments/index.js';
 import { verifyWebhookSignature, webhookReferences } from '../utils/payments/xentripay.js';
 import { sendOrderStatusEmail, clientUrl } from '../utils/emails.js';
+import { handleEventWebhook } from './events.controller.js';
 
 const withItemsAndUser = [
   { model: OrderItem, as: 'items' },
@@ -111,6 +112,12 @@ export const xentripayWebhook = asyncHandler(async (req, res) => {
 
   const event = String(payload?.event ?? req.headers['x-xentripay-event'] ?? '').toUpperCase();
   const order = await findOrderForWebhook(payload);
+
+  // Not a shop order: it may be an event ticket.
+  if (!order) {
+    await handleEventWebhook({ event, references: webhookReferences(payload), trusted: Boolean(secret) });
+    return res.json({ received: true });
+  }
 
   if (order) {
     if (event === 'COLLECTION_SUCCESSFUL') {
