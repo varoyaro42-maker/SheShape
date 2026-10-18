@@ -198,7 +198,15 @@ describe('events: everything set by the admin', () => {
 
     const look = await admin.get(`/api/admin/events/check-in/${w1.token}`)
     assert.equal(look.body.data.name, 'Woman 1')
-    assert.equal((await admin.post(`/api/admin/events/check-in/${w1.token}`)).status, 200)
+    const first = await admin.post(`/api/admin/events/check-in/${w1.token}`)
+    assert.equal(first.status, 200)
+    assert.equal(first.body.data.alreadyCheckedIn, false)
+    assert.ok(first.body.data.checkedInBy, 'records who checked her in')
+    const second = await admin.post(`/api/admin/events/check-in/${w1.token}`)
+    assert.equal(second.body.data.alreadyCheckedIn, true, 'a second scan is flagged as already used')
+    assert.equal(second.body.data.checkedInAt, first.body.data.checkedInAt, 'the first time is kept')
+    const again = await admin.get(`/api/admin/events/check-in/${w1.token}`)
+    assert.equal(again.body.data.checkedInBy, first.body.data.checkedInBy)
 
     const cancelled = await admin.post(`/api/admin/events/${event.id}/registrations/${guest.body.data.id}/cancel`)
     assert.equal(cancelled.body.data.status, 'cancelled')

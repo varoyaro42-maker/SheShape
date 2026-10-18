@@ -5,6 +5,7 @@ import { safeUrl, sanitizeUrls } from '../utils/safeUrl.js';
 import { buildUniqueSlug } from '../utils/slug.js';
 import {
   sequelize,
+  User,
   Event,
   EventActivity,
   EventQuestion,
@@ -453,18 +454,46 @@ export const exportCsv = asyncHandler(async (req, res) => {
 
 // --- Check-in (the QR code on the ticket opens this) ------------------------
 
+const findTicket = (token) =>
+  EventRegistration.findOne({
+    where: { token: String(token ?? '') },
+    include: [{ model: User, as: 'checkedInBy', attributes: ['name'], required: false }],
+  });
+
 export const checkInLookup = asyncHandler(async (req, res) => {
-  const reg = await EventRegistration.findOne({ where: { token: String(req.params.token ?? '') } });
+  const reg = await findTicket(req.params.token);
   if (!reg) throw new HttpError(404, 'Ticket not found');
   const event = await Event.findByPk(reg.eventId);
   const acts = await registrationActivities([reg.id]);
-  res.json({ data: { ...registrationRow(reg, acts, { clinical: false }), event: { id: event.id, title: event.title, date: event.date } } });
+  res.json({
+    data: {
+      ...registrationRow(reg, acts, { clinical: false }),
+      checkedInBy: reg.checkedInBy?.name ?? null,
+      event: { id: event.id, title: event.title, date: event.date },
+    },
+  });
 });
 
+/**
+ * Checks her in once. A second scan never overwrites the first: it reports
+ * alreadyCheckedIn with the original time and who did it. The conditional
+ * update means two phones scanning at the same moment cannot both "win".
+ */
 export const checkIn = asyncHandler(async (req, res) => {
-  const reg = await EventRegistration.findOne({ where: { token: String(req.params.token ?? '') } });
+  const reg = await findTicket(req.params.token);
   if (!reg) throw new HttpError(404, 'Ticket not found');
-  if (reg.status !== 'confirmed') throw new HttpError(400, `This ticket is ${reg.status}, not confirmed.`);
-  if (!reg.checkedInAt) await reg.update({ checkedInAt: new Date() });
-  res.json({ data: { checkedInAt: reg.checkedInAt } });
+  if (reg.status !== 'confirmed') throw new HttpError(400, `This ticket is ${reg.status}, not confirmed. Do not let her in on it.`);
+
+  const [changed] = await EventRegistration.update(
+    { checkedInAt: new Date(), checkedInById: req.user.id },
+    { where: { id: reg.id, checkedInAt: null } }
+  );
+  const fresh = await findTicket(req.params.token);
+  res.json({
+    data: {
+      checkedInAt: fresh.checkedInAt,
+      checkedInBy: fresh.checkedInBy?.name ?? null,
+      alreadyCheckedIn: changed === 0,
+    },
+  });
 });

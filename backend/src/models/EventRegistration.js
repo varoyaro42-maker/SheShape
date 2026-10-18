@@ -57,6 +57,8 @@ const EventRegistration = sequelize.define(
     confirmedAt: { type: DataTypes.DATE, allowNull: true, field: 'confirmed_at' },
     cancelledAt: { type: DataTypes.DATE, allowNull: true, field: 'cancelled_at' },
     checkedInAt: { type: DataTypes.DATE, allowNull: true, field: 'checked_in_at' },
+    // The admin whose phone checked her in.
+    checkedInById: { type: DataTypes.UUID, allowNull: true, field: 'checked_in_by_id' },
     ticketEmailedAt: { type: DataTypes.DATE, allowNull: true, field: 'ticket_emailed_at' },
     adminNote: { type: DataTypes.STRING(300), allowNull: true, field: 'admin_note' },
   },

@@ -74,6 +74,7 @@ Event.hasMany(EventQuestion, { foreignKey: 'eventId', as: 'questions', onDelete:
 EventQuestion.belongsTo(Event, { foreignKey: 'eventId', as: 'event' })
 Event.hasMany(EventRegistration, { foreignKey: 'eventId', as: 'registrations', onDelete: 'CASCADE', hooks: true })
 EventRegistration.belongsTo(Event, { foreignKey: 'eventId', as: 'event' })
+EventRegistration.belongsTo(User, { foreignKey: 'checkedInById', as: 'checkedInBy', onDelete: 'SET NULL' })
 EventRegistration.hasMany(EventRegistrationActivity, { foreignKey: 'registrationId', as: 'picks', onDelete: 'CASCADE', hooks: true })
 EventRegistrationActivity.belongsTo(EventRegistration, { foreignKey: 'registrationId', as: 'registration' })
 EventRegistrationActivity.belongsTo(EventActivity, { foreignKey: 'activityId', as: 'activity' })
