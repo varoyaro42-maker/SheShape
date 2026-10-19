@@ -290,9 +290,7 @@ export default function EventPage() {
           <p className={styles.partnersLabel}>In partnership with</p>
           <ul>
             {event.partners.map((p, i) => (
-              <li key={`${p.name}-${i}`} title={p.name}>
-                {p.imageUrl ? <img src={p.imageUrl} alt={p.name} loading="lazy" /> : <span>{p.name}</span>}
-              </li>
+              <PartnerLogo key={`${p.name}-${i}`} partner={p} />
             ))}
           </ul>
         </section>
@@ -464,6 +462,47 @@ export default function EventPage() {
         )}
 
     </div>
+  )
+}
+
+/**
+ * White logos (made for a dark background) sit straight on the green band;
+ * coloured logos get a white tile. Decided from the image itself, so any file works.
+ */
+function PartnerLogo({ partner }) {
+  const [light, setLight] = useState(false)
+
+  function inspect(event) {
+    try {
+      const img = event.currentTarget
+      const canvas = document.createElement('canvas')
+      canvas.width = 48
+      canvas.height = 48
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })
+      ctx.drawImage(img, 0, 0, 48, 48)
+      const { data } = ctx.getImageData(0, 0, 48, 48)
+      let sum = 0
+      let count = 0
+      let transparent = 0
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 40) {
+          transparent += 1
+          continue
+        }
+        sum += 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]
+        count += 1
+      }
+      // Mostly see-through and what is left is near white: a logo for dark backgrounds.
+      setLight(transparent > 48 * 48 * 0.2 && count > 0 && sum / count > 225)
+    } catch {
+      // unreadable image: keep the white tile
+    }
+  }
+
+  return (
+    <li title={partner.name} className={light ? styles.onGreen : undefined}>
+      {partner.imageUrl ? <img src={partner.imageUrl} alt={partner.name} loading="lazy" onLoad={inspect} /> : <span>{partner.name}</span>}
+    </li>
   )
 }
 
