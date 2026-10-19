@@ -4,19 +4,7 @@ import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
 import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
-
-function resolveRedirect(fromPath, role) {
-  const fallback = role === 'admin' ? '/admin' : '/dashboard';
-
-  // A path from state.from was captured under whoever was logged in before
-  // (e.g. an admin session that expired). Only honor it if it still fits
-  // the role that's actually signing in now — an admin URL is worthless
-  // (and gets bounced to "/") for a customer, and vice versa.
-  if (!fromPath) return fallback;
-  if (fromPath.startsWith('/admin') && role !== 'admin') return fallback;
-
-  return fromPath;
-}
+import { resolveAfterLogin, takeAfterLogin } from '../utils/afterLogin.js';
 
 export default function Login() {
   const { user, isAdmin, login } = useAuth();
@@ -27,7 +15,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const redirectTo = resolveRedirect(location.state?.from?.pathname, isAdmin ? 'admin' : 'customer');
+  const redirectTo = resolveAfterLogin(location.state?.from?.pathname, isAdmin ? 'admin' : 'customer');
 
   if (user) return <Navigate to={redirectTo} replace />;
 
@@ -46,7 +34,7 @@ export default function Login() {
       if (result.pendingVerification) {
         navigate('/verify-email', { replace: true, state: { email: result.email } });
       } else {
-        navigate(resolveRedirect(location.state?.from?.pathname, result.role), { replace: true });
+        navigate(takeAfterLogin(location.state?.from?.pathname, result.role), { replace: true });
       }
     } catch (requestError) {
       setError(readError(requestError));
@@ -103,7 +91,7 @@ export default function Login() {
         </form>
 
         <p className={styles.footer}>
-          New here? <Link to="/register">Create an account</Link>
+          New here? <Link to="/register" state={location.state}>Create an account</Link>
         </p>
     </AuthShell>
   );

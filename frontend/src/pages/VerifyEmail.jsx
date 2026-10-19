@@ -4,6 +4,7 @@ import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
 import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
+import { resolveAfterLogin, takeAfterLogin } from '../utils/afterLogin.js';
 
 export default function VerifyEmail() {
   const { user, verifyEmail, resendOtp } = useAuth();
@@ -18,7 +19,7 @@ export default function VerifyEmail() {
   const [submitting, setSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to={resolveAfterLogin(null, user.role)} replace />;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,7 +29,7 @@ export default function VerifyEmail() {
 
     try {
       await verifyEmail(code);
-      navigate('/dashboard', { replace: true });
+      navigate(takeAfterLogin(null, 'customer'), { replace: true });
     } catch (requestError) {
       setError(readError(requestError));
       setSubmitting(false);

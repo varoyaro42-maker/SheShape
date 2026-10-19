@@ -1,9 +1,10 @@
-import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, ShoppingBag } from 'lucide-react'
 import { useCart } from '../context/cart-context.js'
 import { useAuth } from '../context/auth-context.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import styles from './Navbar.module.css'
+import { returnPathFor } from '../utils/afterLogin.js'
 
 const links = [
   { to: '/', label: 'Home', end: true },
@@ -19,6 +20,7 @@ export default function Navbar() {
   const { count } = useCart()
   const { user, isAdmin, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const menu = useMobileMenu()
 
   const handleLogout = async () => {
@@ -30,6 +32,8 @@ export default function Navbar() {
   const portalPath = isAdmin ? '/admin' : '/dashboard'
   const cartTo = user ? '/dashboard/cart' : '/login'
   const cartState = user ? undefined : { from: { pathname: '/dashboard/cart' } }
+  // Back to this page after signing in.
+  const loginState = returnPathFor(location.pathname) ? { from: { pathname: returnPathFor(location.pathname) } } : undefined
   const cartLabel = count > 0 ? `Cart, ${count} items` : 'Cart'
 
   return (
@@ -94,7 +98,7 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link className={styles.login} to="/login">
+              <Link className={styles.login} to="/login" state={loginState}>
                 Log in
               </Link>
             )}

@@ -5,6 +5,7 @@ import { useCart } from '../context/cart-context.js'
 import { useAuth } from '../context/auth-context.js'
 import { usePortalPath } from '../hooks/usePortalPath.js'
 import { formatPrice } from '../utils/format.js'
+import { rememberReturn, readReturn, clearReturn } from '../utils/afterLogin.js'
 import QuantityStepper from '../components/QuantityStepper.jsx'
 import Loading from '../components/Loading.jsx'
 import Empty from '../components/Empty.jsx'
@@ -33,6 +34,23 @@ export default function Product() {
     setQuantity(1)
     setAdded(false)
   }, [slug])
+
+  // Back from signing in: add what she had chosen, once.
+  useEffect(() => {
+    if (!user || !product || user.role === 'admin') return
+    const pending = readReturn()?.item
+    if (!pending || pending.slug !== product.slug) return
+    clearReturn()
+    const stillThere = (value, list) => (value && list.includes(value) ? value : null)
+    const colorList = [...new Set((product.images ?? []).map((image) => image.color).filter(Boolean))]
+    const color = stillThere(pending.color, colorList)
+    const pendingSize = stillThere(pending.size, product.sizes ?? [])
+    if (product.stock < 1 || (colorList.length && !color) || ((product.sizes ?? []).length && !pendingSize)) return
+    setActiveColor(color)
+    setSize(pendingSize)
+    addItem(product, Math.max(1, Number(pending.quantity) || 1), { color, size: pendingSize })
+    setAdded(true)
+  }, [user, product, addItem])
 
   useEffect(() => {
     if (!added) return
@@ -78,14 +96,17 @@ export default function Product() {
   }
 
   const handleAdd = () => {
-    if (!user) {
-      navigate('/login', { state: { from: { pathname: '/dashboard/cart' } } })
-      return
-    }
-
     const missing = [colors.length && !activeColor ? 'a colour' : null, sizes.length && !size ? 'a size' : null].filter(Boolean)
     if (missing.length) {
       setChoiceError(`Choose ${missing.join(' and ')} first.`)
+      return
+    }
+
+    if (!user) {
+      // Come back to this product after signing in, with her choice already in the cart.
+      const back = `/dashboard/product/${product.slug}`
+      rememberReturn(back, { slug: product.slug, color: activeColor, size, quantity })
+      navigate('/login', { state: { from: { pathname: back } } })
       return
     }
 

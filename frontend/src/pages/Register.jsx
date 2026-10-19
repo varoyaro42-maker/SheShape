@@ -4,6 +4,7 @@ import { useAuth } from '../context/auth-context.js';
 import { readError } from '../api/client.js';
 import AuthShell from '../components/AuthShell.jsx';
 import styles from './Form.module.css';
+import { resolveAfterLogin, takeAfterLogin } from '../utils/afterLogin.js';
 
 const EMPTY_FORM = { name: '', email: '', phone: '', password: '' };
 
@@ -15,7 +16,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  if (user) return <Navigate to="/dashboard" replace />;
+  if (user) return <Navigate to={resolveAfterLogin(null, user.role)} replace />;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -32,7 +33,7 @@ export default function Register() {
       if (result.pendingVerification) {
         navigate('/verify-email', { replace: true, state: { email: result.email } });
       } else {
-        navigate('/dashboard', { replace: true });
+        navigate(takeAfterLogin(null, 'customer'), { replace: true });
       }
     } catch (requestError) {
       setError(readError(requestError));
