@@ -241,7 +241,8 @@
 }
 
 .orderLink {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-family: var(--body);
+  font-variant-numeric: tabular-nums;
   font-size: 0.86rem;
   color: var(--admin-ink);
   text-decoration: none;

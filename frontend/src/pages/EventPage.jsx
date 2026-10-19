@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight, Check, CreditCard, Smartphone } from 'lucide-react'
 import { events, formatEventDate, formatMoney } from '../api/events.js'
@@ -58,6 +59,8 @@ export default function EventPage() {
   const [submitting, setSubmitting] = useState(false)
   const [waiting, setWaiting] = useState(null)
   const formRef = useRef(null)
+  const registerRef = useRef(null)
+  const [formInView, setFormInView] = useState(false)
   const refreshedOnFocus = useRef(false)
 
   useEffect(() => {
@@ -79,6 +82,15 @@ export default function EventPage() {
       return keep.length === current.activityIds.length ? current : { ...current, activityIds: keep }
     })
   }, [event, openActivities])
+
+  // Hide the phone "Register" bar once the form is on screen.
+  useEffect(() => {
+    const el = registerRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return undefined
+    const observer = new IntersectionObserver(([entry]) => setFormInView(entry.isIntersecting), { rootMargin: '0px 0px -30% 0px' })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [event])
 
   // Poll while she approves the MoMo prompt.
   useEffect(() => {
@@ -270,7 +282,7 @@ export default function EventPage() {
           <p className={styles.partnersLabel}>In partnership with</p>
           <ul>
             {event.partners.map((p, i) => (
-              <li key={`${p.name}-${i}`}>
+              <li key={`${p.name}-${i}`} title={p.name}>
                 {p.imageUrl ? <img src={p.imageUrl} alt={p.name} loading="lazy" /> : <span>{p.name}</span>}
               </li>
             ))}
@@ -278,7 +290,26 @@ export default function EventPage() {
         </section>
       )}
 
-      <section id="register" className={styles.registerBand}>
+      <section className={styles.wrap}>
+        <div className={styles.ticketBand}>
+          <div>
+            <p className={styles.bandLabel}>Your ticket</p>
+            <p className={styles.bandPrice}>{event.price ? formatMoney(event.price) : 'Free'}</p>
+            {event.priceNote && <p className={styles.bandNote}>{event.priceNote}</p>}
+          </div>
+          <div className={styles.bandRight}>
+            <p className={styles.bandLabel}>{formatEventDate(event.date)}</p>
+            {event.venue && <p className={styles.bandNote}>{event.venue}{time ? ` · ${time}` : ''}</p>}
+            {event.state === 'open' && (
+              <a href="#register" className={styles.bandCta}>
+                Reserve your place <ArrowRight size={17} />
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section id="register" ref={registerRef} className={styles.registerBand}>
         <div className={styles.wrap}>
           {event.state !== 'open' ? (
             <div className={styles.closed}>
@@ -295,7 +326,8 @@ export default function EventPage() {
               <p className={styles.small}>No prompt? Dial *182*7*1# to see pending payments.</p>
             </div>
           ) : (
-            <form ref={formRef} className={styles.form} onSubmit={submit} noValidate>
+            <div className={styles.registerGrid}>
+            <form id="event-form" ref={formRef} className={styles.form} onSubmit={submit} noValidate>
               <h2 className={styles.formTitle}>Register</h2>
               <p className={styles.formLead}>{placesText(event.placesLeft)} of {event.totalPlaces}. No account needed.</p>
 
@@ -372,9 +404,47 @@ export default function EventPage() {
               </button>
               <p className={styles.small}>Your places are held for {event.holdMinutes} minutes while you pay. You get your ticket on this page and by email.</p>
             </form>
+            <aside className={styles.summary} aria-label="Your registration">
+              <p className={styles.summaryKicker}>Your registration</p>
+              <h3 className={styles.summaryTitle}>{event.title}</h3>
+              <dl className={styles.summaryRows}>
+                <div><dt>Date</dt><dd>{formatEventDate(event.date)}</dd></div>
+                {time && <div><dt>Time</dt><dd>{time}</dd></div>}
+                {event.venue && <div><dt>Venue</dt><dd>{event.venue}</dd></div>}
+                {event.picks > 0 && event.activities.length > 0 && (
+                  <div>
+                    <dt>{needed === 1 ? 'Activity' : 'Activities'}</dt>
+                    <dd>
+                      {form.activityIds.length
+                        ? event.activities.filter((a) => form.activityIds.includes(a.id)).map((a) => a.name).join(', ')
+                        : <span className={styles.muted}>Choose {needed}</span>}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              <div className={styles.summaryTotal}>
+                <span>Total</span>
+                <strong>{event.price ? formatMoney(event.price) : 'Free'}</strong>
+              </div>
+              <button type="submit" form="event-form" className={styles.submit} disabled={submitting}>
+                {submitting ? 'One moment…' : event.price > 0 ? `Pay ${formatMoney(event.price)}` : 'Register'}
+              </button>
+              <p className={styles.small}>{placesText(event.placesLeft)}. No account needed.</p>
+            </aside>
+            </div>
           )}
         </div>
       </section>
+
+      {/* Rendered on <body>: the page's entrance animation would otherwise pin it to the page, not the screen. */}
+      {event.state === 'open' && !waiting && !formInView &&
+        createPortal(
+          <a href="#register" className={styles.mobileBar}>
+            <span>{event.price ? formatMoney(event.price) : 'Free'}</span>
+            <strong>Register <ArrowRight size={16} /></strong>
+          </a>,
+          document.body
+        )}
 
       {(event.contactWhatsapp || event.contactInstagram) && (
         <p className={`${styles.wrap} ${styles.contact}`}>

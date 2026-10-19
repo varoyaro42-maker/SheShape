@@ -2,8 +2,8 @@
   min-height: 70vh;
   padding: 32px 16px 48px;
   background: #f7f5ef;
-  font-family: 'Poppins', var(--body);
-  font-weight: 300;
+  font-family: var(--body);
+  font-weight: 400;
   color: #1e2b23;
 }
 
@@ -42,7 +42,7 @@
 }
 
 .title {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--heading);
   font-weight: 600;
   font-size: 28px;
   line-height: 1.15;

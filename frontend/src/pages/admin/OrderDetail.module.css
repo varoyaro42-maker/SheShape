@@ -16,7 +16,8 @@
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-family: var(--body);
+  font-variant-numeric: tabular-nums;
   color: var(--admin-ink);
 }
 

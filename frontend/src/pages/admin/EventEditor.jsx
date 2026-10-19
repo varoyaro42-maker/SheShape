@@ -259,7 +259,7 @@ export default function AdminEventEditorPage() {
 
         <section className={styles.card} hidden={tab !== 'page'}>
           <h2 className={styles.sectionTitle}>Page</h2>
-          <HomeImageUploader label="Main photo" value={data.heroImage} onChange={(url) => set('heroImage', url)} disabled={saving} hint="One strong photo, portrait works best." />
+          <HomeImageUploader label="Main photo" value={data.heroImage} onChange={(url) => set('heroImage', url)} disabled={saving} hint="Use one strong photo of a woman moving, not the flyer: text inside an image is too small to read on a phone, and the page already shows the same details. Portrait photos work best." />
           <span className={styles.label}>Photo strip</span>
           <div className={ev.thumbs}>
             {data.gallery.map((g, i) => (

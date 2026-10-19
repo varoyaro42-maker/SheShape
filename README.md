@@ -39,22 +39,7 @@ Email is optional in development: with neither `BREVO_API_KEY` nor `SMTP_HOST` s
 
 ## Fonts
 
-The brand fonts are self-hosted from `frontend/public/fonts` as Latin-subset woff2 files (about 20 KB each), declared at the top of `frontend/src/index.css`:
-
-| Family | Role | Weights shipped |
-|---|---|---|
-| Aeonik | Headlines, brand name | 400, 400 italic, 500, 700 |
-| Sofia Pro | Body text, buttons, forms | 400, 400 italic, 500, 600, 700 |
-| Bicyclette | Labels, numbers, the shop wordmark | 400, 700, 900 |
-
-To add a weight, subset the original file with fontTools and drop in a matching `@font-face` rule:
-
-```bash
-python3 -m fontTools.subset "Aeonik-Light.ttf" --output-file=frontend/public/fonts/Aeonik-Light.woff2 \
-  --flavor=woff2 --layout-features='*' --unicodes="U+0000-00FF,U+2000-206F,U+20AC,U+2122"
-```
-
-The original font archives are not in the repository; keep them with the brand assets.
+The whole site uses **Sofia Pro**, self-hosted from `frontend/public/fonts` as woff2 files and declared at the top of `frontend/src/index.css` (weights 400, 400 italic, 500, 600, 700). The `--heading`, `--body` and `--accent` variables all point to it.
 
 ## Tests
 

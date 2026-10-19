@@ -1,4 +1,4 @@
-/* Event pages take the event flyer's look: forest green, cream, Lora + Poppins. */
+/* Event pages take the event flyer's colours: forest green and cream. */
 .page {
   --ev-green: #14402a;
   --ev-sage: #a9c3ac;
@@ -9,9 +9,8 @@
   --ev-line: #e2e6dc;
   background: var(--ev-cream);
   color: var(--ev-ink);
-  font-family: 'Poppins', var(--body);
-  font-weight: 300;
-  padding-bottom: 32px;
+  font-family: var(--body);
+  font-weight: 400;
 }
 
 .wrap {
@@ -35,11 +34,11 @@
 }
 
 .title {
-  font-family: 'Lora', Georgia, serif;
-  font-weight: 600;
-  font-size: clamp(40px, 9vw, 76px);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: clamp(36px, 6.2vw, 60px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
   color: var(--ev-green);
   margin: 0 0 18px;
 }
@@ -176,7 +175,7 @@
 }
 
 .blockTitle {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--heading);
   font-weight: 600;
   font-size: 24px;
   color: var(--ev-sage);
@@ -262,23 +261,35 @@
   list-style: none;
 }
 
-/* Partner logos sit together in white on green, never in their own colours. */
+/* Partner logos sit on matching white tiles, so any file (with or without a background) looks tidy. */
+.partners li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 128px;
+  height: 64px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #fff;
+}
+
 .partners img {
   display: block;
-  max-height: 44px;
-  max-width: 120px;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  filter: brightness(0) invert(1);
 }
 
 .partners span {
-  color: #fff;
-  font-weight: 500;
+  color: var(--ev-green);
+  font-weight: 600;
+  font-size: 13px;
+  text-align: center;
 }
 
 .registerBand {
   margin-top: 32px;
-  padding: 36px 0;
+  padding: 40px 0 44px;
   background: #fff;
   border-top: 1px solid var(--ev-line);
   border-bottom: 1px solid var(--ev-line);
@@ -286,14 +297,155 @@
 }
 
 .form {
-  max-width: 640px;
-  margin-inline: auto;
+  min-width: 0;
+}
+
+.registerGrid {
+  display: grid;
+  gap: 28px;
+  align-items: start;
+}
+
+.summary {
+  display: none;
+}
+
+.summaryKicker,
+.bandLabel {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.summaryKicker {
+  color: #2f6b3d;
+}
+
+.summaryTitle {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--ev-green);
+  margin: 0 0 16px;
+}
+
+.summaryRows {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+
+.summaryRows div {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  gap: 10px;
+  font-size: 14.5px;
+}
+
+.summaryRows dt {
+  color: var(--ev-soft);
+}
+
+.summaryRows dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--ev-soft);
+  font-weight: 400;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 14px 0;
+  margin-bottom: 14px;
+  border-top: 1px solid var(--ev-line);
+  font-size: 15px;
+}
+
+.summaryTotal strong {
+  font-size: 22px;
+  color: var(--ev-green);
+}
+
+/* The flyer's ticket footer: price on the left, date and a call to action on the right. */
+.ticketBand {
+  display: grid;
+  gap: 18px;
+  margin-top: 26px;
+  padding: 26px 24px;
+  border-radius: 24px;
+  background: var(--ev-green);
+  color: #fff;
+}
+
+.ticketBand .bandLabel {
+  color: var(--ev-sage);
+}
+
+.bandPrice {
+  margin: 0;
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: clamp(34px, 6vw, 48px);
+  line-height: 1;
+}
+
+.bandNote {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bandCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ev-green);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mobileBar {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 40;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-radius: 999px;
+  /* Lives on <body>, outside .page, so it carries its own colours and font. */
+  background: #14402a;
+  color: #fff;
+  font-family: var(--body);
+  font-size: 16px;
+  text-decoration: none;
+  box-shadow: 0 14px 34px rgba(6, 49, 26, 0.35);
+}
+
+.mobileBar strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .formTitle,
 .closed h2,
 .waiting h2 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: var(--heading);
   font-weight: 600;
   font-size: clamp(28px, 6vw, 38px);
   color: var(--ev-green);
@@ -325,7 +477,7 @@
 
 .activityGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 10px;
 }
 
@@ -423,7 +575,7 @@
 }
 
 .optional {
-  font-weight: 300;
+  font-weight: 400;
   color: var(--ev-soft);
 }
 
@@ -507,7 +659,7 @@
 }
 
 .method small {
-  font-weight: 300;
+  font-weight: 400;
   font-size: 12.5px;
   color: var(--ev-soft);
 }
@@ -576,10 +728,46 @@
 }
 
 .contact {
-  margin-top: 22px;
+  margin: 0 auto;
+  padding: 22px 0 28px;
   text-align: center;
   font-size: 14px;
   color: var(--ev-soft);
+}
+
+@media (min-width: 900px) {
+  .registerGrid {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    gap: 40px;
+  }
+
+  .summary {
+    display: block;
+    position: sticky;
+    top: 120px;
+    padding: 24px;
+    border-radius: 20px;
+    background: var(--ev-cream);
+    border: 1px solid var(--ev-line);
+  }
+
+  .form .submit {
+    display: none;
+  }
+
+  .ticketBand {
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    padding: 30px 36px;
+  }
+
+  .bandRight {
+    text-align: right;
+  }
+
+  .mobileBar {
+    display: none;
+  }
 }
 
 @media (min-width: 860px) {
