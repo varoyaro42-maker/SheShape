@@ -133,6 +133,17 @@ function readImageUrls(body) {
   })
 }
 
+// "S, M, L" or ["S", "M", "L"] -> ["S", "M", "L"], without blanks or repeats.
+function readSizes(body) {
+  const raw = body.sizes
+  if (raw === undefined || raw === null || raw === '') return []
+  const list = Array.isArray(raw) ? raw : String(raw).split(',')
+  const sizes = [...new Set(list.map((size) => String(size ?? '').trim()).filter(Boolean))]
+  if (sizes.length > 20) throw invalid('sizes', 'A product can have at most 20 sizes.')
+  if (sizes.some((size) => size.length > 20)) throw invalid('sizes', 'Each size must be 20 characters or fewer.')
+  return sizes
+}
+
 async function buildPayload(body, { partial }) {
   const has = (field) => Object.prototype.hasOwnProperty.call(body, field)
   const payload = {}
@@ -156,6 +167,10 @@ async function buildPayload(body, { partial }) {
   if (!partial || has('stock')) {
     const stock = readInteger(body, 'stock', { required: false })
     payload.stock = stock === undefined ? 0 : stock
+  }
+
+  if (!partial || has('sizes')) {
+    payload.sizes = readSizes(body)
   }
 
   if (!partial || has('isPublished')) {

@@ -3,6 +3,9 @@ import { CartContext } from './cart-context.js'
 
 const STORAGE_KEY = 'sheshape.cart.v1'
 
+// One cart line per product + colour + size.
+const lineKey = (id, color, size) => `${id}|${color ?? ''}|${size ?? ''}`
+
 function sanitize(raw) {
   if (!Array.isArray(raw)) return []
 
@@ -16,7 +19,10 @@ function sanitize(raw) {
         item.quantity > 0
     )
     .map((item) => ({
+      key: lineKey(item.id, item.color, item.size),
       id: item.id,
+      color: typeof item.color === 'string' && item.color ? item.color : null,
+      size: typeof item.size === 'string' && item.size ? item.size : null,
       slug: String(item.slug ?? ''),
       name: String(item.name ?? ''),
       price: item.price,
@@ -42,38 +48,45 @@ function clamp(value, max) {
 function reducer(items, action) {
   switch (action.type) {
     case 'add': {
-      const { product, quantity } = action
-      const existing = items.find((item) => item.id === product.id)
+      const { product, quantity, color = null, size = null } = action
+      const key = lineKey(product.id, color, size)
+      // Stock is per product, shared by all its colours and sizes.
+      const elsewhere = items.filter((item) => item.id === product.id && item.key !== key).reduce((sum, item) => sum + item.quantity, 0)
+      const room = Math.max(0, product.stock - elsewhere)
+      const existing = items.find((item) => item.key === key)
 
       if (existing) {
         return items.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: clamp(item.quantity + quantity, product.stock) }
-            : item
+          item.key === key ? { ...item, quantity: clamp(item.quantity + quantity, room) } : item
         )
       }
+
+      if (room <= 0) return items
 
       return [
         ...items,
         {
+          key,
           id: product.id,
+          color,
+          size,
           slug: product.slug,
           name: product.name,
           price: product.price,
-          image: product.images?.[0]?.url ?? null,
+          image: (color && product.images?.find((image) => image.color === color)?.url) || product.images?.[0]?.url || null,
           stock: product.stock,
-          quantity: clamp(quantity, product.stock)
+          quantity: clamp(quantity, room)
         }
       ]
     }
 
     case 'update':
       return items.map((item) =>
-        item.id === action.id ? { ...item, quantity: clamp(action.quantity, item.stock) } : item
+        item.key === action.key ? { ...item, quantity: clamp(action.quantity, item.stock) } : item
       )
 
     case 'remove':
-      return items.filter((item) => item.id !== action.id)
+      return items.filter((item) => item.key !== action.key)
 
     case 'clear':
       return []
@@ -93,9 +106,9 @@ export default function CartProvider({ children }) {
   const value = useMemo(
     () => ({
       items,
-      addItem: (product, quantity = 1) => dispatch({ type: 'add', product, quantity }),
-      updateQuantity: (id, quantity) => dispatch({ type: 'update', id, quantity }),
-      removeItem: (id) => dispatch({ type: 'remove', id }),
+      addItem: (product, quantity = 1, { color = null, size = null } = {}) => dispatch({ type: 'add', product, quantity, color, size }),
+      updateQuantity: (key, quantity) => dispatch({ type: 'update', key, quantity }),
+      removeItem: (key) => dispatch({ type: 'remove', key }),
       clearCart: () => dispatch({ type: 'clear' }),
       count: items.reduce((sum, item) => sum + item.quantity, 0),
       total: items.reduce((sum, item) => sum + item.price * item.quantity, 0)

@@ -104,7 +104,7 @@ function itemsTable(items) {
     .map(
       (item) => `
         <tr>
-          <td style="padding:9px 0;border-bottom:1px solid #e7e9e0;font-size:14px;color:#1c2b22;">${escapeHtml(item.name)} × ${item.quantity}</td>
+          <td style="padding:9px 0;border-bottom:1px solid #e7e9e0;font-size:14px;color:#1c2b22;">${escapeHtml(item.name)}${item.color || item.size ? ` <span style="color:#3a4740;">(${escapeHtml([item.color, item.size && `size ${item.size}`].filter(Boolean).join(', '))})</span>` : ''} × ${item.quantity}</td>
           <td align="right" style="padding:9px 0;border-bottom:1px solid #e7e9e0;font-size:14px;color:#1c2b22;white-space:nowrap;">${formatPrice(item.price * item.quantity)}</td>
         </tr>`
     )

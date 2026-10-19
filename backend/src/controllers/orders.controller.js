@@ -1,6 +1,6 @@
 import { Op } from 'sequelize';
 import sequelize from '../db.js';
-import { Order, OrderItem, Product, PAYMENT_METHODS } from '../models/index.js';
+import { Order, OrderItem, Product, ProductImage, PAYMENT_METHODS } from '../models/index.js';
 import { HttpError } from '../utils/httpError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { buildUniqueOrderNumber } from '../utils/orderNumber.js';
@@ -21,11 +21,15 @@ const collectRequestedItems = (rawItems) => {
     throw new HttpError(400, 'That is too many different items for one order');
   }
 
-  const requested = new Map();
+  // One line per product + colour + size; stock is counted per product.
+  const lines = new Map();
+  const perProduct = new Map();
 
   for (const item of rawItems) {
     const productId = String(item?.productId ?? '').trim();
     const quantity = Number(item?.quantity);
+    const color = String(item?.color ?? '').trim().slice(0, 60) || null;
+    const size = String(item?.size ?? '').trim().slice(0, 20) || null;
 
     if (!productId) {
       throw new HttpError(400, 'Every cart item needs a product');
@@ -35,11 +39,18 @@ const collectRequestedItems = (rawItems) => {
       throw new HttpError(400, `Quantities must be whole numbers between 1 and ${MAX_QUANTITY}`);
     }
 
-    requested.set(productId, (requested.get(productId) ?? 0) + quantity);
+    const key = JSON.stringify([productId, color, size]);
+    const line = lines.get(key) ?? { productId, color, size, quantity: 0 };
+    line.quantity += quantity;
+    lines.set(key, line);
+    perProduct.set(productId, (perProduct.get(productId) ?? 0) + quantity);
   }
 
-  return requested;
+  return { lines: [...lines.values()], perProduct };
 };
+
+/** The colours a product offers: the colours its photos are tagged with. */
+const productColors = (product) => [...new Set((product.images ?? []).map((image) => image.color).filter(Boolean))];
 
 // Undo a freshly created order whose online payment could not be started, so
 // the customer is not left with a pending order and the stock is not held.
@@ -85,6 +96,7 @@ function paymentSummary(order, methods) {
 export const createOrder = asyncHandler(async (req, res) => {
   const { customerName, customerPhone, address, items } = req.body;
   const requested = collectRequestedItems(items);
+  const requestedIds = [...requested.perProduct.keys()];
 
   const paymentMethod = PAYMENT_METHODS.includes(req.body.paymentMethod) ? req.body.paymentMethod : 'cod';
   const methods = await getPublicPaymentMethods();
@@ -108,18 +120,20 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   const { order: created, lines } = await sequelize.transaction(async (transaction) => {
     const products = await Product.findAll({
-      where: { id: { [Op.in]: [...requested.keys()] }, isPublished: true },
+      where: { id: { [Op.in]: requestedIds }, isPublished: true },
       lock: transaction.LOCK.UPDATE,
       transaction,
     });
 
-    if (products.length !== requested.size) {
+    if (products.length !== requestedIds.length) {
       throw new HttpError(400, 'One of the items in your cart is no longer available');
     }
 
-    const lines = products.map((product) => {
-      const quantity = requested.get(product.id);
+    const images = await ProductImage.findAll({ where: { productId: requestedIds }, attributes: ['productId', 'color'], transaction });
+    const byId = new Map(products.map((product) => [product.id, product]));
 
+    for (const product of products) {
+      const quantity = requested.perProduct.get(product.id);
       if (product.stock < quantity) {
         throw new HttpError(
           409,
@@ -128,12 +142,27 @@ export const createOrder = asyncHandler(async (req, res) => {
             : `Only ${product.stock} left of ${product.name}`
         );
       }
+    }
+
+    const lines = requested.lines.map((line) => {
+      const product = byId.get(line.productId);
+      const colors = productColors({ images: images.filter((image) => image.productId === product.id) });
+      const sizes = product.sizes;
+
+      if (colors.length && !colors.includes(line.color)) {
+        throw new HttpError(400, `Choose a colour for ${product.name}.`);
+      }
+      if (sizes.length && !sizes.includes(line.size)) {
+        throw new HttpError(400, `Choose a size for ${product.name}.`);
+      }
 
       return {
         productId: product.id,
         name: product.name,
         price: product.price,
-        quantity,
+        color: colors.length ? line.color : null,
+        size: sizes.length ? line.size : null,
+        quantity: line.quantity,
       };
     });
 
@@ -161,7 +190,7 @@ export const createOrder = asyncHandler(async (req, res) => {
     );
 
     for (const product of products) {
-      await product.decrement('stock', { by: requested.get(product.id), transaction });
+      await product.decrement('stock', { by: requested.perProduct.get(product.id), transaction });
     }
 
     return { order, lines };

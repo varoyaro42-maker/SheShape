@@ -38,6 +38,23 @@ export const Product = sequelize.define('products', {
     defaultValue: 0,
     validate: { min: 0, isInt: true }
   },
+  // Sizes the customer chooses from, e.g. ["S", "M", "L"]. Empty: no size to pick.
+  // MariaDB hands JSON back as a string, hence the getter.
+  sizes: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: [],
+    get() {
+      const raw = this.getDataValue('sizes')
+      if (Array.isArray(raw)) return raw
+      try {
+        const parsed = JSON.parse(raw ?? '[]')
+        return Array.isArray(parsed) ? parsed : []
+      } catch {
+        return []
+      }
+    }
+  },
   isPublished: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

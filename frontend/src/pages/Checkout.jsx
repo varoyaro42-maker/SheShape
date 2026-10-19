@@ -5,7 +5,7 @@ import { useCart } from '../context/cart-context.js';
 import { useAuth } from '../context/auth-context.js';
 import api, { readError } from '../api/client.js';
 import { paymentsApi } from '../api/payments.js';
-import { formatPrice } from '../utils/format.js';
+import { formatPrice, variantLabel } from '../utils/format.js';
 import field from './Form.module.css';
 import styles from './Checkout.module.css';
 
@@ -69,7 +69,7 @@ export default function Checkout() {
       const response = await api.post('/orders', {
         ...values,
         paymentMethod,
-        items: items.map((item) => ({ productId: item.id, quantity: item.quantity }))
+        items: items.map((item) => ({ productId: item.id, color: item.color, size: item.size, quantity: item.quantity }))
       });
 
       const { data: order, payment } = response.data;
@@ -217,9 +217,9 @@ export default function Checkout() {
           <h2 className={styles.panelTitle}>Your order</h2>
 
           {items.map((item) => (
-            <div className={styles.summaryRow} key={item.id}>
+            <div className={styles.summaryRow} key={item.key}>
               <span className={styles.summaryName}>
-                {item.name} × {item.quantity}
+                {item.name}{variantLabel(item) ? ` (${variantLabel(item)})` : ''} × {item.quantity}
               </span>
               <span>{formatPrice(item.price * item.quantity)}</span>
             </div>

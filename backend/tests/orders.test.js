@@ -1,7 +1,7 @@
 import { test, describe, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { app, request, resetDatabase, closeDatabase, createUser, createAdmin, signIn, createProduct } from './helpers.js'
-import { Order, PaymentSettings } from '../src/models/index.js'
+import { Order, PaymentSettings, ProductImage } from '../src/models/index.js'
 
 before(resetDatabase)
 after(closeDatabase)
@@ -50,6 +50,40 @@ describe('placing an order', () => {
     assert.equal(mine.status, 200)
     assert.equal(mine.body.data.length, 1)
     assert.equal(mine.body.data[0].orderNumber, order.orderNumber)
+  })
+
+  test('colour and size: required when the product has them, saved on each line, stock shared', async () => {
+    const tee = await createProduct({ price: 25000, stock: 5, sizes: ['S', 'M', 'L'] })
+    await ProductImage.bulkCreate([
+      { productId: tee.id, url: '/uploads/products/beige.jpg', color: 'Beige', sortOrder: 0 },
+      { productId: tee.id, url: '/uploads/products/black.jpg', color: 'Black', sortOrder: 1 }
+    ])
+    const agent = await signIn(await createUser())
+
+    const noSize = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: tee.id, color: 'Beige', quantity: 1 }] })
+    assert.equal(noSize.status, 400)
+    assert.match(noSize.body.error, /Choose a size/)
+    const badColour = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: tee.id, color: 'Pink', size: 'M', quantity: 1 }] })
+    assert.match(badColour.body.error, /Choose a colour/)
+    const tooMany = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: tee.id, color: 'Beige', size: 'M', quantity: 3 }, { productId: tee.id, color: 'Black', size: 'L', quantity: 3 }] })
+    assert.equal(tooMany.status, 409, 'stock is counted across colours and sizes')
+
+    const response = await agent.post('/api/orders').send({
+      ...delivery,
+      items: [
+        { productId: tee.id, color: 'Beige', size: 'M', quantity: 2 },
+        { productId: tee.id, color: 'Black', size: 'L', quantity: 1 }
+      ]
+    })
+    assert.equal(response.status, 201, JSON.stringify(response.body))
+    const lines = response.body.data.items.map((i) => `${i.color}/${i.size}/${i.quantity}`).sort()
+    assert.deepEqual(lines, ['Beige/M/2', 'Black/L/1'])
+    assert.equal(response.body.data.total, 75000)
+    await tee.reload()
+    assert.equal(tee.stock, 2)
+
+    const page = await request(app).get(`/api/products/${tee.slug}`)
+    assert.deepEqual(page.body.data.sizes, ['S', 'M', 'L'])
   })
 
   test('refuses more than the stock and leaves stock untouched', async () => {

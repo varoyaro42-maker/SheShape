@@ -82,7 +82,40 @@
 
 .swatchActive {
   border-color: var(--green-dark);
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choiceLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.choiceLabel strong {
+  text-transform: none;
+  letter-spacing: 0;
   color: var(--green-dark);
+}
+
+.sizeButton {
+  min-width: 48px;
+  justify-content: center;
+}
+
+.choiceError {
+  margin: 0;
+  color: #b3261e;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .swatchDot {

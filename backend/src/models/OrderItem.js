@@ -28,6 +28,15 @@ const OrderItem = sequelize.define(
       allowNull: false,
       validate: { min: { args: [0], msg: 'Price cannot be negative' } },
     },
+    // What she picked on the product page, kept as text so it survives product edits.
+    color: {
+      type: DataTypes.STRING(60),
+      allowNull: true,
+    },
+    size: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
     quantity: {
       type: DataTypes.INTEGER,
       allowNull: false,

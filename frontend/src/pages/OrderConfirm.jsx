@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { Banknote, Smartphone, CreditCard, Copy, Check, ExternalLink, RefreshCw, Loader2 } from 'lucide-react';
 import api, { readError } from '../api/client.js';
 import { paymentsApi } from '../api/payments.js';
-import { formatPrice } from '../utils/format.js';
+import { formatPrice, variantLabel } from '../utils/format.js';
 import { ORDER_STATUS_LABELS, formatOrderDate } from '../utils/order.js';
 import Loading from '../components/Loading.jsx';
 import Empty from '../components/Empty.jsx';
@@ -177,7 +177,7 @@ export default function OrderConfirm() {
         {order.items.map((item) => (
           <div className={styles.line} key={item.id}>
             <span className={styles.lineName}>
-              {item.name} × {item.quantity}
+              {item.name}{variantLabel(item) ? ` (${variantLabel(item)})` : ''} × {item.quantity}
             </span>
             <span>{formatPrice(item.price * item.quantity)}</span>
           </div>

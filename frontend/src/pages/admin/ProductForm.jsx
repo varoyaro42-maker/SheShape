@@ -17,6 +17,7 @@ const BLANK = {
   price: '',
   categoryId: '',
   stock: '0',
+  sizes: '',
   isPublished: false
 }
 
@@ -68,6 +69,7 @@ export default function AdminProductFormPage() {
           price: String(product.price),
           categoryId: product.category?.id ?? '',
           stock: String(product.stock),
+          sizes: (product.sizes ?? []).join(', '),
           isPublished: product.isPublished
         })
         setImages(product.images ?? [])
@@ -176,6 +178,7 @@ export default function AdminProductFormPage() {
       price: fields.price,
       categoryId: fields.categoryId,
       stock: fields.stock,
+      sizes: fields.sizes,
       isPublished: fields.isPublished
     }
 
@@ -267,6 +270,21 @@ export default function AdminProductFormPage() {
               {fieldErrors.stock && (
                 <span className={styles.hint}>{fieldErrors.stock}</span>
               )}
+            </label>
+
+            <label className={styles.field}>
+              <span className={styles.label}>Sizes</span>
+              <input
+                type="text"
+                value={fields.sizes}
+                onChange={(event) => set('sizes', event.target.value)}
+                placeholder="S, M, L, XL"
+                className={styles.input}
+              />
+              <span className={styles.hint}>
+                {fieldErrors.sizes ||
+                  'Separate with commas. Customers must pick one. Leave empty for products without sizes. Colours come from the colour you give each photo below.'}
+              </span>
             </label>
 
             <label className={styles.field}>

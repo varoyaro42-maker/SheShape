@@ -32,3 +32,8 @@ export function formatRelativeTime(value) {
 
   return new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
+
+/** "Beige · Size M" for a cart or order line; empty when nothing was chosen. */
+export function variantLabel(item) {
+  return [item?.color, item?.size ? `Size ${item.size}` : null].filter(Boolean).join(' · ')
+}

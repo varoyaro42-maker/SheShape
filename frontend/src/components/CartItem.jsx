@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/cart-context.js'
-import { formatPrice } from '../utils/format.js'
+import { formatPrice, variantLabel } from '../utils/format.js'
 import QuantityStepper from './QuantityStepper.jsx'
 import styles from './CartItem.module.css'
 
@@ -17,15 +17,16 @@ export default function CartItem({ item }) {
         <Link to={`/dashboard/product/${item.slug}`} className={styles.name}>
           {item.name}
         </Link>
+        {variantLabel(item) && <span className={styles.unit}>{variantLabel(item)}</span>}
         <span className={styles.unit}>{formatPrice(item.price)} each</span>
         <div className={styles.controls}>
           <QuantityStepper
             value={item.quantity}
             max={item.stock}
-            onChange={(quantity) => updateQuantity(item.id, quantity)}
+            onChange={(quantity) => updateQuantity(item.key, quantity)}
             label={`Quantity for ${item.name}`}
           />
-          <button type="button" className={styles.remove} onClick={() => removeItem(item.id)}>
+          <button type="button" className={styles.remove} onClick={() => removeItem(item.key)}>
             Remove
           </button>
         </div>

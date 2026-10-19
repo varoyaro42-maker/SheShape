@@ -26,7 +26,7 @@ const RESTOCKING = new Set(['pending', 'paid'])
 const withItems = {
   model: OrderItem,
   as: 'items',
-  attributes: ['id', 'productId', 'name', 'price', 'quantity']
+  attributes: ['id', 'productId', 'name', 'price', 'color', 'size', 'quantity']
 }
 
 const withCustomer = {

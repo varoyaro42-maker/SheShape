@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useApi } from '../hooks/useApi.js';
-import { formatPrice } from '../utils/format.js';
+import { formatPrice, variantLabel } from '../utils/format.js';
 import { ORDER_STATUS_LABELS, formatOrderDate } from '../utils/order.js';
 import Loading from '../components/Loading.jsx';
 import Empty from '../components/Empty.jsx';
@@ -41,7 +41,7 @@ export default function MyOrders() {
           {order.items.map((item) => (
             <div className={styles.line} key={item.id}>
               <span className={styles.lineName}>
-                {item.name} × {item.quantity}
+                {item.name}{variantLabel(item) ? ` (${variantLabel(item)})` : ''} × {item.quantity}
               </span>
               <span>{formatPrice(item.price * item.quantity)}</span>
             </div>

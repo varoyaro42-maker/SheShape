@@ -35,7 +35,7 @@ export default function Cart() {
       <div className={styles.layout}>
         <section className={styles.items}>
           {items.map((item) => (
-            <CartItem key={item.id} item={item} />
+            <CartItem key={item.key} item={item} />
           ))}
         </section>
 

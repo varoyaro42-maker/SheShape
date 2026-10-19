@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { adminOrders } from '../../api/admin.js'
 import { readError } from '../../api/client.js'
 import { useToast } from '../../context/toast-context.js'
-import { formatPrice } from '../../utils/format.js'
+import { formatPrice, variantLabel } from '../../utils/format.js'
 import { ORDER_STATUS_LABELS as STATUS_LABELS, formatOrderDate } from '../../utils/order.js'
 import Loading from '../../components/Loading.jsx'
 import styles from './OrderDetail.module.css'
@@ -141,6 +141,7 @@ export default function AdminOrderDetailPage() {
               <li key={item.id} className={styles.item}>
                 <div>
                   <span className={styles.itemName}>{item.name}</span>
+                  {variantLabel(item) && <span className={styles.itemMeta}>{variantLabel(item)}</span>}
                   <span className={styles.itemMeta}>
                     {item.quantity} × {formatPrice(item.price)}
                   </span>

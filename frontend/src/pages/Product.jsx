@@ -20,12 +20,16 @@ export default function Product() {
 
   const [activeImage, setActiveImage] = useState(0)
   const [activeColor, setActiveColor] = useState(null)
+  const [size, setSize] = useState(null)
+  const [choiceError, setChoiceError] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
 
   useEffect(() => {
     setActiveImage(0)
     setActiveColor(null)
+    setSize(null)
+    setChoiceError('')
     setQuantity(1)
     setAdded(false)
   }, [slug])
@@ -65,9 +69,12 @@ export default function Product() {
 
   const swatchHex = (color) => allImages.find((image) => image.color === color)?.colorHex || null
 
+  const sizes = product.sizes ?? []
+
   const handleSelectColor = (color) => {
     setActiveColor(color)
     setActiveImage(0)
+    setChoiceError('')
   }
 
   const handleAdd = () => {
@@ -76,7 +83,13 @@ export default function Product() {
       return
     }
 
-    addItem(product, quantity)
+    const missing = [colors.length && !activeColor ? 'a colour' : null, sizes.length && !size ? 'a size' : null].filter(Boolean)
+    if (missing.length) {
+      setChoiceError(`Choose ${missing.join(' and ')} first.`)
+      return
+    }
+
+    addItem(product, quantity, { color: activeColor, size })
     setAdded(true)
   }
 
@@ -88,33 +101,6 @@ export default function Product() {
 
       <div className={styles.layout}>
         <div className={styles.gallery}>
-          {colors.length > 0 && (
-            <div className={styles.swatches}>
-              <button
-                type="button"
-                onClick={() => handleSelectColor(null)}
-                className={activeColor === null ? `${styles.swatch} ${styles.swatchActive}` : styles.swatch}
-              >
-                All
-              </button>
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => handleSelectColor(color)}
-                  aria-label={color}
-                  title={color}
-                  className={activeColor === color ? `${styles.swatch} ${styles.swatchActive}` : styles.swatch}
-                >
-                  {swatchHex(color) && (
-                    <span className={styles.swatchDot} style={{ background: swatchHex(color) }} />
-                  )}
-                  {color}
-                </button>
-              ))}
-            </div>
-          )}
-
           <div className={styles.mainImage}>
             {cover && <img src={cover} alt={product.name} width="900" height="900" />}
           </div>
@@ -145,6 +131,60 @@ export default function Product() {
           <span className={soldOut ? `${styles.stock} ${styles.stockOut}` : styles.stock}>
             {soldOut ? 'Out of stock' : `${product.stock} in stock`}
           </span>
+
+          {!soldOut && colors.length > 0 && (
+            <div className={styles.choice}>
+              <span className={styles.choiceLabel}>
+                Colour{activeColor ? <strong>: {activeColor}</strong> : null}
+              </span>
+              <div className={styles.swatches}>
+                {colors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => handleSelectColor(color)}
+                    aria-pressed={activeColor === color}
+                    className={activeColor === color ? `${styles.swatch} ${styles.swatchActive}` : styles.swatch}
+                  >
+                    {swatchHex(color) && (
+                      <span className={styles.swatchDot} style={{ background: swatchHex(color) }} />
+                    )}
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!soldOut && sizes.length > 0 && (
+            <div className={styles.choice}>
+              <span className={styles.choiceLabel}>
+                Size{size ? <strong>: {size}</strong> : null}
+              </span>
+              <div className={styles.swatches}>
+                {sizes.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      setSize(option)
+                      setChoiceError('')
+                    }}
+                    aria-pressed={size === option}
+                    className={size === option ? `${styles.swatch} ${styles.sizeButton} ${styles.swatchActive}` : `${styles.swatch} ${styles.sizeButton}`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {choiceError && (
+            <p className={styles.choiceError} role="alert">
+              {choiceError}
+            </p>
+          )}
 
           {!soldOut && (
             <div className={styles.actions}>
