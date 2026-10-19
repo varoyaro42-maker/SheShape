@@ -44,6 +44,13 @@ function useEvent(slug) {
   return { event, missing, loadError, refresh }
 }
 
+/** The line that nudges her to book: louder as places run out. */
+function urgencyText(left, total) {
+  if (left <= 5) return `Only ${left === 1 ? '1 place' : `${left} places`} left. Reserve yours now before they are gone.`
+  if (left / total <= 0.3) return `Places are going fast: only ${left} left. Reserve yours today.`
+  return 'Places are limited. Reserve yours today: it takes two minutes.'
+}
+
 function placesText(left) {
   if (left <= 0) return 'Full'
   return left === 1 ? '1 place left' : `${left} places left`
@@ -329,7 +336,7 @@ export default function EventPage() {
             <div className={styles.registerGrid}>
             <form id="event-form" ref={formRef} className={styles.form} onSubmit={submit} noValidate>
               <h2 className={styles.formTitle}>Register</h2>
-              <p className={styles.formLead}>{placesText(event.placesLeft)} of {event.totalPlaces}. No account needed.</p>
+              <p className={styles.formLead}>{urgencyText(event.placesLeft, event.totalPlaces)}</p>
 
               {message && <p className={styles.error} role="alert">{message}</p>}
 
@@ -429,7 +436,7 @@ export default function EventPage() {
               <button type="submit" form="event-form" className={styles.submit} disabled={submitting}>
                 {submitting ? 'One moment…' : event.price > 0 ? `Pay ${formatMoney(event.price)}` : 'Register'}
               </button>
-              <p className={styles.small}>{placesText(event.placesLeft)}. No account needed.</p>
+              <p className={styles.small}>Your place is confirmed the moment you pay.</p>
             </aside>
             </div>
           )}

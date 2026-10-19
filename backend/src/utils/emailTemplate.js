@@ -10,8 +10,14 @@ const BRAND = {
   textSoft: '#3a4740',
 };
 
-const FONT = "'Montserrat', Arial, sans-serif";
-const FONT_HEADING = "Georgia, 'Playfair Display', serif";
+// Sofia Pro, the site's font, loaded from the website below. Mail apps that
+// ignore web fonts (Gmail, Outlook) fall back to Helvetica/Arial.
+const FONT = "'Sofia Pro', Helvetica, Arial, sans-serif";
+const FONT_HEADING = FONT;
+const SITE = (process.env.CLIENT_URL || 'https://sheshapewellness.com').replace(/\/$/, '');
+const FONT_FACES = [400, 600, 700]
+  .map((w) => `@font-face{font-family:'Sofia Pro';font-weight:${w};font-style:normal;src:url('${SITE}/fonts/SofiaPro-${{ 400: 'Regular', 600: 'SemiBold', 700: 'Bold' }[w]}.woff2') format('woff2');}`)
+  .join('');
 
 export function escapeHtml(value) {
   return String(value ?? '')
@@ -63,6 +69,7 @@ export function renderEmail({ preheader = '', eyebrow = '', title, bodyHtml, cta
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
     <title>${escapeHtml(title)}</title>
+    <style>${FONT_FACES}</style>
   </head>
   <body style="margin:0;padding:0;background:${BRAND.bg};font-family:${FONT};">
     <div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;">${escapeHtml(preheader)}</div>
