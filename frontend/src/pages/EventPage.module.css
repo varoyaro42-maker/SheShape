@@ -11,6 +11,8 @@
   color: var(--ev-ink);
   font-family: var(--body);
   font-weight: 400;
+  /* The layout leaves room above the footer on inner pages; this page ends on its own band. */
+  margin-bottom: calc(-1 * var(--section));
 }
 
 .wrap {
@@ -289,7 +291,7 @@
 
 .registerBand {
   margin-top: 32px;
-  padding: 40px 0 44px;
+  padding: 40px 0 36px;
   background: #fff;
   border-top: 1px solid var(--ev-line);
   border-bottom: 1px solid var(--ev-line);
@@ -646,7 +648,7 @@
 .method {
   display: grid;
   justify-items: start;
-  gap: 4px;
+  gap: 6px;
   padding: 14px;
   border: 1.5px solid var(--ev-line);
   border-radius: 14px;
@@ -728,8 +730,9 @@
 }
 
 .contact {
-  margin: 0 auto;
-  padding: 22px 0 28px;
+  margin: 28px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--ev-line);
   text-align: center;
   font-size: 14px;
   color: var(--ev-soft);

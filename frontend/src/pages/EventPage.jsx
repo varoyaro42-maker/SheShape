@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowRight, Check, CreditCard, Smartphone } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import { events, formatEventDate, formatMoney } from '../api/events.js'
 import { readError } from '../api/client.js'
 import Loading from '../components/Loading.jsx'
 import NotFound from './NotFound.jsx'
+import { MomoBadges, CardBadges } from '../components/PaymentBadges.jsx'
 import styles from './EventPage.module.css'
 
 const blankForm = { name: '', phone: '', email: '', answers: {}, activityIds: [], paymentMethod: 'momo' }
@@ -394,11 +395,13 @@ export default function EventPage() {
                   <legend>Payment</legend>
                   <div className={styles.methods}>
                     <button type="button" className={`${styles.method} ${form.paymentMethod === 'momo' ? styles.selected : ''}`} onClick={() => set('paymentMethod', 'momo')} aria-pressed={form.paymentMethod === 'momo'}>
-                      <Smartphone size={18} /> Mobile money
+                      <MomoBadges />
+                      <span>Mobile money</span>
                       <small>MTN MoMo or Airtel Money</small>
                     </button>
                     <button type="button" className={`${styles.method} ${form.paymentMethod === 'card' ? styles.selected : ''}`} onClick={() => set('paymentMethod', 'card')} aria-pressed={form.paymentMethod === 'card'}>
-                      <CreditCard size={18} /> Card
+                      <CardBadges />
+                      <span>Card</span>
                       <small>Visa or Mastercard</small>
                     </button>
                   </div>
@@ -440,6 +443,13 @@ export default function EventPage() {
             </aside>
             </div>
           )}
+          {(event.contactWhatsapp || event.contactInstagram) && (
+            <p className={styles.contact}>
+              {event.contactWhatsapp && <>Questions? WhatsApp {event.contactWhatsapp}</>}
+              {event.contactWhatsapp && event.contactInstagram && ' · '}
+              {event.contactInstagram && <>@{event.contactInstagram.replace(/^@/, '')}</>}
+            </p>
+          )}
         </div>
       </section>
 
@@ -453,13 +463,6 @@ export default function EventPage() {
           document.body
         )}
 
-      {(event.contactWhatsapp || event.contactInstagram) && (
-        <p className={`${styles.wrap} ${styles.contact}`}>
-          {event.contactWhatsapp && <>Questions? WhatsApp {event.contactWhatsapp}</>}
-          {event.contactWhatsapp && event.contactInstagram && ' · '}
-          {event.contactInstagram && <>@{event.contactInstagram.replace(/^@/, '')}</>}
-        </p>
-      )}
     </div>
   )
 }
