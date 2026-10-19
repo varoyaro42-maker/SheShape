@@ -15,7 +15,7 @@ import ContactMessage, { MESSAGE_STATUSES } from './ContactMessage.js'
 import Subscriber, { SUBSCRIBER_STATUSES } from './Subscriber.js'
 import Booking, { BOOKING_STATUSES } from './Booking.js'
 import AdminInvite from './AdminInvite.js'
-import Event, { EVENT_STATUSES, FEE_PAYERS } from './Event.js'
+import Event, { EVENT_STATUSES, FEE_PAYERS, TICKET_FIELDS } from './Event.js'
 import EventActivity from './EventActivity.js'
 import EventQuestion, { QUESTION_TYPES } from './EventQuestion.js'
 import EventRegistration, { REGISTRATION_STATUSES } from './EventRegistration.js'
@@ -105,6 +105,7 @@ export {
   EventRegistrationActivity,
   EVENT_STATUSES,
   FEE_PAYERS,
+  TICKET_FIELDS,
   QUESTION_TYPES,
   REGISTRATION_STATUSES,
   ORDER_STATUSES,

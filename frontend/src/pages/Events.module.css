@@ -97,6 +97,17 @@
   color: var(--green-mid);
 }
 
+.full {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #b3261e;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .more {
   display: inline-flex;
   align-items: center;

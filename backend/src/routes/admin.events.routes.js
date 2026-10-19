@@ -12,6 +12,7 @@ router.put('/:id', c.update);
 router.delete('/:id', c.remove);
 router.post('/:id/duplicate', c.duplicate);
 router.get('/:id/roster', c.roster);
+router.get('/:id/ticket-preview.pdf', c.ticketPreview);
 router.get('/:id/export.csv', c.exportCsv);
 router.get('/:id/registrations', c.registrations);
 router.post('/:id/registrations', c.addRegistration);

@@ -23,8 +23,22 @@ const BLANK = {
   date: '', startTime: '', endTime: '', venue: '', price: 0, priceNote: '', totalPlaces: 50, picks: 2, picksLabel: '',
   opensAt: null, closesAt: null, status: 'draft', holdMinutes: 15, feePaidBy: 'organiser', healthRetentionDays: 30,
   fullMessage: '', closedMessage: '', heroImage: '', gallery: [], included: [], partners: [], dressCode: '', ticketNote: '',
-  contactWhatsapp: '', contactInstagram: '', activities: [], questions: null
+  contactWhatsapp: '', contactInstagram: '', activities: [], questions: null, ticketFields: null
 }
+
+// What can appear on the ticket (PDF, ticket page and email). The ticket number and QR code always do.
+const TICKET_FIELDS = [
+  ['name', 'Her name'],
+  ['date', 'Date'],
+  ['time', 'Time'],
+  ['venue', 'Venue'],
+  ['activities', 'Her activities'],
+  ['amount', 'Amount paid'],
+  ['paymentReference', 'Payment reference'],
+  ['dressCode', 'Dress code'],
+  ['note', 'Other information'],
+  ['contact', 'WhatsApp contact']
+]
 
 const TYPES = [
   ['text', 'Short answer'],
@@ -287,10 +301,38 @@ export default function AdminEventEditorPage() {
           </div>
           <div><button type="button" className={styles.smallButton} onClick={() => set('partners', [...data.partners, { name: '', imageUrl: '' }])}><Plus size={14} /> Add a partner</button></div>
 
-          <h2 className={styles.sectionTitle}>Ticket email</h2>
+          <h2 className={styles.sectionTitle}>Ticket</h2>
+          <p className={styles.hint}>Every confirmed guest gets the ticket by email with a PDF attached, and can download it again from her ticket page. Each PDF is kept on the server.</p>
+          <div className={styles.field}>
+            <span className={styles.label}>What the ticket shows</span>
+            <div className={ev.checks}>
+              {TICKET_FIELDS.map(([key, label]) => {
+                const on = data.ticketFields ? data.ticketFields.includes(key) : true
+                return (
+                  <label key={key} className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={(e) => {
+                        const current = data.ticketFields ?? TICKET_FIELDS.map(([k]) => k)
+                        set('ticketFields', e.target.checked ? [...current, key] : current.filter((k) => k !== key))
+                      }}
+                    />
+                    <span>{label}</span>
+                  </label>
+                )
+              })}
+            </div>
+            <span className={styles.hint}>The ticket number and QR code are always on it.</span>
+          </div>
           <Field label="Dress code" hint="Shown on the ticket and in the email.">{area('dressCode', 3)}</Field>
           <Field label="Other information for the ticket" hint="Programme, what to bring. Nothing private.">{area('ticketNote', 4)}</Field>
           <Field label="Ticket number prefix" hint="Letters only, e.g. HWE gives HWE-0001.">{text('ticketPrefix', { maxLength: 8 })}</Field>
+          {!isNew && (
+            <p className={styles.hint}>
+              <a href={`/api/admin/events/${id}/ticket-preview.pdf`} target="_blank" rel="noreferrer">Preview the ticket PDF</a> (save your changes first).
+            </p>
+          )}
         </section>
 
         <section className={styles.card} hidden={tab !== 'settings'}>

@@ -50,7 +50,7 @@ const toList = (value) =>
     .filter(Boolean)
     .map((email) => ({ email }));
 
-async function sendViaBrevo({ to, bcc, subject, html, text, replyTo }) {
+async function sendViaBrevo({ to, bcc, subject, html, text, replyTo, attachments }) {
   const body = {
     sender: sender(),
     to: toList(to),
@@ -62,6 +62,7 @@ async function sendViaBrevo({ to, bcc, subject, html, text, replyTo }) {
   const bccList = toList(bcc);
   if (bccList.length) body.bcc = bccList;
   if (replyTo) body.replyTo = { email: replyTo };
+  if (attachments?.length) body.attachment = attachments.map((a) => ({ name: a.filename, content: Buffer.from(a.content).toString('base64') }));
 
   const response = await fetch(BREVO_ENDPOINT, {
     method: 'POST',
@@ -85,11 +86,11 @@ export function emailTransport() {
   return 'console';
 }
 
-export async function sendMail({ to, bcc, subject, html, text, replyTo }) {
+export async function sendMail({ to, bcc, subject, html, text, replyTo, attachments }) {
   const transport = emailTransport();
 
   if (transport === 'brevo') {
-    await sendViaBrevo({ to, bcc, subject, html, text, replyTo });
+    await sendViaBrevo({ to, bcc, subject, html, text, replyTo, attachments });
     return;
   }
 
@@ -103,12 +104,13 @@ export async function sendMail({ to, bcc, subject, html, text, replyTo }) {
       html,
       text,
       replyTo,
+      attachments,
     });
     return;
   }
 
   if (process.env.NODE_ENV === 'test') {
-    testOutbox.push({ to, subject, text, html });
+    testOutbox.push({ to, subject, text, html, attachments });
     return;
   }
   {

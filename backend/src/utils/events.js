@@ -82,6 +82,12 @@ export async function loadEvent(where, { transaction, lock } = {}) {
 }
 
 /** What the public page needs. Counts are always live. */
+/** The last few places: a tenth of the event, at least five. Drives the louder nudge on the page. */
+export function isAlmostFull(event, used) {
+  const left = event.totalPlaces - used.confirmed;
+  return left > 0 && left <= Math.max(5, Math.ceil(event.totalPlaces * 0.1));
+}
+
 export async function publicEvent(event) {
   await expireHolds({ eventId: event.id });
   const used = await usage(event.id);
@@ -95,8 +101,8 @@ export async function publicEvent(event) {
         name: a.name,
         ledBy: a.ledBy,
         description: a.description,
-        places: a.places,
-        left: Math.max(0, a.places - confirmed),
+        // Counts stay private: the page only learns that an activity is full.
+        full: confirmed >= a.places,
       };
     });
   const questions = (event.questions ?? [])
@@ -131,8 +137,7 @@ export async function publicEvent(event) {
     feePaidBy: event.feePaidBy,
     holdMinutes: event.holdMinutes,
     state,
-    placesLeft: Math.max(0, event.totalPlaces - used.confirmed),
-    totalPlaces: event.totalPlaces,
+    almostFull: state === 'open' && isAlmostFull(event, used),
     activities,
     questions,
   };

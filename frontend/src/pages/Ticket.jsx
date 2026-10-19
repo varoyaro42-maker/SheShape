@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Download } from 'lucide-react'
 import { events, formatEventDate, formatMoney } from '../api/events.js'
 import { readError } from '../api/client.js'
 import Loading from '../components/Loading.jsx'
@@ -67,40 +68,73 @@ export default function Ticket() {
     )
   }
 
+  const show = ticket.show ?? {}
+  const when = [show.date !== false ? formatEventDate(e.date) : null, show.time !== false ? time : null].filter(Boolean).join(' · ')
+  const rows = [
+    show.venue !== false && e.venue ? { label: 'Venue', value: e.venue, wide: true } : null,
+    show.activities !== false && ticket.activities.length ? { label: ticket.activities.length > 1 ? 'Your activities' : 'Your activity', value: ticket.activities.join(', '), wide: true } : null,
+    show.amount !== false && ticket.amount > 0 ? { label: 'Paid', value: formatMoney(ticket.amount) } : null,
+    show.paymentReference !== false && ticket.paymentReference ? { label: 'Payment reference', value: ticket.paymentReference } : null,
+  ].filter(Boolean)
+
   return (
     <div className={styles.page}>
       <article className={styles.ticket}>
         <header className={styles.head}>
-          <p className={styles.kicker}>Your ticket</p>
+          <img className={styles.logo} src="/brand/logo-white.svg" alt="She Shape Wellness" />
           <h1 className={styles.title}>{e.title}</h1>
-          <p className={styles.number}>{ticket.ticketNumber}</p>
+          {when && <p className={styles.when}>{when}</p>}
         </header>
+        <div className={styles.tear} aria-hidden="true" />
         <div className={styles.body}>
-          <img className={styles.qr} src={ticket.qrUrl} alt={`QR code for ticket ${ticket.ticketNumber}`} width="200" height="200" />
-          <p className={styles.muted}>Show this code at the entrance.</p>
-          <dl className={styles.rows}>
-            <div><dt>Name</dt><dd>{ticket.name}</dd></div>
-            <div><dt>Date</dt><dd>{formatEventDate(e.date)}</dd></div>
-            {time && <div><dt>Time</dt><dd>{time}</dd></div>}
-            {e.venue && <div><dt>Venue</dt><dd>{e.venue}</dd></div>}
-            {ticket.activities.length > 0 && <div><dt>{ticket.activities.length > 1 ? 'Activities' : 'Activity'}</dt><dd>{ticket.activities.join(', ')}</dd></div>}
-            {ticket.amount > 0 && <div><dt>Paid</dt><dd>{formatMoney(ticket.amount)}</dd></div>}
-            {ticket.paymentReference && <div><dt>Reference</dt><dd>{ticket.paymentReference}</dd></div>}
-          </dl>
-          {e.dressCode && (
-            <div className={styles.note}>
-              <h2>Dress code</h2>
+          <div className={styles.top}>
+            <div>
+              <p className={styles.label}>Ticket</p>
+              <p className={styles.number}>{ticket.ticketNumber}</p>
+              {show.name !== false && (
+                <>
+                  <p className={styles.label}>Name</p>
+                  <p className={styles.name}>{ticket.name}</p>
+                </>
+              )}
+            </div>
+            <img className={styles.qr} src={ticket.qrUrl} alt={`QR code for ticket ${ticket.ticketNumber}`} width="132" height="132" />
+          </div>
+          {rows.length > 0 && (
+            <dl className={styles.rows}>
+              {rows.map((r) => (
+                <div key={r.label} className={r.wide ? styles.wide : ''}>
+                  <dt className={styles.label}>{r.label}</dt>
+                  <dd>{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          {show.dressCode !== false && e.dressCode && (
+            <div className={styles.dress}>
+              <p className={styles.label}>Dress code</p>
               <p>{e.dressCode}</p>
             </div>
           )}
-          {e.ticketNote && (
+          {show.note !== false && e.ticketNote && (
             <div className={styles.note}>
               {e.ticketNote.split(/\n{2,}/).map((p, i) => <p key={i}>{p}</p>)}
             </div>
           )}
-          <p className={styles.muted}>A copy was emailed to {ticket.email}.{e.contactWhatsapp ? ` Questions: WhatsApp ${e.contactWhatsapp}.` : ''}</p>
+          <p className={styles.entry}>
+            Show the QR code at the entrance. One ticket admits one person.
+            {show.contact !== false && e.contactWhatsapp ? <><br />Questions? WhatsApp {e.contactWhatsapp}</> : null}
+          </p>
         </div>
       </article>
+      <div className={styles.actions}>
+        {ticket.pdfUrl && (
+          <a className={styles.button} href={ticket.pdfUrl} download>
+            <Download size={18} /> Download ticket (PDF)
+          </a>
+        )}
+        <p className={styles.muted}>A copy was emailed to {ticket.email}.</p>
+      </div>
     </div>
   )
 }

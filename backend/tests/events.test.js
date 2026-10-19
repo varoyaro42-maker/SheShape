@@ -1,4 +1,6 @@
 import http from 'node:http'
+import os from 'node:os'
+import path from 'node:path'
 import crypto from 'node:crypto'
 import { test, describe, before, after } from 'node:test'
 import assert from 'node:assert/strict'
@@ -33,6 +35,7 @@ let admin, adminUser, event
 const person = (n, extra = {}) => ({ name: `Woman ${n}`, phone: '0788123456', email: `w${n}@example.com`, paymentMethod: 'momo', ...extra })
 
 before(async () => {
+  process.env.TICKETS_DIR = path.join(os.tmpdir(), `sheshape-tickets-${process.pid}`)
   await resetDatabase()
   await new Promise((r) => server.listen(0, '127.0.0.1', r))
   process.env.XENTRIPAY_SANDBOX_URL = `http://127.0.0.1:${server.address().port}`
@@ -69,8 +72,8 @@ describe('events: everything set by the admin', () => {
     event = upd.body.data
     const page = await request(app).get(`/api/events/${event.slug}`)
     assert.equal(page.body.data.state, 'open')
-    assert.equal(page.body.data.placesLeft, 3)
-    assert.deepEqual(page.body.data.activities.map((a) => a.left), [2, 1, 2])
+    assert.equal(page.body.data.placesLeft, undefined, 'place counts stay private')
+    assert.deepEqual(page.body.data.activities.map((a) => a.full), [false, false, false])
 
     const missing = await request(app).post(`/api/events/${event.slug}/register`).send({ ...person(0), activityIds: [event.activities[0].id, event.activities[2].id] })
     assert.equal(missing.status, 400)
@@ -102,10 +105,15 @@ describe('events: everything set by the admin', () => {
     assert.match(mail[0].html, /qr\.png/)
     assert.ok(!mail[0].html.includes('Knee'), 'nothing medical in the email')
     assert.equal((await request(app).get(`/api/events/tickets/${reg.token}/qr.png`)).headers['content-type'], 'image/png')
+    assert.equal(mail[0].attachments?.[0]?.contentType, 'application/pdf', 'the PDF ticket is attached')
+    const pdf = await request(app).get(`/api/events/tickets/${reg.token}/ticket.pdf`).buffer(true)
+    assert.equal(pdf.status, 200)
+    assert.equal(pdf.headers['content-type'], 'application/pdf')
+    assert.match(pdf.headers['content-disposition'], /attachment; filename="her-wellness-experience-2026-HWE-0001\.pdf"/)
+    assert.equal(status.body.data.pdfUrl, `/api/events/tickets/${reg.token}/ticket.pdf`)
 
     const page = await request(app).get(`/api/events/${event.slug}`)
-    assert.equal(page.body.data.placesLeft, 2)
-    assert.equal(page.body.data.activities.find((a) => a.id === reformer.id).left, 0, 'reformer now shows full')
+    assert.equal(page.body.data.activities.find((a) => a.id === reformer.id).full, true, 'reformer now shows full')
   })
 
   test('a full activity cannot be picked; when only one is open she picks one', async () => {
@@ -228,5 +236,42 @@ describe('events: everything set by the admin', () => {
     assert.equal((await request(app).get(`/api/events/${event.slug}`)).body.data.state, 'full')
     const list = await request(app).get('/api/events')
     assert.equal(list.body.data[0].state, 'full')
+  })
+})
+
+describe('events: sold out', () => {
+  test('the team is emailed once when the last place goes, and the page says fully booked', async () => {
+    const created = await admin.post('/api/admin/events').send({ title: 'Tiny Morning Run', date: '2026-12-05', price: 0, totalPlaces: 1, picks: 0, ticketFields: ['name', 'date'] })
+    assert.equal(created.status, 201, JSON.stringify(created.body))
+    const tiny = (await admin.put(`/api/admin/events/${created.body.data.id}`).send({ status: 'open', questions: [] })).body.data
+    assert.deepEqual(tiny.ticketFields, ['name', 'date'])
+
+    const before = (await request(app).get('/api/events')).body.data.find((e) => e.slug === tiny.slug)
+    assert.equal(before.state, 'open')
+    assert.equal(before.placesLeft, undefined, 'no counts on the list either')
+
+    const res = await request(app).post(`/api/events/${tiny.slug}/register`).send({ name: 'Runner One', phone: '0788123456', email: 'runner1@example.com' })
+    assert.equal(res.status, 201, JSON.stringify(res.body))
+    assert.equal(res.body.data.status, 'confirmed')
+    assert.equal(res.body.data.show.venue, false, 'the admin hid the venue on this ticket')
+    await new Promise((r) => setTimeout(r, 100))
+
+    const alerts = testOutbox.filter((m) => m.subject === 'Fully booked: Tiny Morning Run')
+    assert.equal(alerts.length, 1, 'one alert')
+    assert.match(String(alerts[0].to), /events-admin@example\.com/)
+    assert.equal((await request(app).get(`/api/events/${tiny.slug}`)).body.data.state, 'full')
+
+    // Saving the event again does not repeat the alert; adding a place re-arms it.
+    await admin.put(`/api/admin/events/${tiny.id}`).send({ title: 'Tiny Morning Run' })
+    assert.equal(testOutbox.filter((m) => m.subject === 'Fully booked: Tiny Morning Run').length, 1)
+    await admin.put(`/api/admin/events/${tiny.id}`).send({ totalPlaces: 2 })
+    assert.equal((await request(app).get(`/api/events/${tiny.slug}`)).body.data.state, 'open')
+    await request(app).post(`/api/events/${tiny.slug}/register`).send({ name: 'Runner Two', phone: '0788123457', email: 'runner2@example.com' })
+    await new Promise((r) => setTimeout(r, 100))
+    assert.equal(testOutbox.filter((m) => m.subject === 'Fully booked: Tiny Morning Run').length, 2)
+
+    const preview = await admin.get(`/api/admin/events/${tiny.id}/ticket-preview.pdf`).buffer(true)
+    assert.equal(preview.status, 200)
+    assert.equal(preview.headers['content-type'], 'application/pdf')
   })
 })

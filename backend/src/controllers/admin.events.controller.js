@@ -14,6 +14,7 @@ import {
   QUESTION_TYPES,
   EVENT_STATUSES,
   FEE_PAYERS,
+  TICKET_FIELDS,
   REGISTRATION_STATUSES,
 } from '../models/index.js';
 import {
@@ -26,7 +27,7 @@ import {
   readHealth,
   registrationActivities,
 } from '../utils/events.js';
-import { sendTicket } from './events.controller.js';
+import { sendTicket, checkFullyBooked, samplePdf } from './events.controller.js';
 
 const UUID = /^[0-9a-f-]{36}$/i;
 const str = (v, max) => (v === undefined || v === null ? null : String(v).trim().slice(0, max) || null);
@@ -93,6 +94,7 @@ function readEventFields(body, { partial }) {
     out.status = body.status;
   }
   if (has('feePaidBy')) out.feePaidBy = FEE_PAYERS.includes(body.feePaidBy) ? body.feePaidBy : 'organiser';
+  if (has('ticketFields')) out.ticketFields = Array.isArray(body.ticketFields) ? TICKET_FIELDS.filter((f) => body.ticketFields.includes(f)) : null;
   set('heroImage', safeUrl(body.heroImage) || null);
   set('gallery', (Array.isArray(body.gallery) ? body.gallery : []).slice(0, 12).map((g) => sanitizeUrls({ imageUrl: g?.imageUrl, caption: str(g?.caption, 120) || '' })).filter((g) => g.imageUrl));
   set('included', (Array.isArray(body.included) ? body.included : []).map((x) => str(x, 160)).filter(Boolean).slice(0, 20));
@@ -248,7 +250,17 @@ export const update = asyncHandler(async (req, res) => {
     await event.update(fields, { transaction });
     await saveChildren(event, activities, questions, transaction);
   });
+  // More places added (or fewer): re-arm or send the "fully booked" alert.
+  await checkFullyBooked(event.id).catch((error) => console.error('[events] Full check failed', error.message));
   res.json({ data: await adminView(await findEvent(event.id)) });
+});
+
+export const ticketPreview = asyncHandler(async (req, res) => {
+  const event = await findEvent(req.params.id);
+  res.set('Content-Type', 'application/pdf');
+  res.set('Content-Disposition', 'inline; filename="ticket-preview.pdf"');
+  res.set('Cache-Control', 'no-store');
+  res.send(await samplePdf(event));
 });
 
 /** Next year's edition: same page, activities and questions; no registrations; saved as a draft. */
@@ -256,7 +268,7 @@ export const duplicate = asyncHandler(async (req, res) => {
   const source = await findEvent(req.params.id);
   const id = await sequelize.transaction(async (transaction) => {
     const data = source.toJSON();
-    for (const k of ['id', 'activities', 'questions', 'createdAt', 'updatedAt', 'ticketCounter']) delete data[k];
+    for (const k of ['id', 'activities', 'questions', 'createdAt', 'updatedAt', 'ticketCounter', 'fullNotifiedAt']) delete data[k];
     data.title = `${source.title} (copy)`;
     data.slug = await buildUniqueSlug(Event, `${source.slug}-copy`, { transaction });
     data.status = 'draft';
@@ -345,6 +357,7 @@ export const addRegistration = asyncHandler(async (req, res) => {
   if (req.body?.adminNote) await reg.update({ adminNote: str(req.body.adminNote, 300), amount: 0 });
   else await reg.update({ amount: 0 });
   if (req.body?.sendTicket !== false) sendTicket(await reg.reload()).catch((error) => console.error('[events] ticket email', error.message));
+  checkFullyBooked(event.id).catch((error) => console.error('[events] Full check failed', error.message));
   const acts = await registrationActivities([reg.id]);
   res.status(201).json({ data: registrationRow(await reg.reload(), acts, { clinical: false }) });
 });
@@ -392,6 +405,7 @@ export const forceConfirm = asyncHandler(async (req, res) => {
     await reg.update({ status: 'confirmed', confirmedAt: new Date(), adminNote: null, ticketNumber: reg.ticketNumber || `${locked.ticketPrefix}-${String(locked.ticketCounter).padStart(4, '0')}` }, { transaction });
   });
   sendTicket(await reg.reload()).catch((error) => console.error('[events] ticket email', error.message));
+  checkFullyBooked(reg.eventId).catch((error) => console.error('[events] Full check failed', error.message));
   res.json({ data: { id: reg.id, status: 'confirmed' } });
 });
 

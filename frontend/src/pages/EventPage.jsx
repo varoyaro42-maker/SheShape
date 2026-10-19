@@ -45,16 +45,11 @@ function useEvent(slug) {
   return { event, missing, loadError, refresh }
 }
 
-/** The line that nudges her to book: louder as places run out. */
-function urgencyText(left, total) {
-  if (left <= 5) return `Only ${left === 1 ? '1 place' : `${left} places`} left. Reserve yours now before they are gone.`
-  if (left / total <= 0.3) return `Places are going fast: only ${left} left. Reserve yours today.`
-  return 'Places are limited. Reserve yours today: it takes two minutes.'
-}
-
-function placesText(left) {
-  if (left <= 0) return 'Full'
-  return left === 1 ? '1 place left' : `${left} places left`
+/** The line that nudges her to book: louder near the end. Counts stay private. */
+function urgencyText(almostFull) {
+  return almostFull
+    ? 'Last few places. Reserve yours now before they are gone.'
+    : 'Places are limited. Reserve yours today: it takes two minutes.'
 }
 
 export default function EventPage() {
@@ -79,7 +74,7 @@ export default function EventPage() {
     }
   }, [form, slug])
 
-  const openActivities = useMemo(() => (event?.activities ?? []).filter((a) => a.left > 0), [event])
+  const openActivities = useMemo(() => (event?.activities ?? []).filter((a) => !a.full), [event])
   const needed = event ? Math.min(event.picks, openActivities.length) : 0
 
   // Drop picks that have filled since she chose them.
@@ -221,7 +216,8 @@ export default function EventPage() {
           {event.tagline && <p className={styles.tagline}>{event.tagline}</p>}
           <div className={styles.chips}>
             <span className={styles.chipDark}>{formatEventDate(event.date)}</span>
-            {event.state === 'open' && <span className={styles.chip}>{placesText(event.placesLeft)}</span>}
+            {event.state === 'open' && event.almostFull && <span className={styles.chip}>Last few places</span>}
+            {event.state === 'full' && <span className={styles.chipFull}>Fully booked</span>}
           </div>
           <dl className={styles.facts}>
             {time && (<div><dt>Time</dt><dd>{time}</dd></div>)}
@@ -266,7 +262,7 @@ export default function EventPage() {
                   {event.activities.map((a) => (
                     <li key={a.id}>
                       <span>{a.name}{a.ledBy ? <small> · {a.ledBy}</small> : null}</span>
-                      {event.state === 'open' && <em className={a.left ? '' : styles.full}>{placesText(a.left)}</em>}
+                      {(event.state === 'open' || event.state === 'full') && a.full && <em className={styles.full}>Full</em>}
                     </li>
                   ))}
                 </ul>
@@ -306,6 +302,7 @@ export default function EventPage() {
           <div className={styles.bandRight}>
             <p className={styles.bandLabel}>{formatEventDate(event.date)}</p>
             {event.venue && <p className={styles.bandNote}>{event.venue}{time ? ` · ${time}` : ''}</p>}
+            {event.state === 'full' && <span className={styles.bandFull}>Fully booked</span>}
             {event.state === 'open' && (
               <a href="#register" className={styles.bandCta}>
                 Reserve your place <ArrowRight size={17} />
@@ -335,7 +332,7 @@ export default function EventPage() {
             <div className={styles.registerGrid}>
             <form id="event-form" ref={formRef} className={styles.form} onSubmit={submit} noValidate>
               <h2 className={styles.formTitle}>Register</h2>
-              <p className={styles.formLead}>{urgencyText(event.placesLeft, event.totalPlaces)}</p>
+              <p className={styles.formLead}>{urgencyText(event.almostFull)}</p>
 
               {message && <p className={styles.error} role="alert">{message}</p>}
 
@@ -350,13 +347,13 @@ export default function EventPage() {
                   <div className={styles.activityGrid}>
                     {event.activities.map((a) => {
                       const selected = form.activityIds.includes(a.id)
-                      const disabled = a.left <= 0 || (!selected && form.activityIds.length >= needed && needed > 1)
+                      const disabled = a.full || (!selected && form.activityIds.length >= needed && needed > 1)
                       return (
-                        <button key={a.id} type="button" className={`${styles.activity} ${selected ? styles.selected : ''}`} onClick={() => toggleActivity(a.id)} disabled={a.left <= 0} aria-pressed={selected} data-dim={disabled && !selected ? 'true' : undefined}>
+                        <button key={a.id} type="button" className={`${styles.activity} ${selected ? styles.selected : ''}`} onClick={() => toggleActivity(a.id)} disabled={a.full} aria-pressed={selected} data-dim={disabled && !selected ? 'true' : undefined}>
                           <span className={styles.check} aria-hidden="true">{selected && <Check size={14} />}</span>
                           <span className={styles.activityName}>{a.name}</span>
                           {a.ledBy && <span className={styles.activityBy}>{a.ledBy}</span>}
-                          <span className={a.left ? styles.left : styles.fullTag}>{placesText(a.left)}</span>
+                          {a.full && <span className={styles.fullTag}>Full</span>}
                         </button>
                       )
                     })}
@@ -471,10 +468,15 @@ export default function EventPage() {
  */
 function PartnerLogo({ partner }) {
   const [light, setLight] = useState(false)
+  const imgRef = useRef(null)
 
-  function inspect(event) {
+  // A cached logo can finish loading before onLoad is attached: check it here too.
+  useEffect(() => {
+    if (imgRef.current?.complete && imgRef.current.naturalWidth) inspect(imgRef.current)
+  }, [partner.imageUrl])
+
+  function inspect(img) {
     try {
-      const img = event.currentTarget
       const canvas = document.createElement('canvas')
       canvas.width = 48
       canvas.height = 48
@@ -501,7 +503,7 @@ function PartnerLogo({ partner }) {
 
   return (
     <li title={partner.name} className={light ? styles.onGreen : undefined}>
-      {partner.imageUrl ? <img src={partner.imageUrl} alt={partner.name} loading="lazy" onLoad={inspect} /> : <span>{partner.name}</span>}
+      {partner.imageUrl ? <img ref={imgRef} src={partner.imageUrl} alt={partner.name} decoding="async" onLoad={(e) => inspect(e.currentTarget)} /> : <span>{partner.name}</span>}
     </li>
   )
 }

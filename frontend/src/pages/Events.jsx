@@ -29,7 +29,7 @@ export default function Events() {
               {e.tagline && <p>{e.tagline}</p>}
               <div className={styles.meta}>
                 <span>{e.price ? formatMoney(e.price) : 'Free'}</span>
-                <span className={styles.state}>{STATE_TEXT[e.state] ?? `${e.placesLeft} places left`}</span>
+                {STATE_TEXT[e.state] && <span className={`${styles.state} ${e.state === 'full' ? styles.full : ''}`}>{STATE_TEXT[e.state]}</span>}
               </div>
               <span className={styles.more}>
                 {e.state === 'open' ? 'Register' : 'View'} <ArrowRight size={16} />

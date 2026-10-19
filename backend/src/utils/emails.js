@@ -1,5 +1,6 @@
 import { sendMail } from './mailer.js';
 import { renderEmail, toPlainText, escapeHtml, nl2p } from './emailTemplate.js';
+import { ticketRows, eventDate } from './ticketContent.js';
 
 const numberFormat = new Intl.NumberFormat('en-US');
 const formatPrice = (value) => `${numberFormat.format(value)} RWF`;
@@ -9,10 +10,10 @@ export function clientUrl(path = '') {
   return `${base}${path}`;
 }
 
-async function dispatch({ to, subject, eyebrow, title, bodyHtml, ctaLabel, ctaUrl, preheader }) {
+async function dispatch({ to, subject, eyebrow, title, bodyHtml, ctaLabel, ctaUrl, preheader, attachments }) {
   const html = renderEmail({ preheader: preheader || subject, eyebrow, title, bodyHtml, ctaLabel, ctaUrl });
 
-  await sendMail({ to, subject, html, text: toPlainText(bodyHtml) });
+  await sendMail({ to, subject, html, text: toPlainText(bodyHtml), attachments });
 }
 
 // ---------------------------------------------------------------------------
@@ -408,32 +409,38 @@ export async function sendAdminInviteEmail({ to, name, invitedBy, acceptUrl, exp
 // Event tickets: one email that is both the receipt and the ticket. Nothing medical.
 // ---------------------------------------------------------------------------
 
-const eventDate = (date) =>
-  new Date(`${date}T12:00:00+02:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Kigali' });
-
-export async function sendEventTicketEmail({ to, ticket, qrImageUrl, ticketUrl }) {
+export async function sendEventTicketEmail({ to, ticket, qrImageUrl, ticketUrl, pdf }) {
   const e = ticket.event;
-  const rows = [
-    ['Ticket', ticket.ticketNumber],
-    ['Name', ticket.name],
-    ['Date', eventDate(e.date)],
-    e.startTime ? ['Time', e.endTime ? `${e.startTime} to ${e.endTime}` : `From ${e.startTime}`] : null,
-    e.venue ? ['Venue', e.venue] : null,
-    ticket.activities.length ? [ticket.activities.length > 1 ? 'Your activities' : 'Your activity', ticket.activities.join(', ')] : null,
-    ticket.amount ? ['Paid', formatPrice(ticket.amount)] : null,
-    ticket.paymentReference ? ['Payment reference', ticket.paymentReference] : null,
-  ].filter(Boolean);
+  const show = ticket.show ?? {};
+  const rows = ticketRows(ticket, { includeHeader: true });
+  const cell = 'padding:10px 0;border-top:1px solid #e7e9e0;vertical-align:top;';
 
   const bodyHtml = `
-    <p style="margin:0 0 14px;">Hi ${escapeHtml(ticket.name.split(' ')[0])}, your place at ${escapeHtml(e.title)} is confirmed. This email is your ticket and your receipt.</p>
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px;border-collapse:collapse;">
-      ${rows.map(([k, v]) => `<tr><td style="padding:6px 18px 6px 0;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3a4740;vertical-align:top;">${escapeHtml(k)}</td><td style="padding:6px 0;font-size:14px;color:#1c2b22;">${escapeHtml(v)}</td></tr>`).join('')}
+    <p style="margin:0 0 18px;">Hi ${escapeHtml(ticket.name.split(' ')[0])}, your place at ${escapeHtml(e.title)} is confirmed. ${pdf ? 'Your ticket is attached as a PDF: save it to your phone.' : 'This email is your ticket.'}</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;border:1px solid #dfe4dc;border-radius:14px;overflow:hidden;margin:0 0 18px;">
+      <tr>
+        <td style="background:#14402a;padding:18px 20px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ec6a6;">Ticket</p>
+          <p style="margin:0;font-size:24px;font-weight:700;color:#ffffff;">${escapeHtml(ticket.ticketNumber)}</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 20px 4px;background:#ffffff;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+            ${rows.map((r, i) => `<tr><td style="${i ? cell : cell.replace('border-top:1px solid #e7e9e0;', '')}width:38%;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2f6b3d;">${escapeHtml(r.label)}</td><td style="${i ? cell : cell.replace('border-top:1px solid #e7e9e0;', '')}font-size:14px;color:#1c2b22;">${escapeHtml(r.value)}</td></tr>`).join('')}
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" style="padding:16px 20px 20px;background:#f4f1ea;">
+          <img src="${qrImageUrl}" alt="Ticket ${escapeHtml(ticket.ticketNumber)}" width="170" height="170" style="display:block;width:170px;height:170px;border:0;margin:0 auto 8px;" />
+          <p style="margin:0;font-size:12px;color:#3a4740;">Show this code at the entrance. One ticket admits one person.</p>
+        </td>
+      </tr>
     </table>
-    <p style="margin:0 0 8px;font-size:13px;color:#3a4740;">Show this code at the entrance:</p>
-    <img src="${qrImageUrl}" alt="Ticket ${escapeHtml(ticket.ticketNumber)}" width="180" height="180" style="display:block;width:180px;height:180px;border:0;margin:0 0 18px;" />
-    ${e.dressCode ? `<p style="margin:0 0 6px;font-weight:700;">Dress code</p><p style="margin:0 0 14px;">${escapeHtml(e.dressCode)}</p>` : ''}
-    ${e.ticketNote ? nl2p(escapeHtml(e.ticketNote)) : ''}
-    ${e.contactWhatsapp ? `<p style="margin:14px 0 0;font-size:13px;color:#3a4740;">Questions: WhatsApp ${escapeHtml(e.contactWhatsapp)}</p>` : ''}`;
+    ${show.dressCode && e.dressCode ? `<p style="margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2f6b3d;">Dress code</p><p style="margin:0 0 14px;">${escapeHtml(e.dressCode)}</p>` : ''}
+    ${show.note && e.ticketNote ? nl2p(e.ticketNote) : ''}
+    ${show.contact && e.contactWhatsapp ? `<p style="margin:14px 0 0;font-size:13px;color:#3a4740;">Questions: WhatsApp ${escapeHtml(e.contactWhatsapp)}</p>` : ''}`;
 
   await dispatch({
     to,
@@ -441,8 +448,27 @@ export async function sendEventTicketEmail({ to, ticket, qrImageUrl, ticketUrl }
     eyebrow: 'Your ticket',
     title: e.title,
     bodyHtml,
-    ctaLabel: 'Open my ticket',
-    ctaUrl: ticketUrl,
+    ctaLabel: pdf ? 'Download my ticket (PDF)' : 'Open my ticket',
+    ctaUrl: pdf ? clientUrl(`/api/events/tickets/${ticket.token}/ticket.pdf`) : ticketUrl,
     preheader: `Ticket ${ticket.ticketNumber} · ${eventDate(e.date)}`,
+    attachments: pdf ? [{ filename: `${e.slug}-${ticket.ticketNumber}.pdf`, content: pdf, contentType: 'application/pdf' }] : undefined,
+  });
+}
+
+/** To the team, once, when the last place is taken. */
+export async function sendEventFullEmail({ to, event, confirmed, activities, manageUrl }) {
+  const bodyHtml = `
+    <p style="margin:0 0 14px;">Every place for <strong>${escapeHtml(event.title)}</strong> (${escapeHtml(eventDate(event.date))}) is now taken: ${confirmed} of ${event.totalPlaces} confirmed.</p>
+    <p style="margin:0 0 14px;">The event page now shows it as fully booked and registration is closed. To open more places, raise the total in the event's settings.</p>
+    ${activities.length ? `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 14px;border-collapse:collapse;">${activities.map((a) => `<tr><td style="padding:5px 18px 5px 0;font-size:14px;color:#1c2b22;">${escapeHtml(a.name)}</td><td style="padding:5px 0;font-size:14px;color:#3a4740;">${a.taken} of ${a.places}${a.taken >= a.places ? ' · full' : ''}</td></tr>`).join('')}</table>` : ''}`;
+
+  await dispatch({
+    to: to.join(','),
+    subject: `Fully booked: ${event.title}`,
+    eyebrow: 'Sold out',
+    title: `${event.title} is fully booked`,
+    bodyHtml,
+    ctaLabel: 'See the registrations',
+    ctaUrl: manageUrl,
   });
 }

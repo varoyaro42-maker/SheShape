@@ -3,6 +3,8 @@ import sequelize from '../db.js';
 
 export const EVENT_STATUSES = ['draft', 'open', 'closed'];
 export const FEE_PAYERS = ['customer', 'organiser'];
+// The lines an admin can switch on or off on the ticket (PDF, page and email).
+export const TICKET_FIELDS = ['name', 'date', 'time', 'venue', 'activities', 'amount', 'paymentReference', 'dressCode', 'note', 'contact'];
 
 /**
  * Everything about an event is set by an admin: the page copy, the price,
@@ -46,6 +48,10 @@ const Event = sequelize.define(
     dressCode: { type: DataTypes.TEXT, allowNull: true, field: 'dress_code' },
     // Extra lines for the ticket email: programme, what to bring.
     ticketNote: { type: DataTypes.TEXT, allowNull: true, field: 'ticket_note' },
+    // Which TICKET_FIELDS appear on the ticket; null means all of them.
+    ticketFields: { type: DataTypes.JSON, allowNull: true, field: 'ticket_fields' },
+    // Set when the last place is taken, so the team is told once.
+    fullNotifiedAt: { type: DataTypes.DATE, allowNull: true, field: 'full_notified_at' },
     contactWhatsapp: { type: DataTypes.STRING(40), allowNull: true, field: 'contact_whatsapp' },
     contactInstagram: { type: DataTypes.STRING(60), allowNull: true, field: 'contact_instagram' },
     ticketCounter: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0, field: 'ticket_counter' },
@@ -57,13 +63,13 @@ const Event = sequelize.define(
 Event.addHook('afterFind', (result) => {
   const rows = Array.isArray(result) ? result : result ? [result] : [];
   for (const row of rows) {
-    for (const key of ['gallery', 'included', 'partners']) {
+    for (const key of ['gallery', 'included', 'partners', 'ticketFields']) {
       const raw = row.getDataValue(key);
       if (typeof raw === 'string') {
         try {
           row.setDataValue(key, JSON.parse(raw));
         } catch {
-          row.setDataValue(key, []);
+          row.setDataValue(key, key === 'ticketFields' ? null : []);
         }
       }
     }
