@@ -1,0 +1,188 @@
+.page {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 48px 20px 96px;
+}
+
+.title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 2rem;
+  color: var(--text, #1c2b22);
+  margin: 0 0 8px;
+}
+
+.subtitle {
+  font-size: 0.92rem;
+  color: var(--text-muted, #3a4740);
+  margin: 0 0 32px;
+}
+
+.card {
+  background: var(--white, #ffffff);
+  border: 1px solid var(--border, #e7e9e0);
+  border-radius: 20px;
+  padding: 26px 28px;
+  margin-bottom: 20px;
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.number {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text, #1c2b22);
+}
+
+.date {
+  font-size: 0.8rem;
+  color: var(--text-muted, #3a4740);
+}
+
+.badge {
+  padding: 5px 13px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--green-dark, #06311a);
+  background: #e8f0e9;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.methodBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted, #3a4740);
+  background: var(--bg, #f6f6f3);
+  border: 1px solid var(--border, #e7e9e0);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  font-size: 0.9rem;
+  color: var(--text-muted, #3a4740);
+  border-bottom: 1px solid var(--border, #e7e9e0);
+}
+
+.lineName {
+  color: var(--text, #1c2b22);
+}
+
+.total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text, #1c2b22);
+}
+
+.payment {
+  margin-top: 24px;
+  padding: 18px 20px;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text, #1c2b22);
+  background: #f2f6f2;
+  border-radius: 14px;
+}
+
+.lookup {
+  max-width: 420px;
+}
+
+.actions {
+  margin-top: 28px;
+}
+
+.instructions {
+  margin-top: 18px;
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: var(--green-soft);
+}
+
+.instructionsTitle {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  padding: 3px 9px;
+  border: 1px solid var(--green-mid);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.copy:hover {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.instructionsWarn {
+  background: #fff7ed;
+}
+
+.instructionsTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+  color: var(--green-mid);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.errorText {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: #b91c1c;
+}

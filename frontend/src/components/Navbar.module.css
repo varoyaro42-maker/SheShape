@@ -1,0 +1,276 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #fff;
+  color: var(--green-tree);
+  box-shadow: 0 1px 0 rgba(35, 97, 48, 0.14), 0 4px 18px rgba(6, 49, 26, 0.08);
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 100px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--heading);
+  font-size: 23px;
+  font-weight: 700;
+  color: var(--green-tree);
+  letter-spacing: -0.01em;
+}
+
+.brandIcon {
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+}
+
+.brandWord {
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.link {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--green-tree);
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.link:hover {
+  color: var(--green-dark);
+}
+
+.active {
+  color: var(--green-tree);
+  border-bottom-color: var(--green-tree);
+}
+
+.cart {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: rgba(35, 97, 48, 0.08);
+  color: var(--green-tree);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.cart:hover {
+  background: rgba(35, 97, 48, 0.15);
+}
+
+.badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--green-tree);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.accountName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--green-tree);
+}
+
+.logout,
+.login {
+  padding: 0;
+  font: inherit;
+  font-size: 0.85rem;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.logout:hover,
+.login:hover {
+  color: var(--green-dark);
+}
+
+/* Phone-only controls, hidden on wide screens. */
+.mobileActions {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobileCart,
+.menuButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--green-tree);
+  border: none;
+  cursor: pointer;
+}
+
+.mobileCart .badge {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  min-width: 18px;
+  height: 18px;
+  font-size: 11px;
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    height: 76px;
+    gap: 12px;
+  }
+
+  .brand {
+    font-size: 21px;
+  }
+
+  .brandIcon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .brandWord {
+    font-size: 19px;
+  }
+
+  .mobileActions {
+    display: flex;
+  }
+
+  /* The menu drops down from the header and takes the full width. */
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 6px 20px 22px;
+    background: #fff;
+    border-top: 1px solid rgba(35, 97, 48, 0.14);
+    box-shadow: 0 18px 32px rgba(6, 49, 26, 0.16);
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+  }
+
+  .navOpen {
+    display: flex;
+  }
+
+  .link {
+    padding: 14px 4px;
+    font-size: 17px;
+    border-bottom: 1px solid rgba(35, 97, 48, 0.12);
+  }
+
+  .active {
+    color: var(--green-dark);
+    border-bottom-color: rgba(35, 97, 48, 0.12);
+  }
+
+  .tools {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding-top: 16px;
+  }
+
+  .cart {
+    display: none;
+  }
+
+  .account {
+    justify-content: space-between;
+    padding: 6px 4px;
+  }
+
+  .accountName,
+  .login,
+  .logout {
+    font-size: 15px;
+  }
+
+  .login {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(35, 97, 48, 0.4);
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    inset: 64px 0 0 0;
+    background: rgba(6, 49, 26, 0.45);
+    border: none;
+    padding: 0;
+    z-index: -1;
+    cursor: default;
+  }
+}
+
+/* The full logo exactly as supplied: runner above the "She Shape Wellness" script. */
+.brandLogo {
+  display: block;
+  height: 82px;
+  width: auto;
+}
+
+@media (max-width: 900px) {
+  .brandLogo {
+    height: 58px;
+  }
+}

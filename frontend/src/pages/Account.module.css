@@ -1,0 +1,44 @@
+.page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 48px 20px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 2rem;
+  color: var(--text, #1c2b22);
+  margin: 0;
+}
+
+.card {
+  background: var(--white, #ffffff);
+  border: 1px solid var(--border, #e7e9e0);
+  border-radius: 20px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.15rem;
+  color: var(--text, #1c2b22);
+  margin: 0;
+}
+
+.detail {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted, #3a4740);
+}
+
+.avatarRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}

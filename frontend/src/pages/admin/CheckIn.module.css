@@ -1,0 +1,53 @@
+.banner {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 22px 18px;
+  border-radius: 16px;
+  text-align: center;
+  color: #fff;
+}
+
+.banner strong {
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.banner span {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.ok {
+  background: #1d7a45;
+}
+
+.warn {
+  background: #c2410c;
+  animation: pulse 1.2s ease-in-out 3;
+}
+
+.bad {
+  background: #b42318;
+}
+
+.ticket {
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(194, 65, 12, 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warn {
+    animation: none;
+  }
+}

@@ -1,0 +1,212 @@
+import { test, describe, before, after } from 'node:test'
+import assert from 'node:assert/strict'
+import { app, request, resetDatabase, closeDatabase, createUser, createAdmin, signIn, createProduct } from './helpers.js'
+import { Order, PaymentSettings, ProductImage } from '../src/models/index.js'
+
+before(resetDatabase)
+after(closeDatabase)
+
+const delivery = {
+  customerName: 'Ama Uwase',
+  customerPhone: '0788123456',
+  address: 'KG 11 Ave, Kimihurura, Kigali'
+}
+
+describe('placing an order', () => {
+  test('requires a signed-in customer', async () => {
+    const response = await request(app).post('/api/orders').send({ ...delivery, items: [] })
+    assert.equal(response.status, 401)
+  })
+
+  test('cash on delivery reserves stock, totals correctly, and shows up in my orders', async () => {
+    const leggings = await createProduct({ price: 38000, stock: 5 })
+    const journal = await createProduct({ price: 15000, stock: 2 })
+    const agent = await signIn(await createUser())
+
+    const response = await agent.post('/api/orders').send({
+      ...delivery,
+      items: [
+        { productId: leggings.id, quantity: 2 },
+        { productId: journal.id, quantity: 1 }
+      ]
+    })
+
+    assert.equal(response.status, 201)
+    const order = response.body.data
+    assert.equal(order.total, 38000 * 2 + 15000)
+    assert.equal(order.status, 'pending')
+    assert.equal(order.paymentMethod, 'cod')
+    assert.equal(order.items.length, 2)
+    assert.equal(order.customerPhone, '+250788123456')
+    assert.equal(response.body.payment.method, 'cod')
+    assert.equal(response.body.payment.checkoutUrl, null)
+
+    await leggings.reload()
+    await journal.reload()
+    assert.equal(leggings.stock, 3)
+    assert.equal(journal.stock, 1)
+
+    const mine = await agent.get('/api/orders/my')
+    assert.equal(mine.status, 200)
+    assert.equal(mine.body.data.length, 1)
+    assert.equal(mine.body.data[0].orderNumber, order.orderNumber)
+  })
+
+  test('colour and size: required when the product has them, saved on each line, stock shared', async () => {
+    const tee = await createProduct({ price: 25000, stock: 5, sizes: ['S', 'M', 'L'] })
+    await ProductImage.bulkCreate([
+      { productId: tee.id, url: '/uploads/products/beige.jpg', color: 'Beige', sortOrder: 0 },
+      { productId: tee.id, url: '/uploads/products/black.jpg', color: 'Black', sortOrder: 1 }
+    ])
+    const agent = await signIn(await createUser())
+
+    const noSize = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: tee.id, color: 'Beige', quantity: 1 }] })
+    assert.equal(noSize.status, 400)
+    assert.match(noSize.body.error, /Choose a size/)
+    const badColour = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: tee.id, color: 'Pink', size: 'M', quantity: 1 }] })
+    assert.match(badColour.body.error, /Choose a colour/)
+    const tooMany = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: tee.id, color: 'Beige', size: 'M', quantity: 3 }, { productId: tee.id, color: 'Black', size: 'L', quantity: 3 }] })
+    assert.equal(tooMany.status, 409, 'stock is counted across colours and sizes')
+
+    const response = await agent.post('/api/orders').send({
+      ...delivery,
+      items: [
+        { productId: tee.id, color: 'Beige', size: 'M', quantity: 2 },
+        { productId: tee.id, color: 'Black', size: 'L', quantity: 1 }
+      ]
+    })
+    assert.equal(response.status, 201, JSON.stringify(response.body))
+    const lines = response.body.data.items.map((i) => `${i.color}/${i.size}/${i.quantity}`).sort()
+    assert.deepEqual(lines, ['Beige/M/2', 'Black/L/1'])
+    assert.equal(response.body.data.total, 75000)
+    await tee.reload()
+    assert.equal(tee.stock, 2)
+
+    const page = await request(app).get(`/api/products/${tee.slug}`)
+    assert.deepEqual(page.body.data.sizes, ['S', 'M', 'L'])
+  })
+
+  test('refuses more than the stock and leaves stock untouched', async () => {
+    const product = await createProduct({ stock: 1 })
+    const agent = await signIn(await createUser())
+
+    const response = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: product.id, quantity: 2 }] })
+
+    assert.equal(response.status, 409)
+    await product.reload()
+    assert.equal(product.stock, 1)
+  })
+
+  test('refuses unpublished products, empty carts and bad addresses', async () => {
+    const hidden = await createProduct({ isPublished: false })
+    const visible = await createProduct()
+    const agent = await signIn(await createUser())
+
+    const unpublished = await agent.post('/api/orders').send({ ...delivery, items: [{ productId: hidden.id, quantity: 1 }] })
+    assert.equal(unpublished.status, 400)
+
+    const empty = await agent.post('/api/orders').send({ ...delivery, items: [] })
+    assert.equal(empty.status, 400)
+
+    const badAddress = await agent.post('/api/orders').send({ ...delivery, address: 'x', items: [{ productId: visible.id, quantity: 1 }] })
+    assert.equal(badAddress.status, 400)
+    await visible.reload()
+    assert.equal(visible.stock, 5, 'validation failure must roll back the stock decrement')
+  })
+
+  test('card payment without XentriPay configured fails before any stock is reserved', async () => {
+    const product = await createProduct({ stock: 4 })
+    const user = await createUser()
+    const agent = await signIn(user)
+
+    const response = await agent.post('/api/orders').send({
+      ...delivery,
+      paymentMethod: 'card',
+      items: [{ productId: product.id, quantity: 1 }]
+    })
+
+    assert.equal(response.status, 400)
+    assert.match(response.body.error, /Card payment is not available/)
+    await product.reload()
+    assert.equal(product.stock, 4)
+    assert.equal(await Order.count({ where: { userId: user.id } }), 0)
+  })
+
+  test('mobile money is offered only once the shop has a MoMo number, then returns instructions', async () => {
+    const product = await createProduct({ stock: 4 })
+    const agent = await signIn(await createUser())
+
+    const refused = await agent.post('/api/orders').send({
+      ...delivery,
+      paymentMethod: 'momo',
+      items: [{ productId: product.id, quantity: 1 }]
+    })
+    assert.equal(refused.status, 400)
+    assert.match(refused.body.error, /Mobile money is not available/)
+
+    const [settings] = await PaymentSettings.findOrCreate({ where: { id: 1 } })
+    settings.momoNumber = '+250788000111'
+    settings.momoName = 'She Shape Ltd'
+    await settings.save()
+
+    const methods = await request(app).get('/api/payments/methods')
+    assert.equal(methods.status, 200)
+    assert.deepEqual(methods.body.data.momo, { provider: 'manual', number: '+250788000111', name: 'She Shape Ltd' })
+    assert.equal(methods.body.data.card, null)
+
+    const placed = await agent.post('/api/orders').send({
+      ...delivery,
+      paymentMethod: 'momo',
+      items: [{ productId: product.id, quantity: 1 }]
+    })
+    assert.equal(placed.status, 201)
+    assert.equal(placed.body.data.paymentMethod, 'momo')
+    assert.equal(placed.body.data.paymentProvider, 'manual')
+    assert.equal(placed.body.payment.momo.number, '+250788000111')
+    assert.equal(placed.body.data.status, 'pending')
+
+    const status = await agent.get(`/api/payments/orders/${placed.body.data.orderNumber}`)
+    assert.equal(status.status, 200)
+    assert.equal(status.body.data.paymentMethod, 'momo')
+
+    settings.momoNumber = null
+    await settings.save()
+  })
+})
+
+describe('looking up an order', () => {
+  test('owner, admin, or matching phone may view it; others may not', async () => {
+    const product = await createProduct()
+    const owner = await createUser()
+    const ownerAgent = await signIn(owner)
+    const placed = await ownerAgent.post('/api/orders').send({ ...delivery, items: [{ productId: product.id, quantity: 1 }] })
+    const { orderNumber } = placed.body.data
+
+    assert.equal((await ownerAgent.get(`/api/orders/${orderNumber}`)).status, 200)
+    assert.equal((await request(app).get(`/api/orders/${orderNumber}`)).status, 403)
+    assert.equal((await request(app).get(`/api/orders/${orderNumber}`).query({ phone: '0788123456' })).status, 200)
+    assert.equal((await request(app).get(`/api/orders/${orderNumber}`).query({ phone: '0788999999' })).status, 403)
+
+    const strangerAgent = await signIn(await createUser())
+    assert.equal((await strangerAgent.get(`/api/orders/${orderNumber}`)).status, 403)
+
+    const adminAgent = await signIn(await createAdmin())
+    assert.equal((await adminAgent.get(`/api/orders/${orderNumber}`)).status, 200)
+
+    assert.equal((await ownerAgent.get('/api/orders/NOPE-0000')).status, 404)
+  })
+})
+
+describe('xentripay webhook without a secret configured', () => {
+  test('acknowledges payloads it cannot match and never crashes', async () => {
+    const response = await request(app)
+      .post('/api/payments/xentripay/webhook')
+      .set('Content-Type', 'application/json')
+      .send(JSON.stringify({ event: 'COLLECTION_SUCCESSFUL', data: { reference: 'SS-NOPE-0000', id: 'tx_123' } }))
+    assert.equal(response.status, 200)
+    assert.deepEqual(response.body, { received: true })
+
+    const notJson = await request(app).post('/api/payments/xentripay/webhook').set('Content-Type', 'application/json').send('nope')
+    assert.equal(notJson.status, 400)
+  })
+})

@@ -1,0 +1,20 @@
+.shell {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Room above the footer on inner pages; the home page ends on a full-bleed band. */
+.main {
+  padding-bottom: var(--section);
+}
+
+.flush {
+  padding-bottom: 0;
+}
+
+/* The shop page sits on tree green. */
+.tree {
+  background: var(--green-tree);
+}

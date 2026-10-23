@@ -1,0 +1,82 @@
+.carousel {
+  position: relative;
+}
+
+.track {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 6px 4px 18px;
+  margin: -6px -4px 0;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.track:focus-visible {
+  outline: 2px solid var(--green-mid);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.slide {
+  flex: 0 0 min(var(--slide-width, 360px), 84vw);
+  scroll-snap-align: start;
+  display: flex;
+}
+
+.slide > * {
+  width: 100%;
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--green-dark);
+  background: transparent;
+  color: var(--green-dark);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.arrow:hover:not(:disabled) {
+  background: var(--green-dark);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Auto-gliding mode: no snap points, otherwise the browser fights the glide. */
+.looping {
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+}
+
+.looping .slide {
+  scroll-snap-align: none;
+}
+
+.looping {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}

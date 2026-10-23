@@ -1,0 +1,68 @@
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: clamp(28px, 4vw, 44px);
+}
+
+.center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.text {
+  max-width: 640px;
+}
+
+.center .text {
+  margin: 0 auto;
+}
+
+.title {
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.lead {
+  margin-top: 14px;
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--text-soft);
+  max-width: 56ch;
+}
+
+.center .lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.light .title {
+  color: #fff;
+}
+
+.light .lead {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.light :global(.eyebrow) {
+  color: var(--green-light);
+}
+
+.action {
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .center {
+    align-items: center;
+  }
+}

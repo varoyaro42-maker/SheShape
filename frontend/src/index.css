@@ -1,0 +1,350 @@
+/* Brand fonts, self-hosted. Subset to Latin and served as woff2 from /fonts. */
+@font-face { font-family: 'Sofia Pro'; font-weight: 400; font-style: normal; font-display: swap; src: url('/fonts/SofiaPro-Regular.woff2') format('woff2'); }
+@font-face { font-family: 'Sofia Pro'; font-weight: 400; font-style: italic; font-display: swap; src: url('/fonts/SofiaPro-Italic.woff2') format('woff2'); }
+@font-face { font-family: 'Sofia Pro'; font-weight: 500; font-style: normal; font-display: swap; src: url('/fonts/SofiaPro-Medium.woff2') format('woff2'); }
+@font-face { font-family: 'Sofia Pro'; font-weight: 600; font-style: normal; font-display: swap; src: url('/fonts/SofiaPro-SemiBold.woff2') format('woff2'); }
+@font-face { font-family: 'Sofia Pro'; font-weight: 700; font-style: normal; font-display: swap; src: url('/fonts/SofiaPro-Bold.woff2') format('woff2'); }
+
+:root {
+  --green-dark: #06311a;
+  --green-mid: #2f6b3d;
+  --green-light: #9ec6a6;
+  --green-tree: #236130;
+  --green-soft: #e8f0e9;
+  --green-50: #f2f6f2;
+  --bg: #f6f6f3;
+  --surface: #ffffff;
+  --white: #ffffff;
+  --border: #e7e9e0;
+  --text: #1c2b22;
+  --text-soft: #3a4740;
+  --text-muted: #5b6861;
+  --cream: #f4f1ea;
+
+  --heading: 'Sofia Pro', system-ui, sans-serif;
+  --body: 'Sofia Pro', system-ui, sans-serif;
+  --accent: 'Sofia Pro', system-ui, sans-serif;
+  --font-heading: var(--heading);
+
+  --radius-card: 20px;
+  --radius-button: 12px;
+  --shadow-card: 0 1px 2px rgba(28, 43, 34, 0.04);
+  --shadow-lift: 0 18px 40px rgba(6, 49, 26, 0.12);
+
+  --page: 1200px;
+  --gap: 24px;
+  --section: clamp(64px, 9vw, 120px);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--heading);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--green-dark);
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--green-mid);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.page {
+  width: 100%;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Small label above headings. Deliberately plain: no dashes, no icons. */
+.eyebrow {
+  display: block;
+  font-family: var(--accent);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--green-mid);
+  margin-bottom: 14px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 13px 24px;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-button);
+  background: var(--green-dark);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--green-mid);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(6, 49, 26, 0.18);
+}
+
+.btn:hover:not(:disabled) svg:last-child {
+  transform: translateX(3px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--green-dark);
+  border-color: var(--green-dark);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--green-dark);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--green-dark);
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--green-soft);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-light {
+  background: #fff;
+  color: var(--green-dark);
+}
+
+.btn-light:hover:not(:disabled) {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.btn-lg {
+  padding: 16px 28px;
+  font-size: 16px;
+}
+
+.btn-sm {
+  padding: 9px 16px;
+  font-size: 14px;
+}
+
+/* Small rounded tag */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* Motion. Every entrance is opt-in and respects reduced motion. */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Variant that slides in from the right, for carousels. */
+.reveal-x {
+  transform: translateX(32px);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.8s var(--ease-out) both;
+}
+
+.rise-2 {
+  animation-delay: 0.1s;
+}
+
+.rise-3 {
+  animation-delay: 0.2s;
+}
+
+.rise-4 {
+  animation-delay: 0.3s;
+}
+
+@keyframes route-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.route-enter {
+  animation: route-in 0.35s var(--ease-out) both;
+}
+
+.media-zoom {
+  overflow: hidden;
+}
+
+.media-zoom img {
+  transition: transform 0.7s var(--ease-out);
+}
+
+.media-zoom:hover img {
+  transform: scale(1.04);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .rise,
+  .route-enter,
+  .skeleton {
+    animation: none;
+  }
+
+  .media-zoom img,
+  .btn,
+  .btn svg {
+    transition: none;
+  }
+}
+

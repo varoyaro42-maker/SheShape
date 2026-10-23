@@ -1,0 +1,139 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.preview {
+  position: relative;
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-line);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  background: none;
+  border: 1px dashed var(--admin-line);
+  color: var(--admin-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.placeholder:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
+}
+
+.replace {
+  align-self: flex-start;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-ink);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.replace:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #b91c1c;
+}
+
+.input {
+  display: none;
+}
+
+.wide {
+  max-width: 420px;
+  aspect-ratio: 16 / 9;
+  background: #0b2416;
+}
+
+.wide .image {
+  object-fit: contain;
+}
+
+.bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--admin-line);
+}
+
+.bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  transform: scaleX(var(--progress, 0));
+  background: var(--admin-primary, #2f6b3d);
+  transition: transform 0.2s ease;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--admin-muted);
+}
+
+/* Logos: show the whole image on a neutral background instead of cropping. */
+.contain {
+  aspect-ratio: 16 / 7;
+}
+
+.contain .image {
+  object-fit: contain;
+  padding: 16px;
+  box-sizing: border-box;
+}

@@ -1,0 +1,10 @@
+{
+  "name": "sheshape",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm --prefix backend test",
+    "lint": "npm --prefix frontend run lint",
+    "build:deploy": "node scripts/build-deploy.mjs"
+  }
+}

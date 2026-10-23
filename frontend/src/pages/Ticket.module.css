@@ -1,0 +1,259 @@
+.page {
+  min-height: 70vh;
+  padding: 32px 16px 48px;
+  background: #f4f1ea;
+  font-family: var(--body);
+  font-weight: 400;
+  color: #1c2b22;
+}
+
+.card,
+.ticket {
+  max-width: 440px;
+  margin: 0 auto;
+  border-radius: 20px;
+}
+
+.card {
+  padding: 32px 24px;
+  background: #fff;
+  border: 1px solid #e2e6dc;
+}
+
+.center {
+  text-align: center;
+}
+
+.ticket {
+  filter: drop-shadow(0 18px 30px rgba(20, 64, 42, 0.12));
+}
+
+.head {
+  padding: 28px 24px 30px;
+  background: #14402a;
+  color: #fff;
+  text-align: center;
+  border-radius: 20px 20px 0 0;
+}
+
+.logo {
+  display: block;
+  width: 120px;
+  height: auto;
+  margin: 0 auto 16px;
+}
+
+.title {
+  font-family: var(--heading);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.15;
+  margin: 0 0 8px;
+}
+
+.card .title {
+  color: #14402a;
+}
+
+.head .title {
+  color: #fff;
+}
+
+.when {
+  margin: 0;
+  font-weight: 500;
+  font-size: 15px;
+  color: #9ec6a6;
+}
+
+/* The perforation: cream notches cut out of both edges and a dashed rule. */
+.tear {
+  position: relative;
+  height: 24px;
+  background:
+    radial-gradient(circle at 0 50%, #f4f1ea 12px, transparent 12.5px),
+    radial-gradient(circle at 100% 50%, #f4f1ea 12px, transparent 12.5px),
+    #fff;
+}
+
+.tear::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 0;
+  border-top: 1.5px dashed #9ec6a6;
+}
+
+.body {
+  padding: 4px 26px 26px;
+  background: #fff;
+  border-radius: 0 0 20px 20px;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: start;
+  padding-bottom: 18px;
+}
+
+.label {
+  margin: 0 0 4px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #2f6b3d;
+}
+
+.number {
+  margin: 0 0 16px;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  color: #14402a;
+}
+
+.name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.qr {
+  display: block;
+  width: 132px;
+  height: 132px;
+}
+
+.rows {
+  margin: 0 0 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 16px;
+}
+
+.rows div {
+  padding: 14px 0;
+  border-top: 1px solid #dfe4dc;
+}
+
+.rows .wide {
+  grid-column: 1 / -1;
+}
+
+.rows dd {
+  margin: 0;
+  font-weight: 500;
+  font-size: 15.5px;
+  overflow-wrap: anywhere;
+}
+
+.dress,
+.note {
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.dress {
+  background: #eef4ee;
+}
+
+.note {
+  background: #f4f1ea;
+}
+
+.dress p:last-child,
+.note p {
+  margin: 0 0 6px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.note p:last-child {
+  margin-bottom: 0;
+}
+
+.entry {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #5b6a61;
+}
+
+.actions {
+  max-width: 440px;
+  margin: 26px auto 0;
+  text-align: center;
+}
+
+.muted {
+  font-size: 13px;
+  color: #5b6a61;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 15px 28px;
+  border-radius: 999px;
+  background: #14402a;
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button:hover {
+  background: #2f6b3d;
+}
+
+.spinner {
+  display: inline-block;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  border: 3px solid #a9c3ac;
+  border-top-color: #14402a;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 400px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+
+  .qr {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+
+  .rows {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .page {
+    background: #fff;
+    padding: 0;
+  }
+
+  .actions {
+    display: none;
+  }
+}
