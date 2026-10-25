@@ -73,6 +73,8 @@ async function seedPayments() {
   // Not counted: cash on delivery, and an online order still unpaid.
   await Order.create({ orderNumber: 'SSW-P2', customerName: 'Keza Mugisha', customerPhone: '0788123457', address: 'KG 11 Ave, Kigali', total: 9000, status: 'paid', paymentMethod: 'cod', paidAt })
   await Order.create({ orderNumber: 'SSW-P3', customerName: 'Ines Ishimwe', customerPhone: '0788123458', address: 'KG 11 Ave, Kigali', total: 7000, paymentMethod: 'card', paymentProvider: 'xentripay', paymentReference: 'RefB' })
+  // Paid in sandbox testing, then cancelled: not money in the wallet.
+  await Order.create({ orderNumber: 'SSW-P4', customerName: 'Test Order', customerPhone: '0788123459', address: 'KG 11 Ave, Kigali', total: 25000, status: 'cancelled', paymentMethod: 'momo', paymentProvider: 'xentripay', paymentReference: 'RefD', paidAt })
 
   const event = await Event.create({ title: 'Her Wellness Experience', slug: 'her-wellness', date: '2026-11-07', venue: 'Mamba', price: 45000, totalPlaces: 80 })
   await EventRegistration.create({ eventId: event.id, name: 'Aline Uwera', phone: '+250788000222', email: 'aline@example.com', amount: 45000, status: 'confirmed', paymentMethod: 'momo', paymentReference: 'RefC', paidAt })
@@ -92,15 +94,23 @@ describe('Payments and payouts', () => {
 
     const res = await admin.get('/api/admin/payouts/summary')
     assert.equal(res.status, 200)
-    assert.equal(res.body.data.orders.total, 25000)
-    assert.equal(res.body.data.tickets.total, 45000)
+    // The organiser pays the ticket fee (3% taken off); the customer pays it on shop orders.
+    assert.equal(res.body.data.count, 2)
     assert.equal(res.body.data.received, 70000)
-    assert.equal(res.body.data.estimatedBalance, 70000)
+    assert.equal(res.body.data.fees, 1350)
+    assert.equal(res.body.data.net, 68650)
+    assert.equal(res.body.data.estimatedBalance, 68650)
+    const shop = res.body.data.bySource.find((s) => s.source === 'shop')
+    const event = res.body.data.bySource.find((s) => s.label === 'Her Wellness Experience')
+    assert.deepEqual([shop.count, shop.amount, shop.fee], [1, 25000, 0])
+    assert.deepEqual([event.count, event.amount, event.fee, event.net], [1, 45000, 1350, 43650])
     assert.equal(res.body.data.ready, true)
     assert.ok(res.body.data.providers.some((p) => p.id === '63510'))
 
     const list = await admin.get('/api/admin/payouts/received')
-    assert.deepEqual(list.body.data.map((r) => r.amount).sort(), [25000, 45000])
+    const ticket = list.body.data.find((r) => r.kind === 'ticket')
+    assert.deepEqual([ticket.amount, ticket.fee, ticket.net, ticket.phone, ticket.sourceLabel], [45000, 1350, 43650, '+250788000222', 'Her Wellness Experience'])
+    assert.equal(list.body.data.length, 2)
   })
 
   test('a payout goes to XentriPay in the documented format and waits for the OTP', async () => {
@@ -122,7 +132,7 @@ describe('Payments and payouts', () => {
 
     const summary = await admin.get('/api/admin/payouts/summary')
     assert.equal(summary.body.data.waiting, 20010)
-    assert.equal(summary.body.data.estimatedBalance, 70000 - 20010)
+    assert.equal(summary.body.data.estimatedBalance, 68650 - 20010)
   })
 
   test('checking the status moves it to paid out', async () => {

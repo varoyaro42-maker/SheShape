@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, Clock, RefreshCw, Send, Wallet } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Percent, RefreshCw, Send, Wallet } from 'lucide-react'
 import { adminPayouts } from '../../api/admin.js'
 import { readError } from '../../api/client.js'
 import { useToast } from '../../context/toast-context.js'
@@ -117,7 +117,7 @@ export default function AdminPaymentsPage() {
           <h1 className={styles.title}>Payments</h1>
           <p className={styles.subtitle}>
             Money received online through XentriPay, and money sent out of it.
-            {summary?.environment === 'sandbox' && ' Sandbox: test money only.'}
+            {summary?.environment === 'sandbox' && ' XentriPay is set to sandbox (test) mode.'}
           </p>
         </div>
         <button type="button" onClick={load} className={formStyles.smallButton}>
@@ -135,8 +135,7 @@ export default function AdminPaymentsPage() {
               <div>
                 <span className={statStyles.statValue} style={AMOUNT_STYLE}>{formatPrice(summary.received)}</span>
                 <span className={statStyles.statLabel}>
-                  Received online · {summary.orders.count} order{summary.orders.count === 1 ? '' : 's'}, {summary.tickets.count} ticket
-                  {summary.tickets.count === 1 ? '' : 's'}
+                  {summary.count} successful payment{summary.count === 1 ? '' : 's'}
                 </span>
               </div>
               <span className={`${statStyles.statIcon} ${statStyles.statIconGreen}`}>
@@ -145,8 +144,19 @@ export default function AdminPaymentsPage() {
             </div>
             <div className={statStyles.statCard}>
               <div>
-                <span className={statStyles.statValue} style={AMOUNT_STYLE}>{formatPrice(summary.paidOut)}</span>
-                <span className={statStyles.statLabel}>Sent out (with fees)</span>
+                <span className={statStyles.statValue} style={AMOUNT_STYLE}>{formatPrice(summary.fees)}</span>
+                <span className={statStyles.statLabel}>Deducted by XentriPay ({summary.feePercent}% fee)</span>
+              </div>
+              <span className={`${statStyles.statIcon} ${statStyles.statIconAmber}`}>
+                <Percent size={20} />
+              </span>
+            </div>
+            <div className={statStyles.statCard}>
+              <div>
+                <span className={statStyles.statValue} style={AMOUNT_STYLE}>{formatPrice(summary.paidOut + summary.waiting)}</span>
+                <span className={statStyles.statLabel}>
+                  Sent out{summary.waiting > 0 ? ` (${formatPrice(summary.waiting)} waiting for OTP)` : ''}
+                </span>
               </div>
               <span className={`${statStyles.statIcon} ${statStyles.statIconBlue}`}>
                 <ArrowUpRight size={20} />
@@ -154,17 +164,8 @@ export default function AdminPaymentsPage() {
             </div>
             <div className={statStyles.statCard}>
               <div>
-                <span className={statStyles.statValue} style={AMOUNT_STYLE}>{formatPrice(summary.waiting)}</span>
-                <span className={statStyles.statLabel}>Waiting for confirmation</span>
-              </div>
-              <span className={`${statStyles.statIcon} ${statStyles.statIconAmber}`}>
-                <Clock size={20} />
-              </span>
-            </div>
-            <div className={statStyles.statCard}>
-              <div>
                 <span className={statStyles.statValue} style={AMOUNT_STYLE}>{formatPrice(summary.estimatedBalance)}</span>
-                <span className={statStyles.statLabel}>Estimated balance</span>
+                <span className={statStyles.statLabel}>In the wallet</span>
               </div>
               <span className={`${statStyles.statIcon} ${statStyles.statIconPurple}`}>
                 <Wallet size={20} />
@@ -172,9 +173,43 @@ export default function AdminPaymentsPage() {
             </div>
           </div>
           <p className={formStyles.hint} style={{ marginTop: '0.75rem' }}>
-            Worked out from this website's records. XentriPay's fee on payments where we pay the fee is not taken off, so
-            the exact balance is the one in your XentriPay dashboard.
+            Successful payments only, after XentriPay's fee. Worked out from this website's records; the XentriPay
+            dashboard has the official balance.
           </p>
+
+          <h2 className={formStyles.sectionTitle} style={{ marginTop: '1.5rem' }}>Where the money came from</h2>
+          {summary.bySource.length === 0 ? (
+            <Empty message="No successful payments yet." />
+          ) : (
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>From</th>
+                    <th className={styles.numCol}>Payments</th>
+                    <th className={styles.numCol}>Paid</th>
+                    <th className={styles.numCol}>XentriPay fee</th>
+                    <th className={styles.numCol}>You received</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.bySource.map((source) => (
+                    <tr key={source.source}>
+                      <td>
+                        {source.eventId ? <Link to={`/admin/events/${source.eventId}/registrations`}>{source.label}</Link> : source.label}
+                      </td>
+                      <td className={styles.numCol}>{source.count}</td>
+                      <td className={styles.numCol}>{formatPrice(source.amount)}</td>
+                      <td className={styles.numCol}>{source.fee ? `− ${formatPrice(source.fee)}` : '—'}</td>
+                      <td className={styles.numCol}>
+                        <strong>{formatPrice(source.net)}</strong>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </>
       )}
 
@@ -337,7 +372,7 @@ export default function AdminPaymentsPage() {
         </div>
       )}
 
-      <h2 className={formStyles.sectionTitle} style={{ marginTop: '2rem' }}>Money received</h2>
+      <h2 className={formStyles.sectionTitle} style={{ marginTop: '2rem' }}>Every successful payment</h2>
       {received.length === 0 ? (
         <Empty message="No online payments yet." />
       ) : (
@@ -346,10 +381,12 @@ export default function AdminPaymentsPage() {
             <thead>
               <tr>
                 <th>Date</th>
+                <th>Paid by</th>
                 <th>For</th>
-                <th>From</th>
                 <th>Paid with</th>
-                <th className={styles.numCol}>Amount</th>
+                <th className={styles.numCol}>Paid</th>
+                <th className={styles.numCol}>Fee</th>
+                <th className={styles.numCol}>You received</th>
               </tr>
             </thead>
             <tbody>
@@ -357,11 +394,17 @@ export default function AdminPaymentsPage() {
                 <tr key={`${row.kind}-${row.id}`}>
                   <td className={styles.date}>{formatOrderDate(row.paidAt)}</td>
                   <td>
-                    <Link to={row.kind === 'order' ? `/admin/orders/${row.id}` : `/admin/events/${row.eventId}/registrations`}>{row.label}</Link>
+                    <span className={styles.name}>{row.name}</span>
+                    {row.phone && <div className={styles.phone}>{row.phone}</div>}
                   </td>
-                  <td>{row.name}</td>
+                  <td>
+                    <Link to={row.kind === 'order' ? `/admin/orders/${row.id}` : `/admin/events/${row.eventId}/registrations`}>{row.sourceLabel}</Link>
+                    <div className={styles.phone}>{row.label}</div>
+                  </td>
                   <td>{METHOD_LABELS[row.method] ?? row.method}</td>
                   <td className={styles.numCol}>{formatPrice(row.amount)}</td>
+                  <td className={styles.numCol}>{row.fee ? `− ${formatPrice(row.fee)}` : '—'}</td>
+                  <td className={styles.numCol}>{formatPrice(row.net)}</td>
                 </tr>
               ))}
             </tbody>

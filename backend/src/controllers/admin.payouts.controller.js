@@ -8,38 +8,121 @@ import { PAYOUT_PROVIDERS } from '../utils/payments/xentripay.js';
 import { PHONE_PATTERN, normalizePhone } from '../utils/phone.js';
 
 const MIN_PAYOUT = 100;
-const RECENT_LIMIT = 50;
+const RECENT_LIMIT = 200;
 
-// Money that came in through XentriPay: shop orders and event tickets.
-const paidOrders = { paymentProvider: 'xentripay', paidAt: { [Op.ne]: null } };
-const paidTickets = { source: 'online', paymentReference: { [Op.ne]: null }, paidAt: { [Op.ne]: null } };
+// Successful payments that came in through XentriPay: shop orders and event tickets.
+// A cancelled order or ticket is left out (refunded, or a test payment).
+const paidOrders = { paymentProvider: 'xentripay', paidAt: { [Op.ne]: null }, status: { [Op.ne]: 'cancelled' } };
+const paidTickets = {
+  source: 'online',
+  paymentReference: { [Op.ne]: null },
+  paidAt: { [Op.ne]: null },
+  status: { [Op.ne]: 'cancelled' },
+};
 
-const sumOf = async (model, field, where) => Number((await model.sum(field, { where })) || 0);
+// XentriPay's collection fee, taken from the amount when we pay it (3% as of Oct 2026).
+const feePercent = () => {
+  const value = Number(process.env.XENTRIPAY_FEE_PERCENT);
+  return Number.isFinite(value) && value >= 0 ? value : 3;
+};
 
-/** Totals for the payments page. The real wallet balance lives in the XentriPay dashboard. */
+/** Every successful payment with what XentriPay kept and what reached the wallet, newest first. */
+async function successfulPayments() {
+  const [settings, orders, tickets] = await Promise.all([
+    getSettingsRow(),
+    Order.findAll({
+      where: paidOrders,
+      attributes: ['id', 'orderNumber', 'customerName', 'customerPhone', 'total', 'paymentMethod', 'paymentReference', 'paidAt'],
+    }),
+    EventRegistration.findAll({
+      where: paidTickets,
+      attributes: ['id', 'eventId', 'name', 'phone', 'amount', 'paymentMethod', 'paymentReference', 'paidAt', 'ticketNumber'],
+      include: [{ model: Event, as: 'event', attributes: ['id', 'title', 'feePaidBy'] }],
+    }),
+  ]);
+
+  const rate = feePercent() / 100;
+  const withFee = (row, shopPaysFee) => {
+    const fee = shopPaysFee ? Math.round(row.amount * rate) : 0;
+    return { ...row, fee, net: row.amount - fee };
+  };
+
+  return [
+    ...orders.map((o) =>
+      withFee(
+        {
+          kind: 'order',
+          id: o.id,
+          source: 'shop',
+          sourceLabel: 'Shop',
+          label: `Order ${o.orderNumber}`,
+          name: o.customerName,
+          phone: o.customerPhone,
+          amount: o.total,
+          method: o.paymentMethod,
+          reference: o.paymentReference,
+          paidAt: o.paidAt,
+        },
+        settings.xentripayChargesIncluded === true
+      )
+    ),
+    ...tickets.map((t) =>
+      withFee(
+        {
+          kind: 'ticket',
+          id: t.id,
+          eventId: t.eventId,
+          source: `event:${t.eventId}`,
+          sourceLabel: t.event?.title ?? 'Event',
+          label: t.ticketNumber ? `Ticket ${t.ticketNumber}` : 'Event ticket',
+          name: t.name,
+          phone: t.phone,
+          amount: t.amount,
+          method: t.paymentMethod,
+          reference: t.paymentReference,
+          paidAt: t.paidAt,
+        },
+        t.event?.feePaidBy !== 'customer'
+      )
+    ),
+  ].sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt));
+}
+
+const add = (rows, key) => rows.reduce((sum, row) => sum + row[key], 0);
+
+/** Totals for the payments page, worked out from the site's own records. */
 async function totals() {
-  const [ordersTotal, ordersCount, ticketsTotal, ticketsCount, payouts] = await Promise.all([
-    sumOf(Order, 'total', paidOrders),
-    Order.count({ where: paidOrders }),
-    sumOf(EventRegistration, 'amount', paidTickets),
-    EventRegistration.count({ where: paidTickets }),
+  const [payments, payouts] = await Promise.all([
+    successfulPayments(),
     Payout.findAll({ where: { status: ['pending', 'successful'] }, attributes: ['status', 'amount', 'charge'] }),
   ]);
 
   const out = (status) =>
     payouts.filter((p) => p.status === status).reduce((sum, p) => sum + p.amount + (p.charge ?? 0), 0);
 
-  const received = ordersTotal + ticketsTotal;
+  const sources = new Map();
+  for (const row of payments) {
+    const entry = sources.get(row.source) ?? { source: row.source, label: row.sourceLabel, eventId: row.eventId ?? null, rows: [] };
+    entry.rows.push(row);
+    sources.set(row.source, entry);
+  }
+
+  const net = add(payments, 'net');
   const paidOut = out('successful');
   const waiting = out('pending');
 
   return {
-    received,
-    orders: { count: ordersCount, total: ordersTotal },
-    tickets: { count: ticketsCount, total: ticketsTotal },
+    count: payments.length,
+    received: add(payments, 'amount'),
+    fees: add(payments, 'fee'),
+    net,
+    feePercent: feePercent(),
+    bySource: [...sources.values()]
+      .map(({ rows, ...entry }) => ({ ...entry, count: rows.length, amount: add(rows, 'amount'), fee: add(rows, 'fee'), net: add(rows, 'net') }))
+      .sort((a, b) => b.amount - a.amount),
     paidOut,
     waiting,
-    estimatedBalance: received - paidOut - waiting,
+    estimatedBalance: net - paidOut - waiting,
   };
 }
 
@@ -55,51 +138,9 @@ export const summary = asyncHandler(async (req, res) => {
   });
 });
 
-/** The latest payments received, orders and tickets together, newest first. */
+/** The latest successful payments, orders and tickets together. */
 export const received = asyncHandler(async (req, res) => {
-  const [orders, tickets] = await Promise.all([
-    Order.findAll({
-      where: paidOrders,
-      attributes: ['id', 'orderNumber', 'customerName', 'total', 'paymentMethod', 'paymentReference', 'paidAt'],
-      order: [['paidAt', 'DESC']],
-      limit: RECENT_LIMIT,
-    }),
-    EventRegistration.findAll({
-      where: paidTickets,
-      attributes: ['id', 'eventId', 'name', 'amount', 'paymentMethod', 'paymentReference', 'paidAt', 'ticketNumber'],
-      include: [{ model: Event, as: 'event', attributes: ['id', 'title'] }],
-      order: [['paidAt', 'DESC']],
-      limit: RECENT_LIMIT,
-    }),
-  ]);
-
-  const rows = [
-    ...orders.map((o) => ({
-      kind: 'order',
-      id: o.id,
-      label: `Order ${o.orderNumber}`,
-      name: o.customerName,
-      amount: o.total,
-      method: o.paymentMethod,
-      reference: o.paymentReference,
-      paidAt: o.paidAt,
-    })),
-    ...tickets.map((t) => ({
-      kind: 'ticket',
-      id: t.id,
-      eventId: t.eventId,
-      label: t.event ? `${t.event.title} ticket` : 'Event ticket',
-      name: t.name,
-      amount: t.amount,
-      method: t.paymentMethod,
-      reference: t.paymentReference,
-      paidAt: t.paidAt,
-    })),
-  ]
-    .sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt))
-    .slice(0, RECENT_LIMIT);
-
-  res.json({ data: rows });
+  res.json({ data: (await successfulPayments()).slice(0, RECENT_LIMIT) });
 });
 
 export const list = asyncHandler(async (req, res) => {
