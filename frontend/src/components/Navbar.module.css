@@ -2,8 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--green-dark);
-  color: #fff;
+  background: #fff;
+  color: var(--green-tree);
+  box-shadow: 0 1px 0 rgba(35, 97, 48, 0.14), 0 4px 18px rgba(6, 49, 26, 0.08);
 }
 
 .inner {
@@ -22,7 +23,7 @@
   font-family: var(--heading);
   font-size: 23px;
   font-weight: 700;
-  color: #fff;
+  color: var(--green-tree);
   letter-spacing: -0.01em;
 }
 
@@ -50,20 +51,20 @@
 
 .link {
   font-size: 15px;
-  font-weight: 500;
-  color: #e8f0e9;
+  font-weight: 600;
+  color: var(--green-tree);
   padding: 6px 0;
   border-bottom: 2px solid transparent;
   transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .link:hover {
-  color: #fff;
+  color: var(--green-dark);
 }
 
 .active {
-  color: #fff;
-  border-bottom-color: var(--green-light);
+  color: var(--green-tree);
+  border-bottom-color: var(--green-tree);
 }
 
 .cart {
@@ -72,15 +73,15 @@
   gap: 9px;
   padding: 9px 18px;
   border-radius: 999px;
-  background: rgba(158, 198, 166, 0.16);
-  color: #fff;
+  background: rgba(35, 97, 48, 0.08);
+  color: var(--green-tree);
   font-size: 15px;
   font-weight: 600;
   transition: background 0.2s ease;
 }
 
 .cart:hover {
-  background: rgba(158, 198, 166, 0.3);
+  background: rgba(35, 97, 48, 0.15);
 }
 
 .badge {
@@ -88,8 +89,8 @@
   height: 22px;
   padding: 0 6px;
   border-radius: 999px;
-  background: var(--green-light);
-  color: var(--green-dark);
+  background: var(--green-tree);
+  color: #fff;
   font-size: 13px;
   font-weight: 700;
   display: inline-flex;
@@ -107,7 +108,7 @@
 .accountName {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--green-light, #9ec6a6);
+  color: var(--green-tree);
 }
 
 .logout,
@@ -119,12 +120,12 @@
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.85;
+  font-weight: 600;
 }
 
 .logout:hover,
 .login:hover {
-  opacity: 1;
+  color: var(--green-dark);
 }
 
 /* Phone-only controls, hidden on wide screens. */
@@ -144,7 +145,7 @@
   height: 42px;
   border-radius: 12px;
   background: transparent;
-  color: #fff;
+  color: var(--green-tree);
   border: none;
   cursor: pointer;
 }
@@ -196,9 +197,9 @@
     align-items: stretch;
     gap: 0;
     padding: 6px 20px 22px;
-    background: var(--green-dark);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 18px 32px rgba(0, 0, 0, 0.28);
+    background: #fff;
+    border-top: 1px solid rgba(35, 97, 48, 0.14);
+    box-shadow: 0 18px 32px rgba(6, 49, 26, 0.16);
     max-height: calc(100vh - 76px);
     max-height: calc(100dvh - 76px);
     overflow-y: auto;
@@ -211,12 +212,12 @@
   .link {
     padding: 14px 4px;
     font-size: 17px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(35, 97, 48, 0.12);
   }
 
   .active {
-    color: var(--green-light);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+    color: var(--green-dark);
+    border-bottom-color: rgba(35, 97, 48, 0.12);
   }
 
   .tools {
@@ -244,9 +245,8 @@
   .login {
     padding: 12px 14px;
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(35, 97, 48, 0.4);
     text-align: center;
-    opacity: 1;
     font-weight: 600;
   }
 

@@ -78,32 +78,32 @@
 }
 
 .light .input {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  background: rgba(35, 97, 48, 0.05);
+  border-color: rgba(35, 97, 48, 0.4);
+  color: var(--green-tree);
 }
 
 .light .input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(35, 97, 48, 0.65);
 }
 
 .light .input:focus {
-  border-color: var(--green-light);
-  box-shadow: 0 0 0 4px rgba(158, 198, 166, 0.2);
+  border-color: var(--green-tree);
+  box-shadow: 0 0 0 4px rgba(35, 97, 48, 0.15);
 }
 
 .light .button {
-  background: var(--green-light);
-  color: var(--green-dark);
+  background: var(--green-tree);
+  color: #fff;
 }
 
 .light .button:hover:not(:disabled) {
-  background: #fff;
+  background: var(--green-dark);
 }
 
 .light.done {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: var(--green-soft);
+  color: var(--green-tree);
 }
 
 .compact .input {

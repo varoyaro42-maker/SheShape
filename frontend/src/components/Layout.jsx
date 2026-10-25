@@ -9,7 +9,10 @@ export default function Layout() {
   return (
     <div className={styles.shell}>
       <Navbar />
-      <main key={pathname} className={`route-enter ${pathname === '/' ? styles.flush : styles.main}`}>
+      <main
+        key={pathname}
+        className={`route-enter ${pathname === '/' ? styles.flush : styles.main} ${pathname === '/shop' ? styles.tree : ''}`}
+      >
         <Outlet />
       </main>
       <Footer />

@@ -1,0 +1,148 @@
+/* Hover preview under the header, desktop only. */
+.panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid rgba(35, 97, 48, 0.14);
+  border-bottom: 1px solid rgba(35, 97, 48, 0.2);
+  box-shadow: 0 24px 40px rgba(6, 49, 26, 0.15);
+  animation: megaIn 0.18s ease both;
+}
+
+@keyframes megaIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.inner {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 36px;
+  padding-top: 28px;
+  padding-bottom: 32px;
+}
+
+.intro h3 {
+  margin-bottom: 8px;
+  font-size: 22px;
+  color: var(--green-tree);
+}
+
+.intro p {
+  margin-bottom: 16px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-soft);
+}
+
+.cats {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.cats a {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--green-tree);
+}
+
+.cats a:hover {
+  color: var(--green-dark);
+  text-decoration: underline;
+}
+
+.all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: var(--green-tree);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.all:hover {
+  background: var(--green-dark);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  align-content: start;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--green-dark);
+}
+
+.image {
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  background: var(--green-soft) center / cover no-repeat;
+  transition: transform 0.25s ease;
+}
+
+.card:hover .image {
+  transform: translateY(-3px);
+}
+
+.kicker {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green-tree);
+}
+
+.cardTitle {
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.sub {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.message {
+  grid-column: 1 / -1;
+  padding: 24px 0;
+  font-size: 14.5px;
+  color: var(--text-soft);
+}
+
+@media (max-width: 900px) {
+  .panel {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

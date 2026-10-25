@@ -13,3 +13,8 @@
 .flush {
   padding-bottom: 0;
 }
+
+/* The shop page sits on tree green. */
+.tree {
+  background: var(--green-tree);
+}

@@ -366,8 +366,29 @@
 /* Tips band */
 .tips {
   padding: var(--section) 0;
-  background: var(--green-dark);
+  background: var(--green-tree);
   color: #fff;
+}
+
+.tips :global(.btn-light) {
+  color: var(--green-tree);
+}
+
+/* Tree-green bands: the shop strip and the Instagram gallery. */
+.onTree {
+  background: var(--green-tree);
+  color: #fff;
+}
+
+.onTree :global(.btn-outline) {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.onTree :global(.btn-outline:hover:not(:disabled)) {
+  background: #fff;
+  color: var(--green-tree);
+  border-color: #fff;
 }
 
 .tipGrid {

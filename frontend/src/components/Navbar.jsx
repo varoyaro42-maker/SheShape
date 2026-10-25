@@ -1,8 +1,11 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X, ShoppingBag } from 'lucide-react'
 import { useCart } from '../context/cart-context.js'
 import { useAuth } from '../context/auth-context.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
+import MegaMenu from './MegaMenu.jsx'
+import { MEGA_SECTIONS } from './megaSections.js'
 import styles from './Navbar.module.css'
 import { returnPathFor } from '../utils/afterLogin.js'
 
@@ -23,6 +26,48 @@ export default function Navbar() {
   const location = useLocation()
   const menu = useMobileMenu()
 
+  // Desktop hover menu: opens after a short delay, closes shortly after the pointer leaves.
+  const [megaOpen, setMegaOpen] = useState(null)
+  const openTimer = useRef(null)
+  const closeTimer = useRef(null)
+
+  const clearTimers = useCallback(() => {
+    clearTimeout(openTimer.current)
+    clearTimeout(closeTimer.current)
+  }, [])
+
+  const showMega = useCallback(
+    (key) => {
+      if (!window.matchMedia('(min-width: 901px) and (hover: hover)').matches) return
+      clearTimers()
+      openTimer.current = setTimeout(() => setMegaOpen(key), megaOpen ? 0 : 120)
+    },
+    [clearTimers, megaOpen]
+  )
+
+  const hideMega = useCallback(() => {
+    clearTimers()
+    closeTimer.current = setTimeout(() => setMegaOpen(null), 220)
+  }, [clearTimers])
+
+  const keepMega = useCallback(() => clearTimeout(closeTimer.current), [])
+
+  useEffect(() => {
+    clearTimers()
+    setMegaOpen(null)
+  }, [location.pathname, clearTimers])
+
+  useEffect(() => {
+    if (!megaOpen) return undefined
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setMegaOpen(null)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [megaOpen])
+
+  useEffect(() => clearTimers, [clearTimers])
+
   const handleLogout = async () => {
     menu.close()
     await logout()
@@ -37,10 +82,10 @@ export default function Navbar() {
   const cartLabel = count > 0 ? `Cart, ${count} items` : 'Cart'
 
   return (
-    <header className={styles.header}>
+    <header className={styles.header} onMouseLeave={hideMega}>
       <div className={`page ${styles.inner}`}>
         <Link to="/" className={styles.brand} aria-label="She Shape Wellness home">
-          <img src="/brand/logo-white.svg" alt="She Shape Wellness" className={styles.brandLogo} />
+          <img src="/brand/logo-tree.svg" alt="She Shape Wellness" className={styles.brandLogo} />
         </Link>
 
         {/* Phone-only controls: the cart stays one tap away, the rest folds into the menu. */}
@@ -72,6 +117,8 @@ export default function Navbar() {
               className={({ isActive }) =>
                 isActive ? `${styles.link} ${styles.active}` : styles.link
               }
+              onMouseEnter={() => (MEGA_SECTIONS[link.to] ? showMega(link.to) : hideMega())}
+              onFocus={() => (MEGA_SECTIONS[link.to] ? showMega(link.to) : hideMega())}
             >
               {link.label}
             </NavLink>
@@ -105,6 +152,8 @@ export default function Navbar() {
           </div>
         </nav>
       </div>
+
+      {megaOpen && <MegaMenu section={megaOpen} onEnter={keepMega} onNavigate={() => setMegaOpen(null)} />}
 
       {menu.open && (
         <button type="button" className={styles.backdrop} aria-label="Close menu" onClick={menu.close} />

@@ -388,11 +388,12 @@ export default function Home() {
       )}
 
       {products?.length > 0 && (
-        <section className={styles.section}>
+        <section className={`${styles.section} ${styles.onTree}`}>
           <div className="page">
             <SectionHeading
               eyebrow="Shop"
               title="Latest in the shop"
+              light
               action={
                 <Link to="/shop" className="btn btn-outline">
                   View all
@@ -415,11 +416,12 @@ export default function Home() {
       )}
 
       {gallery?.length > 0 && (
-        <section className={styles.gallery}>
+        <section className={`${styles.gallery} ${styles.onTree}`}>
           <div className="page">
             <SectionHeading
               eyebrow="On Instagram"
               title="Life at She Shape Wellness"
+              light
               lead="Classes, challenge groups, workshops and the odd Saturday hike. Follow along."
               action={
                 instagramUrl && (
