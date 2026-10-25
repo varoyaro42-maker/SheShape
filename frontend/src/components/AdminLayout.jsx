@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X, CalendarCheck, Megaphone, ShieldCheck, Ticket, Wallet } from 'lucide-react'
+import { LayoutDashboard, Users, Package, Dumbbell, ClipboardList, Newspaper, CreditCard, User, Home, Mail, Menu, X, CalendarCheck, Megaphone, ShieldCheck, Ticket, Wallet, History } from 'lucide-react'
 import { useAuth } from '../context/auth-context.js'
 import { useMobileMenu } from '../hooks/useMobileMenu.js'
 import { getPageTitle } from '../utils/pageTitle.js'
@@ -22,6 +22,7 @@ const LINKS = [
   { to: '/admin/posts', label: 'Blog', icon: Newspaper },
   { to: '/admin/home', label: 'Site content', icon: Home },
   { to: '/admin/admins', label: 'Admins', icon: ShieldCheck },
+  { to: '/admin/activity', label: 'Activity log', icon: History },
   { to: '/admin/payments', label: 'Payments', icon: Wallet },
   { to: '/admin/settings', label: 'Payment settings', icon: CreditCard },
   { to: '/admin/account', label: 'My account', icon: User }

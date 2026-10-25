@@ -1,4 +1,5 @@
 import { User } from '../models/index.js';
+import { logAuth } from '../utils/audit.js';
 import { HttpError } from '../utils/httpError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
@@ -57,6 +58,7 @@ export const login = asyncHandler(async (req, res) => {
   });
 
   if (!user || !(await user.checkPassword(password))) {
+    await logAuth(req, 'login_failed', user, { email: String(email).trim().toLowerCase().slice(0, 160) });
     throw new HttpError(401, 'Email or password is incorrect');
   }
 
@@ -66,6 +68,7 @@ export const login = asyncHandler(async (req, res) => {
   }
 
   setAuthCookie(res, signToken(user));
+  await logAuth(req, 'login', user);
   res.json({ data: user });
 });
 
@@ -83,6 +86,7 @@ export const verifyEmail = asyncHandler(async (req, res) => {
 
   clearPendingCookie(res);
   setAuthCookie(res, signToken(user));
+  await logAuth(req, 'login', user);
   res.json({ data: user });
 });
 
@@ -120,6 +124,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   user.password = newPassword;
   await user.save({ fields: ['passwordHash'] });
+  await logAuth(req, 'password_reset', user);
 
   res.status(204).end();
 });
@@ -135,14 +140,16 @@ export const changePassword = asyncHandler(async (req, res) => {
 
   user.password = newPassword;
   await user.save({ fields: ['passwordHash'] });
+  await logAuth(req, 'password_changed', user);
 
   res.status(204).end();
 });
 
-export const logout = (req, res) => {
+export const logout = asyncHandler(async (req, res) => {
+  if (req.user) await logAuth(req, 'logout', req.user);
   clearAuthCookie(res);
   res.status(204).end();
-};
+});
 
 export const me = (req, res) => {
   res.json({ data: req.user ?? null });

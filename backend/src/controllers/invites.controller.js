@@ -4,6 +4,7 @@ import { HttpError } from '../utils/httpError.js';
 import { sequelize, User, AdminInvite } from '../models/index.js';
 import { hashInviteToken } from '../models/AdminInvite.js';
 import { signToken, setAuthCookie } from '../utils/token.js';
+import { logAuth } from '../utils/audit.js';
 
 async function findOpenInvite(token) {
   const invite = await AdminInvite.findOne({
@@ -57,5 +58,6 @@ export const accept = asyncHandler(async (req, res) => {
 
   setAuthCookie(res, signToken(user));
   const fresh = await User.findByPk(user.id);
+  await logAuth(req, 'login', fresh);
   res.json({ data: fresh });
 });

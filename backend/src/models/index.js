@@ -21,6 +21,8 @@ import EventQuestion, { QUESTION_TYPES } from './EventQuestion.js'
 import EventRegistration, { REGISTRATION_STATUSES } from './EventRegistration.js'
 import EventRegistrationActivity from './EventRegistrationActivity.js'
 import Payout, { PAYOUT_STATUSES } from './Payout.js'
+import AuditLog from './AuditLog.js'
+import { installAuditHooks, useAuditModel } from '../utils/audit.js'
 
 Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' })
 Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' })
@@ -82,6 +84,9 @@ EventRegistrationActivity.belongsTo(EventActivity, { foreignKey: 'activityId', a
 EventActivity.hasMany(EventRegistrationActivity, { foreignKey: 'activityId', as: 'picks', onDelete: 'CASCADE', hooks: true })
 Payout.belongsTo(User, { foreignKey: 'createdById', as: 'createdBy', onDelete: 'SET NULL' })
 
+useAuditModel(AuditLog)
+installAuditHooks()
+
 export {
   sequelize,
   User,
@@ -107,6 +112,7 @@ export {
   EventRegistrationActivity,
   Payout,
   PAYOUT_STATUSES,
+  AuditLog,
   EVENT_STATUSES,
   FEE_PAYERS,
   TICKET_FIELDS,

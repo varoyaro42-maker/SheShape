@@ -107,3 +107,8 @@ export const adminPayouts = {
   create: (payload) => api.post('/admin/payouts', payload).then(unwrap),
   refresh: (id) => api.post(`/admin/payouts/${id}/refresh`).then(unwrap)
 }
+
+export const adminActivity = {
+  list: (params) => api.get('/admin/activity', { params }).then((r) => r.data),
+  people: () => api.get('/admin/activity/people').then(unwrap)
+}

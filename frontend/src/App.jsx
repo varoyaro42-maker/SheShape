@@ -45,6 +45,7 @@ const AdminPostsPage = lazy(() => import('./pages/admin/Posts.jsx'))
 const AdminPostEditorPage = lazy(() => import('./pages/admin/PostEditor.jsx'))
 const AdminPaymentSettingsPage = lazy(() => import('./pages/admin/PaymentSettings.jsx'))
 const AdminPaymentsPage = lazy(() => import('./pages/admin/Payments.jsx'))
+const AdminActivityPage = lazy(() => import('./pages/admin/Activity.jsx'))
 const AdminHomeSettingsPage = lazy(() => import('./pages/admin/HomeSettings.jsx'))
 const AdminMessagesPage = lazy(() => import('./pages/admin/Messages.jsx'))
 const AdminMessageDetailPage = lazy(() => import('./pages/admin/MessageDetail.jsx'))
@@ -114,6 +115,7 @@ export default function App() {
           <Route path="posts/new" element={<AdminPostEditorPage />} />
           <Route path="posts/:id" element={<AdminPostEditorPage />} />
           <Route path="payments" element={<AdminPaymentsPage />} />
+          <Route path="activity" element={<AdminActivityPage />} />
           <Route path="settings" element={<AdminPaymentSettingsPage />} />
           <Route path="home" element={<AdminHomeSettingsPage />} />
           <Route path="messages" element={<AdminMessagesPage />} />

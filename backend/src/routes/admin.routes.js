@@ -3,6 +3,8 @@ import { prepare, receiveFile } from '../controllers/uploads.controller.js';
 import { overview } from '../controllers/admin.dashboard.controller.js';
 import { search } from '../controllers/admin.search.controller.js';
 import { protect, adminOnly } from '../middleware/auth.js';
+import { auditAdminWrites } from '../utils/audit.js';
+import { activity, activityPeople } from '../controllers/admin.activity.controller.js';
 import adminProductRoutes from './admin.products.routes.js';
 import adminOrderRoutes from './admin.orders.routes.js';
 import adminPostRoutes from './admin.posts.routes.js';
@@ -20,11 +22,13 @@ import adminPayoutRoutes from './admin.payouts.routes.js';
 
 const router = Router();
 
-router.use(protect, adminOnly);
+router.use(protect, adminOnly, auditAdminWrites);
 
 router.get('/check', (req, res) => res.json({ data: { ok: true } }));
 router.get('/dashboard', overview);
 router.get('/search', search);
+router.get('/activity', activity);
+router.get('/activity/people', activityPeople);
 router.post('/uploads/prepare', prepare(['product', 'home', 'video']));
 router.post('/uploads/file', receiveFile(['product', 'home', 'video']));
 router.use('/products', adminProductRoutes);
