@@ -20,6 +20,7 @@ import EventActivity from './EventActivity.js'
 import EventQuestion, { QUESTION_TYPES } from './EventQuestion.js'
 import EventRegistration, { REGISTRATION_STATUSES } from './EventRegistration.js'
 import EventRegistrationActivity from './EventRegistrationActivity.js'
+import Payout, { PAYOUT_STATUSES } from './Payout.js'
 
 Category.hasMany(Product, { foreignKey: 'categoryId', as: 'products' })
 Product.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' })
@@ -79,6 +80,7 @@ EventRegistration.hasMany(EventRegistrationActivity, { foreignKey: 'registration
 EventRegistrationActivity.belongsTo(EventRegistration, { foreignKey: 'registrationId', as: 'registration' })
 EventRegistrationActivity.belongsTo(EventActivity, { foreignKey: 'activityId', as: 'activity' })
 EventActivity.hasMany(EventRegistrationActivity, { foreignKey: 'activityId', as: 'picks', onDelete: 'CASCADE', hooks: true })
+Payout.belongsTo(User, { foreignKey: 'createdById', as: 'createdBy', onDelete: 'SET NULL' })
 
 export {
   sequelize,
@@ -103,6 +105,8 @@ export {
   EventQuestion,
   EventRegistration,
   EventRegistrationActivity,
+  Payout,
+  PAYOUT_STATUSES,
   EVENT_STATUSES,
   FEE_PAYERS,
   TICKET_FIELDS,

@@ -99,3 +99,11 @@ export const adminAdmins = {
   remove: (id) => api.delete(`/admin/admins/${id}`),
   setClinical: (id, isClinical) => api.put(`/admin/admins/${id}/clinical`, { isClinical }).then(unwrap)
 }
+
+export const adminPayouts = {
+  summary: () => api.get('/admin/payouts/summary').then(unwrap),
+  received: () => api.get('/admin/payouts/received').then(unwrap),
+  list: () => api.get('/admin/payouts').then(unwrap),
+  create: (payload) => api.post('/admin/payouts', payload).then(unwrap),
+  refresh: (id) => api.post(`/admin/payouts/${id}/refresh`).then(unwrap)
+}

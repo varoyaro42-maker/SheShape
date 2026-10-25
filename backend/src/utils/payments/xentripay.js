@@ -164,5 +164,74 @@ export function createXentripayClient({ apiKey, environment = 'sandbox' }) {
         raw: data,
       };
     },
+
+    /**
+     * Send money out of the wallet. XentriPay holds it as PENDING until the
+     * business confirms the OTP it sends to the registered email/phone.
+     */
+    async initiatePayout({ reference, providerId, account, name, amount }) {
+      const data = await request('/api/payment-requests', {
+        method: 'POST',
+        body: {
+          customerReference: reference,
+          telecomProviderId: String(providerId),
+          msisdn: account,
+          name,
+          transactionType: 'PAYOUT',
+          currency: 'RWF',
+          amount: Math.round(amount),
+        },
+      });
+
+      return {
+        status: normalizePayoutStatus(data?.status),
+        message: data?.statusMessage || '',
+        id: data?.id !== undefined && data?.id !== null ? String(data.id) : null,
+        internalRef: data?.internalRef ?? null,
+        charge: data?.txnCharge !== undefined && data?.txnCharge !== null ? Math.round(Number(data.txnCharge)) : null,
+        validatedName: data?.validatedAccountName ?? null,
+        raw: data,
+      };
+    },
+
+    /** Status from the provider, looked up by our customerReference. */
+    async getPayoutStatus(reference) {
+      const data = await request(`/api/payment-requests/check-status?customerRef=${encodeURIComponent(reference)}`);
+      const inner = data?.data ?? {};
+      return {
+        status: normalizePayoutStatus(inner.status ?? data?.status),
+        message: data?.message || '',
+        raw: data,
+      };
+    },
   };
 }
+
+/** Payout statuses: PENDING, then COMPLETED (provider) / SUCCESSFUL (XentriPay), FAILED or REVERSED. */
+export function normalizePayoutStatus(value) {
+  const status = String(value ?? '').trim().toUpperCase();
+  if (['COMPLETED', 'SUCCESSFUL', 'SUCCESS'].includes(status)) return 'successful';
+  if (['FAILED', 'FAILURE', 'DECLINED', 'CANCELLED', 'CANCELED', 'REJECTED'].includes(status)) return 'failed';
+  if (status === 'REVERSED') return 'reversed';
+  return 'pending';
+}
+
+/** telecomProviderId values from the API documentation, section 6. */
+export const PAYOUT_PROVIDERS = [
+  { id: '63510', name: 'MTN Mobile Money', type: 'momo' },
+  { id: '63514', name: 'Airtel Money', type: 'momo' },
+  { id: '63509', name: 'SPENN', type: 'momo' },
+  { id: '040', name: 'Bank of Kigali', type: 'bank' },
+  { id: '400', name: 'Banque Populaire du Rwanda', type: 'bank' },
+  { id: '192', name: 'Equity Bank', type: 'bank' },
+  { id: '100', name: 'Ecobank Rwanda', type: 'bank' },
+  { id: '115', name: 'Access Bank Rwanda', type: 'bank' },
+  { id: '070', name: 'Guaranty Trust Bank (Rwanda)', type: 'bank' },
+  { id: '010', name: 'I&M Bank (Investment and Mortgage Bank)', type: 'bank' },
+  { id: '025', name: 'NCBA (National Commercial Bank of Africa)', type: 'bank' },
+  { id: '145', name: 'Urwego Opportunity Bank', type: 'bank' },
+  { id: '800', name: 'Zigama CSS', type: 'bank' },
+  { id: '900', name: 'Bank of Africa Rwanda', type: 'bank' },
+  { id: '950', name: 'Unguka Bank', type: 'bank' },
+  { id: '951', name: 'Banque Nationale du Rwanda', type: 'bank' },
+];

@@ -16,6 +16,7 @@ import adminSubscriberRoutes from './admin.subscribers.routes.js';
 import adminBookingRoutes from './admin.bookings.routes.js';
 import adminAdminRoutes from './admin.admins.routes.js';
 import adminEventRoutes from './admin.events.routes.js';
+import adminPayoutRoutes from './admin.payouts.routes.js';
 
 const router = Router();
 
@@ -39,5 +40,6 @@ router.use('/subscribers', adminSubscriberRoutes);
 router.use('/bookings', adminBookingRoutes);
 router.use('/admins', adminAdminRoutes);
 router.use('/events', adminEventRoutes);
+router.use('/payouts', adminPayoutRoutes);
 
 export default router;
