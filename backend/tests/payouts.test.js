@@ -1,4 +1,5 @@
 import http from 'node:http'
+import crypto from 'node:crypto'
 import { test, describe, before, after } from 'node:test'
 import assert from 'node:assert/strict'
 import { app, request, resetDatabase, closeDatabase, createUser, createAdmin, signIn } from './helpers.js'
@@ -179,5 +180,39 @@ describe('Payments and payouts', () => {
     const shown = list.body.data.find((p) => p.amount === 999999)
     assert.equal(shown.status, 'failed')
     assert.equal(shown.createdBy.name, 'Admin')
+  })
+
+  test('payout webhooks: OTP note, then success, only with a valid signature', async () => {
+    const secret = 'wh_payout_secret'
+    await admin.put('/api/admin/settings').send({ xentripayWebhookSecret: secret })
+    const created = await admin.post('/api/admin/payouts').send({ providerId: '63510', account: '0788302209', name: 'Coach Ninette', amount: 15000 })
+    const payout = created.body.data
+
+    const post = (body, sig) => {
+      const raw = JSON.stringify(body)
+      return request(app)
+        .post('/api/payments/xentripay/webhook')
+        .set('Content-Type', 'application/json')
+        .set('X-Xentripay-Signature', sig ?? `sha256=${crypto.createHmac('sha256', secret).update(raw).digest('hex')}`)
+        .send(raw)
+    }
+
+    const otp = await post({ event: 'SINGLEPAYOUTCREATEDPENDINGOTP', data: { id: Number(payout.xentripayId), reference: payout.reference, status: 'PENDING' } })
+    assert.equal(otp.status, 200)
+    assert.match((await Payout.findByPk(payout.id)).statusMessage, /OTP/)
+
+    const forged = await post({ event: 'PAYOUT_SUCCESS', data: { reference: payout.reference, status: 'SUCCESSFUL' } }, 'sha256=bad')
+    assert.equal(forged.status, 401)
+    assert.equal((await Payout.findByPk(payout.id)).status, 'pending')
+
+    const done = await post({ event: 'PAYOUT_SUCCESS', data: { id: Number(payout.xentripayId), amount: 15000, status: 'SUCCESSFUL', reference: payout.reference } })
+    assert.equal(done.status, 200)
+    const fresh = await Payout.findByPk(payout.id)
+    assert.equal(fresh.status, 'successful')
+    assert.ok(fresh.completedAt)
+
+    // A late failure for a payout already sent changes nothing.
+    await post({ event: 'PAYMENT_REQUEST_FAILED', data: { reference: payout.reference } })
+    assert.equal((await Payout.findByPk(payout.id)).status, 'successful')
   })
 })

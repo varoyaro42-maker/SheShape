@@ -219,3 +219,59 @@ export const refresh = asyncHandler(async (req, res) => {
 
   res.json({ data: payout });
 });
+
+// Webhook event names, compared without underscores: the guide spells them both ways.
+const PAYOUT_EVENTS = {
+  PAYOUTSUCCESS: 'successful',
+  PAYMENTREQUESTCOMPLETED: 'successful',
+  PAYOUTFAILED: 'failed',
+  PAYMENTREQUESTFAILED: 'failed',
+  PAYOUTREVERSED: 'reversed',
+  PAYMENTREQUESTREVERSED: 'reversed',
+};
+const PAYOUT_NOTES = {
+  SINGLEPAYOUTCREATEDPENDINGOTP: 'Waiting for the OTP to be confirmed in XentriPay.',
+  SINGLEPAYOUTCONFIRMED: 'OTP confirmed. XentriPay is sending the money.',
+  PAYOUTCONFIRMED: 'OTP confirmed. XentriPay is sending the money.',
+};
+
+export const isPayoutEvent = (event) => /^(SINGLE_?PAYOUT|PAYOUT|PAYMENT_?REQUEST)/.test(String(event ?? '').toUpperCase());
+
+/**
+ * Called by the XentriPay webhook for payout events. `trusted` is true when
+ * the signature was checked; otherwise the status is asked from XentriPay.
+ */
+export async function handlePayoutWebhook({ event, references, trusted }) {
+  if (!references.length) return;
+
+  const payout = await Payout.findOne({
+    where: { [Op.or]: [{ reference: references }, { xentripayId: references }, { internalRef: references }] },
+  });
+  if (!payout) return;
+
+  const key = String(event).toUpperCase().replace(/_/g, '');
+  let status = PAYOUT_EVENTS[key];
+
+  if (status && !trusted) {
+    const client = await getXentripayClient();
+    const fresh = client ? await client.getPayoutStatus(payout.reference).catch(() => null) : null;
+    status = fresh?.status && fresh.status !== 'pending' ? fresh.status : null;
+  }
+
+  // Only a sent payout can be reversed; a finished one never goes back to waiting.
+  const allowed = payout.status === 'pending' || (payout.status === 'successful' && status === 'reversed');
+
+  if (status && allowed) {
+    payout.status = status;
+    if (status === 'successful') payout.completedAt = new Date();
+    if (status === 'failed') payout.statusMessage = 'XentriPay reported the payout failed.';
+    if (status === 'reversed') payout.statusMessage = 'The payout was reversed by the provider.';
+  } else if (PAYOUT_NOTES[key] && payout.status === 'pending') {
+    payout.statusMessage = PAYOUT_NOTES[key];
+  } else {
+    return;
+  }
+
+  payout.checkedAt = new Date();
+  await payout.save();
+}

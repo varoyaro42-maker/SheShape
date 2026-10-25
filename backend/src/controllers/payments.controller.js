@@ -11,6 +11,7 @@ import {
 import { verifyWebhookSignature, webhookReferences } from '../utils/payments/xentripay.js';
 import { sendOrderStatusEmail, clientUrl } from '../utils/emails.js';
 import { handleEventWebhook } from './events.controller.js';
+import { handlePayoutWebhook, isPayoutEvent } from './admin.payouts.controller.js';
 
 const withItemsAndUser = [
   { model: OrderItem, as: 'items' },
@@ -92,7 +93,7 @@ async function findOrderForWebhook(payload) {
 
 /**
  * XentriPay posts signed JSON here. We acknowledge everything with 200 (so
- * they do not retry) and only act on collection outcomes.
+ * they do not retry) and act on collection and payout outcomes.
  */
 export const xentripayWebhook = asyncHandler(async (req, res) => {
   const rawBody = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : JSON.stringify(req.body ?? {});
@@ -111,6 +112,13 @@ export const xentripayWebhook = asyncHandler(async (req, res) => {
   }
 
   const event = String(payload?.event ?? req.headers['x-xentripay-event'] ?? '').toUpperCase();
+
+  // Money we sent out, from the admin Payments page.
+  if (isPayoutEvent(event)) {
+    await handlePayoutWebhook({ event, references: webhookReferences(payload), trusted: Boolean(secret) });
+    return res.json({ received: true });
+  }
+
   const order = await findOrderForWebhook(payload);
 
   // Not a shop order: it may be an event ticket.

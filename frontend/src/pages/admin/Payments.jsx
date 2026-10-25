@@ -317,7 +317,7 @@ export default function AdminPaymentsPage() {
                   </td>
                   <td>
                     <span className={`${styles.badge} ${styles[BADGE_CLASS[payout.status]]}`}>{STATUS_LABELS[payout.status] ?? payout.status}</span>
-                    {payout.status === 'failed' && payout.statusMessage && <div className={styles.phone}>{payout.statusMessage}</div>}
+                    {payout.status !== 'successful' && payout.statusMessage && <div className={styles.phone}>{payout.statusMessage}</div>}
                   </td>
                   <td className={styles.numCol}>
                     {formatPrice(payout.amount)}

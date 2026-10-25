@@ -194,9 +194,10 @@ export default function AdminPaymentSettingsPage() {
               autoComplete="off"
             />
             <span className={styles.hint}>
-              Register this URL as a webhook in XentriPay for the events COLLECTION_SUCCESSFUL and COLLECTION_FAILED,
-              then paste the secretHash it returns here. Paid orders then update within seconds; without it the
-              site still checks XentriPay directly while the customer waits.{' '}
+              Register this URL as a webhook in XentriPay for COLLECTION_SUCCESSFUL and COLLECTION_FAILED (payments
+              in) and PAYOUT_SUCCESS, PAYOUT_FAILED, PAYOUT_REVERSED and SINGLEPAYOUTCREATEDPENDINGOTP (payouts), then
+              paste the secret it returns here. Orders, tickets and payouts then update within seconds; without it
+              the site still checks XentriPay directly.{' '}
               <code style={{ userSelect: 'all' }}>{webhookUrl}</code>
             </span>
           </label>

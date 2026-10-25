@@ -47,10 +47,10 @@ export function verifyWebhookSignature({ rawBody, signature, secret }) {
   return crypto.timingSafeEqual(a, b);
 }
 
-/** Every reference-like value in a webhook payload, for matching to an order. */
+/** Every reference-like value in a webhook payload, for matching to an order or payout. */
 export function webhookReferences(payload) {
   const data = payload?.data ?? {};
-  return ['customerRef', 'reference', 'refid', 'rid', 'tid', 'id']
+  return ['customerRef', 'customerReference', 'reference', 'refid', 'rid', 'tid', 'internalRef', 'id']
     .map((key) => data[key])
     .filter((value) => value !== undefined && value !== null && value !== '')
     .map(String);
